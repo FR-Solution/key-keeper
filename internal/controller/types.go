@@ -22,6 +22,6 @@ type Certificates struct {
 	CA            struct {
 		CommonName string `yaml:"common_name"`
 		VaultPath  string `yaml:"vault_path"`
-		Path       string `yaml:"path"`
+		HostPath   string `yaml:"host_path"`
 	} `yaml:"ca"`
 }

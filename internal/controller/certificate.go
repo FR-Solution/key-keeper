@@ -6,14 +6,14 @@ import (
 )
 
 func (s *controller) storeCertificate(path string, cert []byte) error {
-	if err := os.WriteFile(path, cert, 0644); err != nil {
+	if err := os.WriteFile(path+".pem", cert, 0644); err != nil {
 		return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
 	}
 	return nil
 }
 
 func (s *controller) storeKey(path string, key []byte) error {
-	if err := os.WriteFile(path, key, 0600); err != nil {
+	if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
 		return fmt.Errorf("failed to save key file: %w", err)
 	}
 	return nil

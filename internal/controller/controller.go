@@ -47,11 +47,11 @@ func (s *controller) TurnOn() error {
 		return err
 	}
 
-	if err := s.storeCertificate(s.certs.CA.Path+".pem", icaCert); err != nil {
+	if err := s.storeCertificate(s.certs.CA.HostPath, icaCert); err != nil {
 		return err
 	}
 
-	if err := s.storeKey(s.certs.CA.Path+"-key.pem", icaKey); err != nil {
+	if err := s.storeKey(s.certs.CA.HostPath, icaKey); err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 		"ttl":         "8760h",
 	}
 
-	csr, err := s.vault.Write(ctx, s.certs.CertPath+"/intermediate/generate/internal", csrData)
+	csr, err := s.vault.Write(ctx, s.certs.CertPath+"/intermediate/generate/exported", csrData)
 	if err != nil {
 		return
 	}
@@ -125,10 +125,14 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 	ctx, cancel = context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
 
-	if _, err = s.vault.Write(ctx, s.certs.CA.VaultPath, ica); err != nil {
+	storedICA = map[string]interface{}{
+		"certificate": ica["certificate"],
+		"private_key": csr["private_key"],
+	}
+	if _, err = s.vault.Write(ctx, s.certs.CA.VaultPath, storedICA); err != nil {
 		return
 	}
-	return ica["certificate"].([]byte), ica["private_key"].([]byte), nil
+	return ica["certificate"].([]byte), csr["private_key"].([]byte), nil
 }
 
 // func (s *controller) GenerateCert(ctx context.Context) ([]byte, []byte, error) {
