@@ -77,7 +77,7 @@ func (s *controller) TurnOn() error {
 func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
-	storedICA, _ := s.vault.Get(ctx, s.certs.CA.VaultKV, "intermediate-ca")
+	storedICA, _ := s.vault.Get(ctx, s.certs.VaultKV, "intermediate-ca")
 	if cert != nil {
 		return storedICA["certificate"].([]byte), storedICA["private_key"].([]byte), nil
 	}
