@@ -47,11 +47,11 @@ func (s *controller) TurnOn() error {
 		return err
 	}
 
-	if err := s.storeCertificate("/etc/kubernetes/pki/ca/root-ca.pem", icaCert); err != nil {
+	if err := s.storeCertificate(s.certs.CA.Path+".pem", icaCert); err != nil {
 		return err
 	}
 
-	if err := s.storeKey("/etc/kubernetes/pki/ca/root-ca-key.pem", icaKey); err != nil {
+	if err := s.storeKey(s.certs.CA.Path+"-key.pem", icaKey); err != nil {
 		return err
 	}
 
@@ -75,7 +75,7 @@ func (s *controller) TurnOn() error {
 func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
-	storedICA, _ := s.vault.Read(ctx, s.certs.CA.StorePath)
+	storedICA, _ := s.vault.Read(ctx, s.certs.CA.VaultPath)
 	if cert != nil {
 		return storedICA["certificate"].([]byte), storedICA["private_key"].([]byte), nil
 	}
@@ -125,7 +125,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 	ctx, cancel = context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
 
-	if _, err = s.vault.Write(ctx, s.certs.CA.StorePath, ica); err != nil {
+	if _, err = s.vault.Write(ctx, s.certs.CA.VaultPath, ica); err != nil {
 		return
 	}
 	return ica["certificate"].([]byte), ica["private_key"].([]byte), nil

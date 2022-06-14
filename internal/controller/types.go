@@ -20,7 +20,8 @@ type Certificates struct {
 	CertPath      string        `yaml:"cert_path"`
 	ValidInterval time.Duration `yaml:"valid_interval"`
 	CA            struct {
-		StorePath  string `yaml:"store_path"`
 		CommonName string `yaml:"common_name"`
+		VaultPath  string `yaml:"vault_path"`
+		Path       string `yaml:"path"`
 	} `yaml:"ca"`
 }
