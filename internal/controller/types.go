@@ -18,8 +18,8 @@ type Vault struct {
 type Certificates struct {
 	RootPath      string        `yaml:"root_path"`
 	CertPath      string        `yaml:"cert_path"`
-	ValidInterval time.Duration `yaml:"valid_interval"`
 	VaultKV       string        `yaml:"vault_kv"`
+	ValidInterval time.Duration `yaml:"valid_interval"`
 	CA            struct {
 		CommonName string `yaml:"common_name"`
 		HostPath   string `yaml:"host_path"`
