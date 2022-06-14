@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"os"
 )
@@ -19,28 +21,28 @@ func (s *controller) storeKey(path string, key []byte) error {
 	return nil
 }
 
-// func (s *controller) readCertificate(domain string) (*tls.Certificate, error) {
-// 	crtContent, err := os.ReadFile(s.certPath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (s *controller) readCertificate(path string) (*tls.Certificate, error) {
+	crtContent, err := os.ReadFile(path + ".pem")
+	if err != nil {
+		return nil, err
+	}
 
-// 	keyContent, err := os.ReadFile(s.keyPath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	keyContent, err := os.ReadFile(path + "-key.pem")
+	if err != nil {
+		return nil, err
+	}
 
-// 	cert, err := tls.X509KeyPair(crtContent, keyContent)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to parse x509 key pair: %w", err)
-// 	}
-// 	if len(cert.Certificate) == 0 {
-// 		return nil, fmt.Errorf("list of certificates is empty")
-// 	}
+	cert, err := tls.X509KeyPair(crtContent, keyContent)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse x509 key pair: %w", err)
+	}
+	if len(cert.Certificate) == 0 {
+		return nil, fmt.Errorf("list of certificates is empty")
+	}
 
-// 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &cert, nil
-// }
+	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
+	if err != nil {
+		return nil, err
+	}
+	return &cert, nil
+}

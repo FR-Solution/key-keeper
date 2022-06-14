@@ -64,5 +64,5 @@ func (c *vault) Get(ctx context.Context, mountPath, secretePath string) (map[str
 	if s != nil {
 		return s.Data, err
 	}
-	return s.Data, err
+	return nil, err
 }
