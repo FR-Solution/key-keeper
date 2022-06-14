@@ -10,10 +10,10 @@ vault:
 certificates:
   root_path: "root ca path"
   cert_path: "path for generate certificate"
+  vault_kv: "path for kv"
   valid_interval: "valid expire cert interval: 1s, 3m, 5h"
   ca:
     common_name: "common_name"
-    vault_kv: "path for store of ca in vault"
     host_path: "path for store of ca in host"
 ```
 

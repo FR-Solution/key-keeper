@@ -131,7 +131,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 		"certificate": ica["certificate"],
 		"private_key": csr["private_key"],
 	}
-	if err = s.vault.Put(ctx, s.certs.CA.VaultKV, "intermediate-ca", storedICA); err != nil {
+	if err = s.vault.Put(ctx, s.certs.VaultKV, "intermediate-ca", storedICA); err != nil {
 		return
 	}
 	return ica["certificate"].([]byte), csr["private_key"].([]byte), nil
