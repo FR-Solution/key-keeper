@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,9 +13,23 @@ import (
 	"github.com/terra-cube/key-keeper/internal/vault"
 )
 
-const configPath = "./config.yml"
-
 func main() {
+	loggerConfig := zap.NewProductionConfig()
+	loggerConfig.Level.SetLevel(zap.DebugLevel)
+	logger, err := loggerConfig.Build()
+	if err != nil {
+		panic(err)
+	}
+	zap.ReplaceGlobals(logger)
+
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "path to config file")
+	flag.Parse()
+
+	if configPath == "" {
+		zap.L().Fatal("not found config param")
+	}
+
 	cfg, err := config.Read(configPath)
 	if err != nil {
 		zap.L().Fatal("read configuration", zap.Error(err))
