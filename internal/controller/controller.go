@@ -20,11 +20,11 @@ type store interface {
 type controller struct {
 	store store
 
-	commonName              string
-	domainName              string
 	storeIntermediateCAPath string
 	storeCertPath           string
 	storeTimeout            time.Duration
+	commonName              string
+	domainName              string
 	certPath                string
 	keyPath                 string
 	caPath                  string
@@ -35,11 +35,11 @@ func New(store store, cfg Config) *controller {
 	c := &controller{
 		store: store,
 
-		commonName:              cfg.CommonName,
-		domainName:              cfg.DomainName,
 		storeIntermediateCAPath: cfg.VaultCertPath,
 		storeCertPath:           cfg.VaultCertPath,
 		storeTimeout:            cfg.VaultTimeout,
+		commonName:              cfg.CommonName,
+		domainName:              cfg.DomainName,
 		certPath:                cfg.CertPath,
 		keyPath:                 cfg.KeyPath,
 		caPath:                  cfg.CaPath,
@@ -129,7 +129,7 @@ func (s *controller) GenerateCert(ctx context.Context) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
 		"common_name": s.domainName,
 	}
-	cert, err := s.store.Write(ctx, "pki_int/issue/example-dot-com", certData)
+	cert, err := s.store.Write(ctx, s.storeCertPath, certData)
 	if err != nil {
 		return nil, nil, err
 	}
