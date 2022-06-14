@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var intermediateCommonNameLayout = "%s Intermediate Authority"
@@ -77,7 +79,10 @@ func (s *controller) TurnOn() error {
 func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
-	storedICA, _ := s.vault.Get(ctx, s.certs.VaultKV, "intermediate-ca")
+	storedICA, err := s.vault.Get(ctx, s.certs.VaultKV, s.certs.CA.CommonName+"-ca")
+	if err != nil {
+		zap.L().Error("get", zap.String("mount_path", s.certs.VaultKV), zap.String("secrete_path", s.certs.CA.CommonName+"-ca"), zap.Error(err))
+	}
 	if cert != nil {
 		return []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string)), nil
 	}
