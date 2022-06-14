@@ -5,14 +5,22 @@ import (
 )
 
 type Config struct {
-	VaultIntermediateCAPath string
-	VaultCertPath           string
-	VaultTimeout            time.Duration
+	Vault Vault        `yaml:"vault"`
+	Certs Certificates `yaml:"certificates"`
+}
 
-	CommonName    string
-	DomainName    string
-	CertPath      string
-	KeyPath       string
-	CaPath        string
-	ValidInterval time.Duration
+type Vault struct {
+	Address string        `yaml:"address"`
+	Token   string        `yaml:"token"`
+	Timeout time.Duration `yaml:"timeout"`
+}
+
+type Certificates struct {
+	RootPath      string        `yaml:"root_path"`
+	CertPath      string        `yaml:"cert_path"`
+	ValidInterval time.Duration `yaml:"valid_interval"`
+	CA            struct {
+		StorePath  string `yaml:"store_path"`
+		CommonName string `yaml:"common_name"`
+	} `yaml:"ca"`
 }

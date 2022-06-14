@@ -47,18 +47,7 @@ func main() {
 
 	cntl := controller.New(
 		v,
-		controller.Config{
-			VaultIntermediateCAPath: cfg.Vault.IntermediateCAPath,
-			VaultCertPath:           cfg.Vault.CertPath,
-			VaultTimeout:            cfg.Vault.Timeout,
-
-			CommonName:    cfg.Certificate.CommonName,
-			DomainName:    cfg.Certificate.DomainName,
-			CaPath:        cfg.Certificate.CaPath,
-			CertPath:      cfg.Certificate.CertPath,
-			KeyPath:       cfg.Certificate.KeyPath,
-			ValidInterval: cfg.Certificate.ValidInterval,
-		},
+		cfg,
 	)
 
 	go func() {

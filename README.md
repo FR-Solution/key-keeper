@@ -6,20 +6,20 @@ Example config.yml
 vault:
   address: "address vault"
   token: "unexpired token"
-  intermediate_ca_path: "path for saving intermediate ca"
-  cert_path: "path for generate certificate"
   timeout: "timeout request: 1s, 3m, 5h"
-certificate:
-  common_name: "common_name"
-  domain_name: "domain_name"
-  cert_path: "path for save cert on host"
-  key_path: "path for save key on host"
+certificates:
+  root_path: "root ca path"
+  cert_path: "path for generate certificate"
   valid_interval: "valid expire cert interval: 1s, 3m, 5h"
+  ca:
+    store_path: "path for store of ca"
+    common_name: "common_name"
 ```
 
 Build:
 
     go build -o key-keeper cmd/key-keeper/main.go
+
 Run:
 
     key-keeper -config /path/to/config
