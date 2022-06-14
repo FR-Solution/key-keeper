@@ -79,7 +79,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 	defer cancel()
 	storedICA, _ := s.vault.Get(ctx, s.certs.VaultKV, "intermediate-ca")
 	if cert != nil {
-		return storedICA["certificate"].([]byte), storedICA["private_key"].([]byte), nil
+		return []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string)), nil
 	}
 	//TODO: check expire
 
@@ -134,7 +134,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 	if err = s.vault.Put(ctx, s.certs.VaultKV, "intermediate-ca", storedICA); err != nil {
 		return
 	}
-	return ica["certificate"].([]byte), csr["private_key"].([]byte), nil
+	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
 // func (s *controller) GenerateCert(ctx context.Context) ([]byte, []byte, error) {
