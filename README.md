@@ -19,7 +19,7 @@ certificate:
 
 Build:
 
-    go build -o cmd/key-keeper/main.go -o key-keeper
+    go build -o key-keeper cmd/key-keeper/main.go
 Run:
 
     key-keeper -config /path/to/config

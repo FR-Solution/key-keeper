@@ -50,14 +50,14 @@ func main() {
 		controller.Config{
 			VaultIntermediateCAPath: cfg.Vault.IntermediateCAPath,
 			VaultCertPath:           cfg.Vault.CertPath,
-			VaultTimeout:            cfg.Vault.Timeout.Duration,
+			VaultTimeout:            cfg.Vault.Timeout,
 
 			CommonName:    cfg.Certificate.CommonName,
 			DomainName:    cfg.Certificate.DomainName,
 			CaPath:        cfg.Certificate.CaPath,
 			CertPath:      cfg.Certificate.CertPath,
 			KeyPath:       cfg.Certificate.KeyPath,
-			ValidInterval: cfg.Certificate.ValidInterval.Duration,
+			ValidInterval: cfg.Certificate.ValidInterval,
 		},
 	)
 

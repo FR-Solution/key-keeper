@@ -3,10 +3,9 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"gopkg.in/yaml.v3"
-
-	"github.com/terra-cube/key-keeper/internal/utils"
 )
 
 type Configuration struct {
@@ -15,20 +14,20 @@ type Configuration struct {
 }
 
 type vault struct {
-	Address            string         `yaml:"address"`
-	Token              string         `yaml:"token"`
-	IntermediateCAPath string         `yaml:"intermediate_ca_path"`
-	CertPath           string         `yaml:"cert_path"`
-	Timeout            utils.Duration `yaml:"timeout"`
+	Address            string        `yaml:"address"`
+	Token              string        `yaml:"token"`
+	IntermediateCAPath string        `yaml:"intermediate_ca_path"`
+	CertPath           string        `yaml:"cert_path"`
+	Timeout            time.Duration `yaml:"timeout"`
 }
 
 type certificate struct {
-	CommonName    string         `yaml:"common_name"`
-	DomainName    string         `yaml:"domain_name"`
-	CaPath        string         `yaml:"ca_path"`
-	CertPath      string         `yaml:"cert_path"`
-	KeyPath       string         `yaml:"key_path"`
-	ValidInterval utils.Duration `yaml:"valid_interval"`
+	CommonName    string        `yaml:"common_name"`
+	DomainName    string        `yaml:"domain_name"`
+	CaPath        string        `yaml:"ca_path"`
+	CertPath      string        `yaml:"cert_path"`
+	KeyPath       string        `yaml:"key_path"`
+	ValidInterval time.Duration `yaml:"valid_interval"`
 }
 
 func Read(path string) (cfg Configuration, err error) {
