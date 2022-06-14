@@ -12,6 +12,8 @@ type vault interface {
 	Write(ctx context.Context, path string, data map[string]interface{}) (map[string]interface{}, error)
 	Read(ctx context.Context, path string) (map[string]interface{}, error)
 	List(ctx context.Context, path string) (map[string]interface{}, error)
+	Put(ctx context.Context, mountPath, secretePath string, data map[string]interface{}) error
+	Get(ctx context.Context, mountPath, secretePath string) (map[string]interface{}, error)
 }
 
 type controller struct {
@@ -75,7 +77,7 @@ func (s *controller) TurnOn() error {
 func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
-	storedICA, _ := s.vault.Read(ctx, s.certs.CA.VaultPath)
+	storedICA, _ := s.vault.Get(ctx, s.certs.CA.VaultKV, "intermediate-ca")
 	if cert != nil {
 		return storedICA["certificate"].([]byte), storedICA["private_key"].([]byte), nil
 	}
@@ -129,7 +131,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 		"certificate": ica["certificate"],
 		"private_key": csr["private_key"],
 	}
-	if _, err = s.vault.Write(ctx, s.certs.CA.VaultPath, storedICA); err != nil {
+	if err = s.vault.Put(ctx, s.certs.CA.VaultKV, "intermediate-ca", storedICA); err != nil {
 		return
 	}
 	return ica["certificate"].([]byte), csr["private_key"].([]byte), nil

@@ -13,8 +13,8 @@ certificates:
   valid_interval: "valid expire cert interval: 1s, 3m, 5h"
   ca:
     common_name: "common_name"
-    vault_path: "path for store of ca in vault"
-    path: "path for store of ca in host"
+    vault_kv: "path for store of ca in vault"
+    host_path: "path for store of ca in host"
 ```
 
 Build:

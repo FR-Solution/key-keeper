@@ -53,3 +53,16 @@ func (c *vault) Write(ctx context.Context, path string, data map[string]interfac
 	}
 	return nil, err
 }
+
+func (c *vault) Put(ctx context.Context, mountPath, secretePath string, data map[string]interface{}) error {
+	_, err := c.cli.KVv2(mountPath).Put(ctx, secretePath, data)
+	return err
+}
+
+func (c *vault) Get(ctx context.Context, mountPath, secretePath string) (map[string]interface{}, error) {
+	s, err := c.cli.KVv2(mountPath).Get(ctx, secretePath)
+	if s != nil {
+		return s.Data, err
+	}
+	return s.Data, err
+}
