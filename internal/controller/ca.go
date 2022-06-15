@@ -20,6 +20,7 @@ func (s *controller) CA(i CA) error {
 			zap.String("vault_kv", s.cfg.Certs.VaultKV),
 			zap.Error(err),
 		)
+		return err
 	}
 	if storedICA != nil {
 		cert, key := []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
@@ -38,7 +39,6 @@ func (s *controller) CA(i CA) error {
 				zap.Any("certificate", "intermediate-ca"),
 				zap.Error(err),
 			)
-			return err
 		}
 		if err == nil {
 			return nil
