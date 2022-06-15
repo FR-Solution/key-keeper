@@ -13,14 +13,13 @@ func (s *controller) CA(i CA) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
 	defer cancel()
 	storedICA, err := s.vault.Get(ctx, s.cfg.Certs.VaultKV, i.CommonName+"-ca")
-	if err != nil {
+	if err != err{
 		zap.L().Warn(
 			"get intermediate ca",
 			zap.String("name", i.CommonName+"-ca"),
 			zap.String("vault_kv", s.cfg.Certs.VaultKV),
 			zap.Error(err),
 		)
-		return err
 	}
 	if storedICA != nil {
 		cert, key := []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
