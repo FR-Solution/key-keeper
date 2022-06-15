@@ -117,8 +117,8 @@ func (s *controller) StoreCA(i CA, crt, key []byte) error {
 	defer cancel()
 	// saving the created Intermediate CA
 	storedICA := map[string]interface{}{
-		"certificate": crt,
-		"private_key": key,
+		"certificate": string(crt),
+		"private_key": string(key),
 	}
 	if err := s.vault.Put(ctx, s.cfg.Certs.VaultKV, i.CommonName+"-ca", storedICA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
@@ -126,7 +126,6 @@ func (s *controller) StoreCA(i CA, crt, key []byte) error {
 
 	if err := s.storeCertificate(i.HostPath, crt, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
-
 	}
 	return nil
 }
