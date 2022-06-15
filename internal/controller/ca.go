@@ -14,8 +14,12 @@ func (s *controller) CA() error {
 	defer cancel()
 	storedICA, err := s.vault.Get(ctx, s.cfg.Certs.VaultKV, s.cfg.Certs.CA.CommonName+"-ca")
 	if err != nil {
-
-		return err
+		zap.L().Warn(
+			"get intermediate ca",
+			zap.String("name", s.cfg.Certs.CA.CommonName+"-ca"),
+			zap.String("vault_kv", s.cfg.Certs.VaultKV),
+			zap.Error(err),
+		)
 	}
 	if storedICA != nil {
 		cert, key := []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
@@ -116,7 +120,7 @@ func (s *controller) StoreCA(crt, key []byte) error {
 		"certificate": crt,
 		"private_key": key,
 	}
-	if err := s.vault.Put(ctx, s.cfg.Certs.VaultKV, "intermediate-ca", storedICA); err != nil {
+	if err := s.vault.Put(ctx, s.cfg.Certs.VaultKV, s.cfg.Certs.CA.CommonName+"-ca", storedICA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
 	}
 
