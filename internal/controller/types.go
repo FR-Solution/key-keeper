@@ -20,13 +20,13 @@ type Certificates struct {
 	CertPath      string        `yaml:"cert_path"`
 	VaultKV       string        `yaml:"vault_kv"`
 	ValidInterval time.Duration `yaml:"valid_interval"`
-	CA            struct {
+	CA            *struct {
 		CommonName string `yaml:"common_name"`
 		HostPath   string `yaml:"host_path"`
-	} `yaml:"ca"`
-	CSR struct {
+	} `yaml:"ca,omitempty"`
+	CSR *struct {
 		CommonName string `yaml:"common_name"`
 		Role       string `yaml:"role"`
 		HostPath   string `yaml:"host_path"`
-	} `yaml:"csr"`
+	} `yaml:"csr,omitempty"`
 }
