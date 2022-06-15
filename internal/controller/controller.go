@@ -43,7 +43,7 @@ func (s *controller) TurnOn() error {
 		go s.runtime()
 	}()
 
-	cert, err := s.readCertificate(s.certs.Cert.HostPath)
+	cert, err := s.readCertificate(s.certs.CSR.HostPath)
 	if cert != nil && time.Until(cert.Leaf.NotAfter) > s.certs.ValidInterval {
 		return nil
 	}
@@ -65,7 +65,7 @@ func (s *controller) TurnOn() error {
 	if err != nil {
 		return err
 	}
-	if err := s.storeCertificate(s.certs.Cert.HostPath, certData, keyData); err != nil {
+	if err := s.storeCertificate(s.certs.CSR.HostPath, certData, keyData); err != nil {
 		return err
 	}
 	return nil
@@ -164,9 +164,9 @@ func (s *controller) GenerateCert() ([]byte, []byte, error) {
 	defer cancel()
 
 	certData := map[string]interface{}{
-		"common_name": s.certs.Cert.CommonName,
+		"common_name": s.certs.CSR.CommonName,
 	}
-	cert, err := s.vault.Write(ctx, s.certs.CertPath+"/issue/"+s.certs.Cert.Role, certData)
+	cert, err := s.vault.Write(ctx, s.certs.CertPath+"/issue/"+s.certs.CSR.Role, certData)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -178,7 +178,7 @@ func (s *controller) runtime() {
 	for {
 		select {
 		case <-t:
-			cert, err := s.readCertificate(s.certs.Cert.HostPath)
+			cert, err := s.readCertificate(s.certs.CSR.HostPath)
 			if cert == nil || time.Until(cert.Leaf.NotAfter) < s.certs.ValidInterval {
 				certData, keyData, err := s.GenerateCert()
 				if err != nil {
@@ -187,10 +187,10 @@ func (s *controller) runtime() {
 						zap.Error(err),
 					)
 				}
-				if err := s.storeCertificate(s.certs.Cert.HostPath, certData, keyData); err != nil {
+				if err := s.storeCertificate(s.certs.CSR.HostPath, certData, keyData); err != nil {
 					zap.L().Error(
 						"store certificate",
-						zap.String("path", s.certs.Cert.HostPath),
+						zap.String("path", s.certs.CSR.HostPath),
 						zap.Error(err),
 					)
 				}

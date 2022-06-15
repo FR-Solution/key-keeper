@@ -15,7 +15,7 @@ certificates:
   ca:
     common_name: "common_name"
     host_path: "path for store of ca in host"
-  cert:
+  csr:
     common_name: "common_name"
     role: "role for generate cert"
     host_path: "path for store of ca in host"
