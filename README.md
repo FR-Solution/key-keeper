@@ -13,12 +13,12 @@ certificates:
   vault_kv: "path for kv"
   valid_interval: "valid expire cert interval: 1s, 3m, 5h"
   ca:
-    common_name: "common_name"
-    host_path: "path for store of ca in host"
+    - common_name: "common_name"
+      host_path: "path for store of ca in host"
   csr:
-    common_name: "common_name"
-    role: "role for generate cert"
-    host_path: "path for store of ca in host"
+    - common_name: "common_name"
+      role: "role for generate cert"
+      host_path: "path for store of ca in host"
 ```
 
 Build:

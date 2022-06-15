@@ -9,14 +9,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) CA() error {
+func (s *controller) CA(i CA) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
 	defer cancel()
-	storedICA, err := s.vault.Get(ctx, s.cfg.Certs.VaultKV, s.cfg.Certs.CA.CommonName+"-ca")
+	storedICA, err := s.vault.Get(ctx, s.cfg.Certs.VaultKV, i.CommonName+"-ca")
 	if err != nil {
 		zap.L().Warn(
 			"get intermediate ca",
-			zap.String("name", s.cfg.Certs.CA.CommonName+"-ca"),
+			zap.String("name", i.CommonName+"-ca"),
 			zap.String("vault_kv", s.cfg.Certs.VaultKV),
 			zap.Error(err),
 		)
@@ -45,7 +45,7 @@ func (s *controller) CA() error {
 		}
 	}
 
-	cert, key, err := s.GenerateIntermediateCA()
+	cert, key, err := s.GenerateIntermediateCA(i)
 	if err != nil {
 		zap.L().Error(
 			"generate intermediate-ca",
@@ -54,7 +54,7 @@ func (s *controller) CA() error {
 		return err
 	}
 
-	if err = s.StoreCA(cert, key); err != nil {
+	if err = s.StoreCA(i, cert, key); err != nil {
 		zap.L().Error(
 			"stored intermediate-ca",
 			zap.Error(err),
@@ -64,13 +64,13 @@ func (s *controller) CA() error {
 
 	return nil
 }
-func (s *controller) GenerateIntermediateCA() (crt, key []byte, err error) {
+func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 	// create intermediate CA
 	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
 	defer cancel()
 
 	csrData := map[string]interface{}{
-		"common_name": fmt.Sprintf(intermediateCommonNameLayout, s.cfg.Certs.CA.CommonName),
+		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
 		"ttl":         "8760h",
 	}
 
@@ -112,7 +112,7 @@ func (s *controller) GenerateIntermediateCA() (crt, key []byte, err error) {
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
-func (s *controller) StoreCA(crt, key []byte) error {
+func (s *controller) StoreCA(i CA, crt, key []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
 	defer cancel()
 	// saving the created Intermediate CA
@@ -120,12 +120,12 @@ func (s *controller) StoreCA(crt, key []byte) error {
 		"certificate": crt,
 		"private_key": key,
 	}
-	if err := s.vault.Put(ctx, s.cfg.Certs.VaultKV, s.cfg.Certs.CA.CommonName+"-ca", storedICA); err != nil {
+	if err := s.vault.Put(ctx, s.cfg.Certs.VaultKV, i.CommonName+"-ca", storedICA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
 	}
 
-	if err := s.storeCertificate(s.cfg.Certs.CA.HostPath, crt, key); err != nil {
-		return fmt.Errorf("host path %s : %w", s.cfg.Certs.CA.HostPath, err)
+	if err := s.storeCertificate(i.HostPath, crt, key); err != nil {
+		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 
 	}
 	return nil
