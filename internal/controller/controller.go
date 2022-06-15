@@ -31,14 +31,14 @@ func New(store vault, cfg Config) *controller {
 }
 
 func (s *controller) TurnOn() error {
-	if err := s.workflow(); err != nil {
+	if err := s.Workflow(); err != nil {
 		return err
 	}
 
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()
 	for range t.C {
-		if err := s.workflow(); err != nil {
+		if err := s.Workflow(); err != nil {
 			return err
 		}
 	}
@@ -46,12 +46,11 @@ func (s *controller) TurnOn() error {
 	return nil
 }
 
-func (s *controller) workflow() error {
-	for _, i := range s.cfg.Certs.CA {
-		if err := s.CA(i); err != nil {
-			return err
-		}
+func (s *controller) Workflow() error {
+	if err := s.CA(s.cfg.Certs.CA); err != nil {
+		return err
 	}
+
 	for _, i := range s.cfg.Certs.CSR {
 		if err := s.CSR(i); err != nil {
 			return err

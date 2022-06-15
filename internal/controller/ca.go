@@ -13,7 +13,7 @@ func (s *controller) CA(i CA) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
 	defer cancel()
 	storedICA, err := s.vault.Get(ctx, s.cfg.Certs.VaultKV, i.CommonName+"-ca")
-	if err != err{
+	if err != err {
 		zap.L().Warn(
 			"get intermediate ca",
 			zap.String("name", i.CommonName+"-ca"),
@@ -103,7 +103,8 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"certificate": ica["certificate"],
 	}
 
-	if _, err = s.vault.Write(ctx, s.cfg.Certs.CertPath+"/intermediate/set-signed", certData); err != nil {
+	path := s.cfg.Certs.CertPath + "/intermediate/set-signed"
+	if _, err = s.vault.Write(ctx, path, certData); err != nil {
 		err = fmt.Errorf("publish the signed certificate back to the Intermediate CA: %w", err)
 		return
 	}

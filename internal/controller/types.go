@@ -20,7 +20,7 @@ type Certificates struct {
 	CertPath      string        `yaml:"cert_path"`
 	VaultKV       string        `yaml:"vault_kv"`
 	ValidInterval time.Duration `yaml:"valid_interval"`
-	CA            []CA          `yaml:"ca,omitempty"`
+	CA            CA            `yaml:"ca,omitempty"`
 	CSR           []CSR         `yaml:"csr,omitempty"`
 }
 
