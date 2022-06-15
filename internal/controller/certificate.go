@@ -7,14 +7,11 @@ import (
 	"os"
 )
 
-func (s *controller) storeCertificate(path string, cert []byte) error {
+func (s *controller) storeCertificate(path string, cert, key []byte) error {
 	if err := os.WriteFile(path+".pem", cert, 0644); err != nil {
 		return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
 	}
-	return nil
-}
 
-func (s *controller) storeKey(path string, key []byte) error {
 	if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
 		return fmt.Errorf("failed to save key file: %w", err)
 	}
@@ -22,17 +19,21 @@ func (s *controller) storeKey(path string, key []byte) error {
 }
 
 func (s *controller) readCertificate(path string) (*tls.Certificate, error) {
-	crtContent, err := os.ReadFile(path + ".pem")
+	crt, err := os.ReadFile(path + ".pem")
 	if err != nil {
 		return nil, err
 	}
 
-	keyContent, err := os.ReadFile(path + "-key.pem")
+	key, err := os.ReadFile(path + "-key.pem")
 	if err != nil {
 		return nil, err
 	}
+	return parseToCert(crt, key)
 
-	cert, err := tls.X509KeyPair(crtContent, keyContent)
+}
+
+func parseToCert(crt, key []byte) (*tls.Certificate, error) {
+	cert, err := tls.X509KeyPair(crt, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse x509 key pair: %w", err)
 	}

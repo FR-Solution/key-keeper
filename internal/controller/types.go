@@ -24,4 +24,9 @@ type Certificates struct {
 		CommonName string `yaml:"common_name"`
 		HostPath   string `yaml:"host_path"`
 	} `yaml:"ca"`
+	Cert struct {
+		CommonName string `yaml:"common_name"`
+		Role       string `yaml:"role"`
+		HostPath   string `yaml:"host_path"`
+	} `yaml:"cert"`
 }

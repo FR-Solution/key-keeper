@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -37,13 +39,17 @@ func New(store vault, cfg Config) *controller {
 }
 
 func (s *controller) TurnOn() error {
-	// cert, err := s.readCertificate(s.domainName)
-	// if cert != nil && time.Until(cert.Leaf.NotAfter) > s.validInterval {
-	// 	return nil
-	// }
-	// if err != nil && !os.IsNotExist(err) {
-	// 	return err
-	// }
+	defer func() {
+		go s.runtime()
+	}()
+
+	cert, err := s.readCertificate(s.certs.Cert.HostPath)
+	if cert != nil && time.Until(cert.Leaf.NotAfter) > s.certs.ValidInterval {
+		return nil
+	}
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
 
 	//create intermediate CA with common name example.com
 	icaCert, icaKey, err := s.GenerateIntermediateCA()
@@ -51,42 +57,51 @@ func (s *controller) TurnOn() error {
 		return err
 	}
 
-	if err := s.storeCertificate(s.certs.CA.HostPath, icaCert); err != nil {
+	if err := s.storeCertificate(s.certs.CA.HostPath, icaCert, icaKey); err != nil {
 		return err
 	}
 
-	if err := s.storeKey(s.certs.CA.HostPath, icaKey); err != nil {
+	certData, keyData, err := s.GenerateCert()
+	if err != nil {
 		return err
 	}
-
-	// ctx, cancel = context.WithTimeout(context.Background(), s.vaultTimeout)
-	// defer cancel()
-	// certData, keyData, err := s.GenerateCert(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-	// if err := s.storeCertificate(s.certPath, certData); err != nil {
-	// 	return err
-	// }
-	// if err := s.storeKey(s.keyPath, keyData); err != nil {
-	// 	return err
-	// }
-
-	// go s.runtime()
+	if err := s.storeCertificate(s.certs.Cert.HostPath, certData, keyData); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err error) {
+func (s *controller) GenerateIntermediateCA() (crt []byte, key []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
 	defer cancel()
 	storedICA, err := s.vault.Get(ctx, s.certs.VaultKV, s.certs.CA.CommonName+"-ca")
 	if err != nil {
-		zap.L().Error("get", zap.String("mount_path", s.certs.VaultKV), zap.String("secrete_path", s.certs.CA.CommonName+"-ca"), zap.Error(err))
+		zap.L().Error(
+			"getting",
+			zap.Any("certificate", "intermediate-ca"),
+			zap.String("mount_path", s.certs.VaultKV),
+			zap.String("secrete_path", s.certs.CA.CommonName+"-ca"),
+			zap.Error(err),
+		)
 	}
-	if cert != nil {
-		return []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string)), nil
+	if storedICA != nil {
+		crt, key = []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
+		var cert *tls.Certificate
+		cert, err = parseToCert(crt, key)
+		if cert != nil && time.Until(cert.Leaf.NotAfter) < s.certs.ValidInterval {
+			err = fmt.Errorf("the certificate expires after %f h.", time.Until(cert.Leaf.NotAfter).Hours())
+		}
+		if err != nil {
+			zap.L().Error(
+				"analize",
+				zap.Any("certificate", "intermediate-ca"),
+				zap.Error(err),
+			)
+		}
+		if err == nil {
+			return
+		}
 	}
-	//TODO: check expire
 
 	// create intermediate CA
 	ctx, cancel = context.WithTimeout(context.Background(), s.vaultTimeout)
@@ -99,6 +114,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 
 	csr, err := s.vault.Write(ctx, s.certs.CertPath+"/intermediate/generate/exported", csrData)
 	if err != nil {
+		err = fmt.Errorf("create intermediate CA: %w", err)
 		return
 	}
 
@@ -114,6 +130,7 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 
 	ica, err := s.vault.Write(ctx, s.certs.RootPath+"/root/sign-intermediate", icaData)
 	if err != nil {
+		err = fmt.Errorf("send the intermediate CA's CSR to the root CA for signing CA: %w", err)
 		return
 	}
 
@@ -126,56 +143,61 @@ func (s *controller) GenerateIntermediateCA() (cert []byte, key []byte, err erro
 	}
 
 	if _, err = s.vault.Write(ctx, s.certs.CertPath+"/intermediate/set-signed", certData); err != nil {
+		err = fmt.Errorf("publish the signed certificate back to the Intermediate CA: %w", err)
 		return
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), s.vaultTimeout)
-	defer cancel()
-
+	// saving the created Intermediate CA
 	storedICA = map[string]interface{}{
 		"certificate": ica["certificate"],
 		"private_key": csr["private_key"],
 	}
 	if err = s.vault.Put(ctx, s.certs.VaultKV, "intermediate-ca", storedICA); err != nil {
+		err = fmt.Errorf("saving the created Intermediate CA: %w", err)
 		return
 	}
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
-// func (s *controller) GenerateCert(ctx context.Context) ([]byte, []byte, error) {
-// 	certData := map[string]interface{}{
-// 		"common_name": s.domainName,
-// 	}
-// 	cert, err := s.vault.Write(ctx, s.vaultCertPath, certData)
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-// 	return cert["certificate"].([]byte), cert["private_key"].([]byte), nil
-// }
+func (s *controller) GenerateCert() ([]byte, []byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
+	defer cancel()
 
-// func (s *controller) runtime() {
-// 	t := time.Tick(time.Hour)
-// 	for {
-// 		select {
-// 		case <-t:
-// 			cert, err := s.readCertificate(s.domainName)
-// 			if cert == nil || time.Until(cert.Leaf.NotAfter) < s.validInterval {
-// 				ctx, cancel := context.WithTimeout(context.Background(), s.vaultTimeout)
-// 				certData, keyData, err := s.GenerateCert(ctx)
-// 				if err != nil {
-// 					zap.L().Error("generate certificate", zap.Error(err))
-// 				}
-// 				cancel()
-// 				if err := s.storeCertificate(s.certPath, certData); err != nil {
-// 					zap.L().Error("store certificate", zap.Error(err))
-// 				}
-// 				if err := s.storeKey(s.keyPath, keyData); err != nil {
-// 					zap.L().Error("store key", zap.Error(err))
-// 				}
-// 			}
-// 			if err != nil {
-// 				zap.L().Error("read certificate", zap.Error(err))
-// 			}
-// 		}
-// 	}
-// }
+	certData := map[string]interface{}{
+		"common_name": s.certs.Cert.CommonName,
+	}
+	cert, err := s.vault.Write(ctx, s.certs.CertPath+"/issue/"+s.certs.Cert.Role, certData)
+	if err != nil {
+		return nil, nil, err
+	}
+	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
+}
+
+func (s *controller) runtime() {
+	t := time.Tick(time.Hour)
+	for {
+		select {
+		case <-t:
+			cert, err := s.readCertificate(s.certs.Cert.HostPath)
+			if cert == nil || time.Until(cert.Leaf.NotAfter) < s.certs.ValidInterval {
+				certData, keyData, err := s.GenerateCert()
+				if err != nil {
+					zap.L().Error(
+						"generate certificate",
+						zap.Error(err),
+					)
+				}
+				if err := s.storeCertificate(s.certs.Cert.HostPath, certData, keyData); err != nil {
+					zap.L().Error(
+						"store certificate",
+						zap.String("path", s.certs.Cert.HostPath),
+						zap.Error(err),
+					)
+				}
+			}
+			if err != nil {
+				zap.L().Error("read certificate", zap.Error(err))
+			}
+		}
+	}
+}
