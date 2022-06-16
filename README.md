@@ -6,6 +6,8 @@ Example config.yml
 vault:
   address: "address vault"
   token: "unexpired token"
+  path_to_role_id: "path to local role id"
+  path_to_secret_id: "path to local secret id"
   timeout: "timeout request: 1s, 3m, 5h"
 certificates:
   root_path: "root ca path"

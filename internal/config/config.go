@@ -7,9 +7,15 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/terra-cube/key-keeper/internal/controller"
+	"github.com/terra-cube/key-keeper/internal/vault"
 )
 
-func Read(path string) (cfg controller.Config, err error) {
+type Config struct {
+	Vault        vault.Config      `yaml:"vault"`
+	Certificates controller.Config `yaml:"certificates"`
+}
+
+func Read(path string) (cfg Config, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		err = fmt.Errorf("read config file %s: %w", path, err)

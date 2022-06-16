@@ -38,8 +38,7 @@ func main() {
 	zap.L().Debug("configuration", zap.Any("config", cfg))
 
 	v, err := vault.New(
-		cfg.Vault.Address,
-		cfg.Vault.Token,
+		cfg.Vault,
 	)
 	if err != nil {
 		zap.L().Fatal("init vault", zap.Error(err))
@@ -47,7 +46,7 @@ func main() {
 
 	cntl := controller.New(
 		v,
-		cfg,
+		cfg.Certificates,
 	)
 
 	go func() {

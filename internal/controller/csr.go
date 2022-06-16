@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 func (s *controller) CSR(i CSR) error {
 	csr, err := s.readCertificate(i.HostPath)
-	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.cfg.Certs.ValidInterval {
+	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ValidInterval {
 		return nil
 	}
 	if err != nil && !os.IsNotExist(err) {
@@ -35,14 +34,11 @@ func (s *controller) CSR(i CSR) error {
 }
 
 func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), s.cfg.Vault.Timeout)
-	defer cancel()
-
 	certData := map[string]interface{}{
 		"common_name": i.CommonName,
 	}
-	path := s.cfg.Certs.CertPath + "/issue/" + i.Role
-	cert, err := s.vault.Write(ctx, path, certData)
+	path := s.certs.CertPath + "/issue/" + i.Role
+	cert, err := s.vault.Write(path, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
 	}

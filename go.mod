@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/hashicorp/vault/api v1.7.1
+	github.com/hashicorp/vault/api/auth/approle v0.1.1
 	go.uber.org/zap v1.21.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
