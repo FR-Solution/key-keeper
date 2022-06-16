@@ -73,7 +73,8 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"ttl":         "8760h",
 	}
 
-	csr, err := s.vault.Write(ctx, s.cfg.Certs.CertPath+"/intermediate/generate/exported", csrData)
+	path := s.cfg.Certs.CertPath + "/intermediate/generate/exported"
+	csr, err := s.vault.Write(ctx, path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create intermediate CA: %w", err)
 		return
@@ -89,7 +90,8 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"ttl":    "8760h",
 	}
 
-	ica, err := s.vault.Write(ctx, s.cfg.Certs.RootPath+"/root/sign-intermediate", icaData)
+	path = s.cfg.Certs.RootPath + "/root/sign-intermediate"
+	ica, err := s.vault.Write(ctx, path, icaData)
 	if err != nil {
 		err = fmt.Errorf("send the intermediate CA's CSR to the root CA for signing CA: %w", err)
 		return
@@ -103,7 +105,7 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"certificate": ica["certificate"],
 	}
 
-	path := s.cfg.Certs.CertPath + "/intermediate/set-signed"
+	path = s.cfg.Certs.CertPath + "/intermediate/set-signed"
 	if _, err = s.vault.Write(ctx, path, certData); err != nil {
 		err = fmt.Errorf("publish the signed certificate back to the Intermediate CA: %w", err)
 		return
