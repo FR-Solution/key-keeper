@@ -47,7 +47,7 @@ func New(cfg Config) (*vault, error) {
 		&auth.SecretID{
 			FromString: secretID,
 		},
-		auth.WithMountPath(fmt.Sprintf("auth/%s/login", cfg.RolePath)),
+		auth.WithMountPath(cfg.RolePath),
 	)
 	if err != nil {
 		return nil, err
