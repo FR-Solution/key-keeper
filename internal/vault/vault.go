@@ -64,13 +64,13 @@ func New(cfg Config) (*vault, error) {
 }
 
 func (s *vault) roleID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/role-id", s.cfg.RolePath, s.cfg.RoleName)
+	path := fmt.Sprintf("auth/%s/approle/role/%s/role-id", s.cfg.RolePath, s.cfg.RoleName)
 	approle, err := s.Read(path)
 	if err != nil {
 		if roleID, rErr := readFromFile(s.cfg.PathToRoleID); rErr == nil {
 			return string(roleID), nil
 		}
-		return "", fmt.Errorf("read role_id fo role %s : %w", s.cfg.RoleName, err)
+		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
 	}
 	if approle == nil {
 		return "", fmt.Errorf("no role_id info was returned")
@@ -85,13 +85,13 @@ func (s *vault) roleID() (string, error) {
 }
 
 func (s *vault) secretID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/secret-id", s.cfg.RolePath, s.cfg.RoleName)
+	path := fmt.Sprintf("auth/%s/approle/role/%s/secret-id", s.cfg.RolePath, s.cfg.RoleName)
 	approle, err := s.Write(path, nil)
 	if err != nil {
 		if secretID, rErr := readFromFile(s.cfg.PathToSecretID); rErr == nil {
 			return string(secretID), nil
 		}
-		return "", fmt.Errorf("read secrete_id fo role %s : %w", s.cfg.RoleName, err)
+		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
 	}
 	if approle == nil {
 		return "", fmt.Errorf("no secrete_id info was returned")
