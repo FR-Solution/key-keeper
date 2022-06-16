@@ -63,7 +63,7 @@ func New(cfg Config) (*vault, error) {
 }
 
 func (s *vault) roleID() (string, error) {
-	path := fmt.Sprintf("auth/approle/role/%s/role-id", s.cfg.Role)
+	path := fmt.Sprintf("auth/%s/role-id", s.cfg.Role)
 	approle, err := s.Read(path)
 	if err != nil {
 		if roleID, rErr := readFromFile(s.cfg.PathToRoleID); rErr == nil {
@@ -84,7 +84,7 @@ func (s *vault) roleID() (string, error) {
 }
 
 func (s *vault) secretID() (string, error) {
-	path := fmt.Sprintf("auth/approle/role/%s/secret-id", s.cfg.Role)
+	path := fmt.Sprintf("auth/%s/secret-id", s.cfg.Role)
 	approle, err := s.Write(path, nil)
 	if err != nil {
 		if secretID, rErr := readFromFile(s.cfg.PathToSecretID); rErr == nil {
