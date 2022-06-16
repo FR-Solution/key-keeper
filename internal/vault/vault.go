@@ -101,7 +101,7 @@ func (s *vault) secretID() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found secrete_id")
 	}
-	err = writeToFile(s.cfg.PathToRoleID, secretID.(string))
+	err = writeToFile(s.cfg.PathToSecretID, secretID.(string))
 	return secretID.(string), err
 }
 
