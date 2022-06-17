@@ -5,11 +5,11 @@ import (
 )
 
 type Config struct {
-	Address        string        `yaml:"address"`
-	Token          string        `yaml:"token"`
-	RolePath       string        `yaml:"role_path"`
-	RoleName       string        `yaml:"role_name"`
-	PathToRoleID   string        `yaml:"path_to_role_id"`
-	PathToSecretID string        `yaml:"path_to_secret_id"`
-	Timeout        time.Duration `yaml:"timeout"`
+	Address             string        `yaml:"address"`
+	BootsrapToken       string        `yaml:"bootstrap_token"`
+	AppRolePath         string        `yaml:"approle_path"`
+	AppRoleName         string        `yaml:"approle_name"`
+	LocalPathToRoleID   string        `yaml:"local_path_to_role_id"`
+	LocalPathToSecretID string        `yaml:"local_path_to_secret_id"`
+	RequestTimeout      time.Duration `yaml:"request_timeout"`
 }

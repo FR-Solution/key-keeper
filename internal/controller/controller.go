@@ -46,12 +46,14 @@ func (s *controller) TurnOn() error {
 }
 
 func (s *controller) Workflow() error {
-	if err := s.CA(s.certs.CA); err != nil {
-		return err
+	for _, c := range s.certs.CA {
+		if err := s.CA(c); err != nil {
+			return err
+		}
 	}
 
-	for _, i := range s.certs.CSR {
-		if err := s.CSR(i); err != nil {
+	for _, c := range s.certs.CSR {
+		if err := s.CSR(c); err != nil {
 			return err
 		}
 	}

@@ -11,7 +11,7 @@ import (
 
 func (s *controller) CSR(i CSR) error {
 	csr, err := s.readCertificate(i.HostPath)
-	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ValidInterval {
+	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ReissueInterval {
 		return nil
 	}
 	if err != nil && !os.IsNotExist(err) {
@@ -40,7 +40,7 @@ func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
 		"alt_names":   strings.Join(i.Hosts, ","),
 		"ip_sans":     strings.Join(i.IPs, ","),
 	}
-	path := s.certs.CertPath + "/issue/" + i.Role
+	path := i.CertPath + "/issue/" + i.Role
 	cert, err := s.vault.Write(path, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)

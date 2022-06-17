@@ -22,7 +22,7 @@ func (s *controller) CA(i CA) error {
 		cert, key := []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
 		var ca *tls.Certificate
 		ca, err = parseToCert(cert, key)
-		if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ValidInterval {
+		if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ReissueInterval {
 			zap.L().Warn(
 				"expired intermediate-ca",
 				zap.Float64("until_h", time.Until(ca.Leaf.NotAfter).Hours()),
@@ -67,7 +67,7 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"ttl":         "8760h",
 	}
 
-	path := s.certs.CertPath + "/intermediate/generate/exported"
+	path := i.CertPath + "/intermediate/generate/exported"
 	csr, err := s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create intermediate CA: %w", err)
@@ -81,7 +81,7 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"ttl":    "8760h",
 	}
 
-	path = s.certs.RootPath + "/root/sign-intermediate"
+	path = i.RootPathCA + "/root/sign-intermediate"
 	ica, err := s.vault.Write(path, icaData)
 	if err != nil {
 		err = fmt.Errorf("send the intermediate CA's CSR to the root CA for signing CA: %w", err)
@@ -93,7 +93,7 @@ func (s *controller) GenerateIntermediateCA(i CA) (crt, key []byte, err error) {
 		"certificate": ica["certificate"],
 	}
 
-	path = s.certs.CertPath + "/intermediate/set-signed"
+	path = i.CertPath + "/intermediate/set-signed"
 	if _, err = s.vault.Write(path, certData); err != nil {
 		err = fmt.Errorf("publish the signed certificate back to the Intermediate CA: %w", err)
 		return

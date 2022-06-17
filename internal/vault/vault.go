@@ -19,14 +19,14 @@ func New(cfg Config) (*vault, error) {
 		&api.Config{
 			Address: cfg.Address,
 			HttpClient: &http.Client{
-				Timeout: cfg.Timeout,
+				Timeout: cfg.RequestTimeout,
 			},
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
-	client.SetToken(cfg.Token)
+	client.SetToken(cfg.BootsrapToken)
 
 	s := &vault{
 		cli: client,
@@ -47,7 +47,7 @@ func New(cfg Config) (*vault, error) {
 		&auth.SecretID{
 			FromString: secretID,
 		},
-		auth.WithMountPath(cfg.RolePath),
+		auth.WithMountPath(cfg.AppRolePath),
 	)
 	if err != nil {
 		return nil, err
@@ -64,10 +64,10 @@ func New(cfg Config) (*vault, error) {
 }
 
 func (s *vault) roleID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/role-id", s.cfg.RolePath, s.cfg.RoleName)
+	path := fmt.Sprintf("auth/%s/role/%s/role-id", s.cfg.AppRolePath, s.cfg.AppRoleName)
 	approle, err := s.Read(path)
 	if err != nil {
-		if roleID, rErr := readFromFile(s.cfg.PathToRoleID); rErr == nil {
+		if roleID, rErr := readFromFile(s.cfg.LocalPathToRoleID); rErr == nil {
 			return string(roleID), nil
 		}
 		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
@@ -80,15 +80,15 @@ func (s *vault) roleID() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
-	err = writeToFile(s.cfg.PathToRoleID, roleID.(string))
+	err = writeToFile(s.cfg.LocalPathToRoleID, roleID.(string))
 	return roleID.(string), err
 }
 
 func (s *vault) secretID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/secret-id", s.cfg.RolePath, s.cfg.RoleName)
+	path := fmt.Sprintf("auth/%s/role/%s/secret-id", s.cfg.AppRolePath, s.cfg.AppRoleName)
 	approle, err := s.Write(path, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(s.cfg.PathToSecretID); rErr == nil {
+		if secretID, rErr := readFromFile(s.cfg.LocalPathToSecretID); rErr == nil {
 			return string(secretID), nil
 		}
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
@@ -101,7 +101,7 @@ func (s *vault) secretID() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found secrete_id")
 	}
-	err = writeToFile(s.cfg.PathToSecretID, secretID.(string))
+	err = writeToFile(s.cfg.LocalPathToSecretID, secretID.(string))
 	return secretID.(string), err
 }
 
