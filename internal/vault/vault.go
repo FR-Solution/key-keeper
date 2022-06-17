@@ -11,7 +11,6 @@ import (
 
 type vault struct {
 	cli *api.Client
-	cfg Config
 }
 
 func New(cfg Config) (*vault, error) {
@@ -30,14 +29,13 @@ func New(cfg Config) (*vault, error) {
 
 	s := &vault{
 		cli: client,
-		cfg: cfg,
 	}
 
-	roleID, err := s.roleID()
+	roleID, err := s.roleID(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("get role id: %w", err)
 	}
-	secretID, err := s.secretID()
+	secretID, err := s.secretID(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("get secret id: %w", err)
 	}
@@ -63,11 +61,11 @@ func New(cfg Config) (*vault, error) {
 	return s, nil
 }
 
-func (s *vault) roleID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/role-id", s.cfg.AppRolePath, s.cfg.AppRoleName)
+func (s *vault) roleID(cfg Config) (string, error) {
+	path := fmt.Sprintf("auth/%s/role/%s/role-id", cfg.AppRolePath, cfg.AppRoleName)
 	approle, err := s.Read(path)
 	if err != nil {
-		if roleID, rErr := readFromFile(s.cfg.LocalPathToRoleID); rErr == nil {
+		if roleID, rErr := readFromFile(cfg.LocalPathToRoleID); rErr == nil {
 			return string(roleID), nil
 		}
 		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
@@ -80,15 +78,17 @@ func (s *vault) roleID() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
-	err = writeToFile(s.cfg.LocalPathToRoleID, roleID.(string))
+	if err = writeToFile(cfg.LocalPathToRoleID, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", cfg.LocalPathToRoleID, err)
+	}
 	return roleID.(string), err
 }
 
-func (s *vault) secretID() (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/secret-id", s.cfg.AppRolePath, s.cfg.AppRoleName)
+func (s *vault) secretID(cfg Config) (string, error) {
+	path := fmt.Sprintf("auth/%s/role/%s/secret-id", cfg.AppRolePath, cfg.AppRoleName)
 	approle, err := s.Write(path, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(s.cfg.LocalPathToSecretID); rErr == nil {
+		if secretID, rErr := readFromFile(cfg.LocalPathToSecretID); rErr == nil {
 			return string(secretID), nil
 		}
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
@@ -101,7 +101,10 @@ func (s *vault) secretID() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found secrete_id")
 	}
-	err = writeToFile(s.cfg.LocalPathToSecretID, secretID.(string))
+
+	if err = writeToFile(cfg.LocalPathToSecretID, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", cfg.LocalPathToSecretID, err)
+	}
 	return secretID.(string), err
 }
 
