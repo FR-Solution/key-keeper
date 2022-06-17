@@ -19,7 +19,9 @@ type CA struct {
 }
 
 type CSR struct {
-	CommonName string `yaml:"common_name"`
-	Role       string `yaml:"role"`
-	HostPath   string `yaml:"host_path"`
+	CommonName string   `yaml:"common_name"`
+	Hosts      []string `yaml:"hosts"`
+	IPs        []string `yaml:"ips"`
+	Role       string   `yaml:"role"`
+	HostPath   string   `yaml:"host_path"`
 }

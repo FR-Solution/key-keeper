@@ -36,6 +36,8 @@ func (s *controller) CSR(i CSR) error {
 func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
 		"common_name": i.CommonName,
+		"alt_names":   i.Hosts,
+		"ip_sans":     i.IPs,
 	}
 	path := s.certs.CertPath + "/issue/" + i.Role
 	cert, err := s.vault.Write(path, certData)

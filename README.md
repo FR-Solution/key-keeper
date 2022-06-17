@@ -23,6 +23,12 @@ certificates:
     - common_name: "common_name"
       role: "role for generate cert"
       host_path: "path for store of ca in host"
+      hosts:
+        - "host1"
+          "host2"
+      ips:
+        - "127.127.0.7"
+          "127.127.0.9"
 ```
 
 Build:
