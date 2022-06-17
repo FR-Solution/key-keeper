@@ -50,7 +50,7 @@ func main() {
 	)
 
 	go func() {
-		if err := cntl.TurnOn(); err != nil {
+		if err := cntl.Start(); err != nil {
 			zap.L().Fatal("start", zap.Error(err))
 		}
 	}()

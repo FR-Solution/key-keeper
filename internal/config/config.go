@@ -15,6 +15,7 @@ type Config struct {
 	Certificates controller.Config `yaml:"certificates"`
 }
 
+// Read config by path.
 func Read(path string) (cfg Config, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {

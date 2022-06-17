@@ -108,14 +108,7 @@ func (s *vault) secretID(cfg Config) (string, error) {
 	return secretID.(string), err
 }
 
-func (s *vault) List(path string) (map[string]interface{}, error) {
-	sec, err := s.cli.Logical().List(path)
-	if sec != nil {
-		return sec.Data, err
-	}
-	return nil, err
-}
-
+// Read secret from vault by path.
 func (s *vault) Read(path string) (map[string]interface{}, error) {
 	sec, err := s.cli.Logical().Read(path)
 	if sec != nil {
@@ -124,6 +117,7 @@ func (s *vault) Read(path string) (map[string]interface{}, error) {
 	return nil, err
 }
 
+// Write secret in vault by path.
 func (s *vault) Write(path string, data map[string]interface{}) (map[string]interface{}, error) {
 	sec, err := s.cli.Logical().Write(path, data)
 	if sec != nil {
@@ -132,11 +126,13 @@ func (s *vault) Write(path string, data map[string]interface{}) (map[string]inte
 	return nil, err
 }
 
+// Put in KV.
 func (s *vault) Put(mountPath, secretePath string, data map[string]interface{}) error {
 	_, err := s.cli.KVv2(mountPath).Put(context.Background(), secretePath, data)
 	return err
 }
 
+// Get from KV.
 func (s *vault) Get(mountPath, secretePath string) (map[string]interface{}, error) {
 	sec, err := s.cli.KVv2(mountPath).Get(context.Background(), secretePath)
 	if sec != nil {

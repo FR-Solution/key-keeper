@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) CSR(i CSR) error {
+func (s *controller) csr(i CSR) error {
 	csr, err := s.readCertificate(i.HostPath)
 	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ReissueInterval {
 		return nil
@@ -19,13 +19,13 @@ func (s *controller) CSR(i CSR) error {
 		return err
 	}
 
-	cert, key, err := s.GenerateCSR(i)
+	cert, key, err := s.generateCSR(i)
 	if err != nil {
 		zap.L().Error("generate csr", zap.Error(err))
 		return err
 	}
 
-	err = s.StoreCSR(i, cert, key)
+	err = s.storeCSR(i, cert, key)
 	if err != nil {
 		zap.L().Error("store csr", zap.Error(err))
 		return err
@@ -34,7 +34,7 @@ func (s *controller) CSR(i CSR) error {
 	return err
 }
 
-func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
+func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
 		"common_name": i.CommonName,
 		"alt_names":   strings.Join(i.Hosts, ","),
@@ -48,7 +48,7 @@ func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
 	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
 }
 
-func (s *controller) StoreCSR(i CSR, cert, key []byte) error {
+func (s *controller) storeCSR(i CSR, cert, key []byte) error {
 	if err := s.storeCertificate(i.HostPath, cert, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 	}

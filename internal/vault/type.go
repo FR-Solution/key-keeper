@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Config for work with vault
 type Config struct {
 	Address             string        `yaml:"address"`
 	BootsrapToken       string        `yaml:"bootstrap_token"`
