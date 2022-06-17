@@ -45,6 +45,8 @@ func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
 	}
+
+	zap.L().Info("csr generated", zap.String("common_name", i.CommonName))
 	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
 }
 

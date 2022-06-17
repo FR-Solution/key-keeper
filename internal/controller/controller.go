@@ -2,6 +2,8 @@ package controller
 
 import (
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var intermediateCommonNameLayout = "%s Intermediate Authority"
@@ -29,32 +31,31 @@ func New(store vault, certs Config) *controller {
 
 // Start controller of key-keeper.
 func (s *controller) Start() error {
-	if err := s.workflow(); err != nil {
-		return err
-	}
+	s.workflow()
 
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()
 	for range t.C {
-		if err := s.workflow(); err != nil {
-			return err
-		}
+		s.workflow()
 	}
 
 	return nil
 }
 
-func (s *controller) workflow() error {
+func (s *controller) workflow() {
 	for _, c := range s.certs.CA {
-		if err := s.ca(c); err != nil {
-			return err
-		}
+		go func(c CA) {
+			if err := s.ca(c); err != nil {
+				zap.L().Error("ca", zap.String("common_name", c.CommonName), zap.Error(err))
+			}
+		}(c)
 	}
 
 	for _, c := range s.certs.CSR {
-		if err := s.csr(c); err != nil {
-			return err
-		}
+		go func(c CSR) {
+			if err := s.csr(c); err != nil {
+				zap.L().Error("ca", zap.String("common_name", c.CommonName), zap.Error(err))
+			}
+		}(c)
 	}
-	return nil
 }
