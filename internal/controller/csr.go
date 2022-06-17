@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -36,8 +37,8 @@ func (s *controller) CSR(i CSR) error {
 func (s *controller) GenerateCSR(i CSR) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
 		"common_name": i.CommonName,
-		"alt_names":   i.Hosts,
-		"ip_sans":     i.IPs,
+		"alt_names":   strings.Join(i.Hosts, ","),
+		"ip_sans":     strings.Join(i.IPs, ","),
 	}
 	path := s.certs.CertPath + "/issue/" + i.Role
 	cert, err := s.vault.Write(path, certData)
