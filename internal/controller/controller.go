@@ -3,6 +3,8 @@ package controller
 import (
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var intermediateCommonNameLayout = "%s Intermediate Authority"
@@ -43,6 +45,8 @@ func (s *controller) Start() error {
 
 func (s *controller) workflow() {
 	wg := &sync.WaitGroup{}
+
+	zap.L().Debug("root-ca")
 	for _, c := range s.certs.RootCA {
 		wg.Add(1)
 		go func(c RootCA) {
@@ -52,6 +56,7 @@ func (s *controller) workflow() {
 	}
 	wg.Wait()
 
+	zap.L().Debug("intermediate-ca")
 	for _, c := range s.certs.IntermediateCA {
 		wg.Add(1)
 		go func(c IntermediateCA) {
@@ -61,6 +66,7 @@ func (s *controller) workflow() {
 	}
 	wg.Wait()
 
+	zap.L().Debug("csr")
 	for _, c := range s.certs.CSR {
 		go func(c CSR) {
 			s.csr(c)
