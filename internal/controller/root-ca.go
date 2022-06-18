@@ -21,8 +21,7 @@ func (s *controller) generateRootCA(i RootCA) (err error) {
 		"common_name": i.CommonName,
 		"ttl":         "8760h",
 	}
-
-	path := i.RootPathCA + "/generate/internal"
+	path := i.RootPathCA + "/root/generate/internal"
 	_, err = s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create root CA: %w", err)

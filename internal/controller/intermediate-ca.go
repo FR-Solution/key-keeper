@@ -78,7 +78,7 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, 
 		"ttl":    "8760h",
 	}
 
-	path = i.RootPathCA + "/sign-intermediate"
+	path = i.RootPathCA + "/root/sign-intermediate"
 	ica, err := s.vault.Write(path, icaData)
 	if err != nil {
 		err = fmt.Errorf("send the intermediate CA's CSR to the root CA for signing CA: %w", err)
