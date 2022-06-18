@@ -96,7 +96,7 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, 
 		return
 	}
 
-	zap.L().Info("ca generated", zap.String("common_name", i.CommonName))
+	zap.L().Info("intermediate-ca generated", zap.String("common_name", i.CommonName))
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
