@@ -22,10 +22,12 @@ func (s *controller) generateRootCA(i RootCA) (err error) {
 		"ttl":         "8760h",
 	}
 
-	path := i.RootPathCA + "/root/generate/internal"
+	path := i.RootPathCA + "/generate/internal"
 	_, err = s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create root CA: %w", err)
+	} else {
+		zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
 	}
 	return
 }
