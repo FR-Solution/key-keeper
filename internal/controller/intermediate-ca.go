@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) ca(i CA) error {
+func (s *controller) intermediateCA(i IntermediateCA) {
 	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
 	if err != err {
 		zap.L().Warn(
@@ -37,7 +37,7 @@ func (s *controller) ca(i CA) error {
 			)
 		}
 		if err == nil {
-			return nil
+			return
 		}
 	}
 
@@ -47,21 +47,17 @@ func (s *controller) ca(i CA) error {
 			"generate intermediate-ca",
 			zap.Error(err),
 		)
-		return err
 	}
 
-	if err = s.storeCA(i, cert, key); err != nil {
+	if err = s.storeIntermediateCA(i, cert, key); err != nil {
 		zap.L().Error(
 			"stored intermediate-ca",
 			zap.Error(err),
 		)
-		return err
 	}
-
-	return nil
 }
 
-func (s *controller) generateIntermediateCA(i CA) (crt, key []byte, err error) {
+func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
 	// create intermediate CA
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
@@ -104,7 +100,7 @@ func (s *controller) generateIntermediateCA(i CA) (crt, key []byte, err error) {
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
-func (s *controller) storeCA(i CA, crt, key []byte) error {
+func (s *controller) storeIntermediateCA(i IntermediateCA, crt, key []byte) error {
 	// saving the created Intermediate CA
 	storedICA := map[string]interface{}{
 		"certificate": string(crt),

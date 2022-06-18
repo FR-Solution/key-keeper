@@ -17,6 +17,9 @@ certificates:
   ca:
     - common_name: "common_name"
       root_path_ca: "root ca path"
+  intermediate_ca:
+    - common_name: "common_name"
+      root_path_ca: "root ca path"
       cert_path: "path for generate certificate"
       host_path: "path for store of ca in host"
   csr:

@@ -5,13 +5,19 @@ import (
 )
 
 type Config struct {
-	VaultKV         string        `yaml:"vault_kv"`
-	ReissueInterval time.Duration `yaml:"reissue_interval"`
-	CA              []CA          `yaml:"ca,omitempty"`
-	CSR             []CSR         `yaml:"csr,omitempty"`
+	VaultKV         string           `yaml:"vault_kv"`
+	ReissueInterval time.Duration    `yaml:"reissue_interval"`
+	RootCA          []RootCA         `yaml:"root_ca,omitempty"`
+	IntermediateCA  []IntermediateCA `yaml:"intermediate_ca,omitempty"`
+	CSR             []CSR            `yaml:"csr,omitempty"`
 }
 
-type CA struct {
+type RootCA struct {
+	CommonName string `yaml:"common_name"`
+	RootPathCA string `yaml:"root_path_ca"`
+}
+
+type IntermediateCA struct {
 	CommonName string `yaml:"common_name"`
 	RootPathCA string `yaml:"root_path_ca"`
 	CertPath   string `yaml:"cert_path"`

@@ -9,29 +9,23 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) csr(i CSR) error {
+func (s *controller) csr(i CSR) {
 	csr, err := s.readCertificate(i.HostPath)
 	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ReissueInterval {
-		return nil
+		return
 	}
 	if err != nil && !os.IsNotExist(err) {
 		zap.L().Error("read csr", zap.String("path", i.HostPath), zap.Error(err))
-		return err
 	}
 
 	cert, key, err := s.generateCSR(i)
 	if err != nil {
 		zap.L().Error("generate csr", zap.Error(err))
-		return err
 	}
 
-	err = s.storeCSR(i, cert, key)
-	if err != nil {
+	if err = s.storeCSR(i, cert, key); err != nil {
 		zap.L().Error("store csr", zap.Error(err))
-		return err
 	}
-
-	return err
 }
 
 func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
