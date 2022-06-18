@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -43,13 +44,17 @@ func (s *controller) Start() error {
 }
 
 func (s *controller) workflow() {
+	wg := &sync.WaitGroup{}
 	for _, c := range s.certs.CA {
+		wg.Add(1)
 		go func(c CA) {
+			defer wg.Done()
 			if err := s.ca(c); err != nil {
 				zap.L().Error("ca", zap.String("common_name", c.CommonName), zap.Error(err))
 			}
 		}(c)
 	}
+	wg.Wait()
 
 	for _, c := range s.certs.CSR {
 		go func(c CSR) {
