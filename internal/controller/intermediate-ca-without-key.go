@@ -32,12 +32,14 @@ func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
 		return
 	}
 
-	crt, err = s.generateIntermediateCAWithoutKey(i)
-	if err != nil {
-		zap.L().Error(
-			"generate intermediate-ca",
-			zap.Error(err),
-		)
+	if !i.WithoutCreating {
+		crt, err = s.generateIntermediateCAWithoutKey(i)
+		if err != nil {
+			zap.L().Error(
+				"generate intermediate-ca",
+				zap.Error(err),
+			)
+		}
 	}
 }
 

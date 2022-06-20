@@ -66,7 +66,6 @@ func (s *controller) workflow() {
 			} else {
 				s.intermediateCAWithoutKey(c)
 			}
-
 		}(c)
 	}
 	wg.Wait()
