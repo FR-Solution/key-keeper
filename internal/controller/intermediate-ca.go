@@ -102,7 +102,7 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, 
 	}
 
 	zap.L().Info("intermediate-ca generated", zap.String("common_name", i.CommonName))
-	return []byte(csr["csr"].(string)), []byte(csr["private_key"].(string)), nil
+	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
 func (s *controller) storeIntermediateCA(i IntermediateCA, crt, key []byte) error {
