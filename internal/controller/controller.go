@@ -61,7 +61,12 @@ func (s *controller) workflow() {
 		wg.Add(1)
 		go func(c IntermediateCA) {
 			defer wg.Done()
-			s.intermediateCA(c)
+			if c.WithLocalKey {
+				s.intermediateCAWithKey(c)
+			} else {
+				s.intermediateCAWithoutKey(c)
+			}
+
 		}(c)
 	}
 	wg.Wait()

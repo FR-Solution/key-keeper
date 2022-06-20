@@ -18,11 +18,12 @@ type RootCA struct {
 }
 
 type IntermediateCA struct {
-	CommonName string `yaml:"common_name"`
-	RootPathCA string `yaml:"root_path_ca"`
-	CertPath   string `yaml:"cert_path"`
-	Create     bool   `yaml:"create"`
-	HostPath   string `yaml:"host_path"`
+	CommonName   string `yaml:"common_name"`
+	RootPathCA   string `yaml:"root_path_ca"`
+	CertPath     string `yaml:"cert_path"`
+	Create       bool   `yaml:"create"`
+	WithLocalKey bool   `yaml:"with_local_key"`
+	HostPath     string `yaml:"host_path"`
 }
 
 type CSR struct {

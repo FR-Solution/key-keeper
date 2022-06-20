@@ -1,21 +1,19 @@
 package controller
 
 import (
-	"crypto/tls"
 	"fmt"
-	"time"
 
 	"go.uber.org/zap"
 )
 
-func (s *controller) intermediateCA(i IntermediateCA) {
+func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
 	var (
-		crt, key []byte
-		err      error
+		crt []byte
+		err error
 	)
 
 	defer func() {
-		if err := s.storeIntermediateCA(i, crt, key); err != nil {
+		if err := s.storeIntermediateCAWithoutKey(i, crt, nil); err != nil {
 			zap.L().Error(
 				"stored intermediate-ca",
 				zap.Error(err),
@@ -23,7 +21,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 		}
 	}()
 
-	crt, key, err = s.readIntermediateCA(i)
+	crt, err = s.readIntermediateCAWithoutKey(i)
 	if err != nil {
 		zap.L().Error(
 			"read intermediate ca",
@@ -34,7 +32,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 		return
 	}
 
-	crt, key, err = s.generateIntermediateCA(i)
+	crt, err = s.generateIntermediateCAWithoutKey(i)
 	if err != nil {
 		zap.L().Error(
 			"generate intermediate-ca",
@@ -43,33 +41,23 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 	}
 }
 
-func (s *controller) readIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
-	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
-	if err != nil {
-		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
-		return
-	}
-
-	crt, key = []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
-	var ca *tls.Certificate
-	ca, err = parseToCert(crt, key)
-	if err != nil {
-		err = fmt.Errorf("parse : %w", err)
-	}
-	if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ReissueInterval {
-		err = fmt.Errorf("expired until(h) %f", time.Until(ca.Leaf.NotAfter).Hours())
+func (s *controller) readIntermediateCAWithoutKey(i IntermediateCA) (crt []byte, err error) {
+	path := i.CertPath + "/cert/ca"
+	ica, err := s.vault.Read(path)
+	if ica != nil {
+		return []byte(ica["certificate"].(string)), err
 	}
 	return
 }
 
-func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
+func (s *controller) generateIntermediateCAWithoutKey(i IntermediateCA) (crt []byte, err error) {
 	// create intermediate CA
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
 		"ttl":         "8760h",
 	}
 
-	path := i.CertPath + "/intermediate/generate/exported"
+	path := i.CertPath + "/intermediate/generate/internal"
 	csr, err := s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create intermediate CA: %w", err)
@@ -102,19 +90,10 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, 
 	}
 
 	zap.L().Info("intermediate-ca generated", zap.String("common_name", i.CommonName))
-	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
+	return []byte(ica["certificate"].(string)), nil
 }
 
-func (s *controller) storeIntermediateCA(i IntermediateCA, crt, key []byte) error {
-	// saving the created Intermediate CA
-	storedICA := map[string]interface{}{
-		"certificate": string(crt),
-		"private_key": string(key),
-	}
-	if err := s.vault.Put(s.certs.VaultKV, i.CommonName+"-ca", storedICA); err != nil {
-		return fmt.Errorf("saving in vault: %w", err)
-	}
-
+func (s *controller) storeIntermediateCAWithoutKey(i IntermediateCA, crt, key []byte) error {
 	if err := s.storeCertificate(i.HostPath, crt, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 	}

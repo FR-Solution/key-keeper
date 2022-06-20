@@ -7,13 +7,17 @@ import (
 	"os"
 )
 
-func (s *controller) storeCertificate(path string, cert, key []byte) error {
-	if err := os.WriteFile(path+".pem", cert, 0644); err != nil {
-		return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
+func (s *controller) storeCertificate(path string, crt, key []byte) error {
+	if crt != nil {
+		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {
+			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
+		}
 	}
 
-	if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
-		return fmt.Errorf("failed to save key file: %w", err)
+	if key != nil {
+		if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
+			return fmt.Errorf("failed to save key file: %w", err)
+		}
 	}
 	return nil
 }
