@@ -9,52 +9,58 @@ import (
 )
 
 func (s *controller) intermediateCA(i IntermediateCA) {
-	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
-	if err != err {
-		zap.L().Warn(
-			"get intermediate ca",
-			zap.String("name", i.CommonName+"-ca"),
-			zap.String("vault_kv", s.certs.VaultKV),
+	var (
+		crt, key []byte
+		err      error
+	)
+
+	defer func() {
+		if err := s.storeIntermediateCA(i, crt, key); err != nil {
+			zap.L().Error(
+				"stored intermediate-ca",
+				zap.Error(err),
+			)
+		}
+	}()
+
+	crt, key, err = s.readIntermediateCA(i)
+	if err != nil {
+		zap.L().Error(
+			"read intermediate ca",
+			zap.String("common_name", i.CommonName+"-ca"),
 			zap.Error(err),
 		)
-	}
-	if storedICA != nil {
-		cert, key := []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
-		var ca *tls.Certificate
-		ca, err = parseToCert(cert, key)
-		if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ReissueInterval {
-			zap.L().Warn(
-				"expired intermediate-ca",
-				zap.Float64("until_h", time.Until(ca.Leaf.NotAfter).Hours()),
-				zap.Error(err),
-			)
-		}
-		if err != nil {
-			zap.L().Error(
-				"analize",
-				zap.Any("certificate", "intermediate-ca"),
-				zap.Error(err),
-			)
-		}
-		if err == nil {
-			return
-		}
+	} else {
+		return
 	}
 
-	cert, key, err := s.generateIntermediateCA(i)
+	crt, key, err = s.generateIntermediateCA(i)
 	if err != nil {
 		zap.L().Error(
 			"generate intermediate-ca",
 			zap.Error(err),
 		)
 	}
+}
 
-	if err = s.storeIntermediateCA(i, cert, key); err != nil {
-		zap.L().Error(
-			"stored intermediate-ca",
-			zap.Error(err),
-		)
+func (s *controller) readIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
+	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
+	if err != err {
+		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
+		return
 	}
+
+	crt, key = []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
+
+	var ca *tls.Certificate
+	ca, err = parseToCert(crt, key)
+	if err != nil {
+		err = fmt.Errorf("parse : %w", err)
+	}
+	if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ReissueInterval {
+		err = fmt.Errorf("expired until(h) %f", time.Until(ca.Leaf.NotAfter).Hours())
+	}
+	return
 }
 
 func (s *controller) generateIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
