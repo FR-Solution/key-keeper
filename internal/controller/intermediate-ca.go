@@ -6,14 +6,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
+func (s *controller) intermediateCA(i IntermediateCA) {
 	var (
 		crt []byte
 		err error
 	)
 
 	defer func() {
-		if err := s.storeIntermediateCAWithoutKey(i, crt, nil); err != nil {
+		if err := s.storeIntermediateCA(i, crt, nil); err != nil {
 			zap.L().Error(
 				"stored intermediate-ca",
 				zap.Error(err),
@@ -21,7 +21,7 @@ func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
 		}
 	}()
 
-	crt, err = s.readIntermediateCAWithoutKey(i)
+	crt, err = s.readIntermediateCA(i)
 	if err != nil {
 		zap.L().Error(
 			"read intermediate ca",
@@ -32,8 +32,8 @@ func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
 		return
 	}
 
-	if !i.WithoutCreating {
-		crt, err = s.generateIntermediateCAWithoutKey(i)
+	if !i.ReadOnly {
+		crt, err = s.generateIntermediateCA(i)
 		if err != nil {
 			zap.L().Error(
 				"generate intermediate-ca",
@@ -43,7 +43,7 @@ func (s *controller) intermediateCAWithoutKey(i IntermediateCA) {
 	}
 }
 
-func (s *controller) readIntermediateCAWithoutKey(i IntermediateCA) (crt []byte, err error) {
+func (s *controller) readIntermediateCA(i IntermediateCA) (crt []byte, err error) {
 	path := i.CertPath + "/cert/ca"
 	ica, err := s.vault.Read(path)
 	if ica != nil {
@@ -52,7 +52,7 @@ func (s *controller) readIntermediateCAWithoutKey(i IntermediateCA) (crt []byte,
 	return
 }
 
-func (s *controller) generateIntermediateCAWithoutKey(i IntermediateCA) (crt []byte, err error) {
+func (s *controller) generateIntermediateCA(i IntermediateCA) (crt []byte, err error) {
 	// create intermediate CA
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
@@ -95,7 +95,7 @@ func (s *controller) generateIntermediateCAWithoutKey(i IntermediateCA) (crt []b
 	return []byte(ica["certificate"].(string)), nil
 }
 
-func (s *controller) storeIntermediateCAWithoutKey(i IntermediateCA, crt, key []byte) error {
+func (s *controller) storeIntermediateCA(i IntermediateCA, crt, key []byte) error {
 	if err := s.storeCertificate(i.HostPath, crt, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 	}

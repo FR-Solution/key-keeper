@@ -8,25 +8,25 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) intermediateCAWithKey(i IntermediateCA) {
+func (s *controller) intermediateCAWithExportedKey(i IntermediateCA) {
 	var (
 		crt, key []byte
 		err      error
 	)
 
 	defer func() {
-		if err := s.storeIntermediateCAWithKey(i, crt, key); err != nil {
+		if err := s.storeIntermediateCAWithExportedKey(i, crt, key); err != nil {
 			zap.L().Error(
-				"stored intermediate ca  with key",
+				"stored intermediate ca  with exported key",
 				zap.Error(err),
 			)
 		}
 	}()
 
-	crt, key, err = s.readIntermediateCAWithKey(i)
+	crt, key, err = s.readIntermediateCAWithExportedKey(i)
 	if err != nil {
 		zap.L().Error(
-			"read  intermediate ca with key",
+			"read  intermediate ca with exported key",
 			zap.String("common_name", i.CommonName+"-ca"),
 			zap.Error(err),
 		)
@@ -34,18 +34,18 @@ func (s *controller) intermediateCAWithKey(i IntermediateCA) {
 		return
 	}
 
-	if !i.WithoutCreating {
-		crt, key, err = s.generateIntermediateCAWithKey(i)
+	if !i.ReadOnly {
+		crt, key, err = s.generateIntermediateCAWithExportedKey(i)
 		if err != nil {
 			zap.L().Error(
-				"generate intermediate ca with key",
+				"generate intermediate ca with exported key",
 				zap.Error(err),
 			)
 		}
 	}
 }
 
-func (s *controller) readIntermediateCAWithKey(i IntermediateCA) (crt, key []byte, err error) {
+func (s *controller) readIntermediateCAWithExportedKey(i IntermediateCA) (crt, key []byte, err error) {
 	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
 	if err != nil {
 		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
@@ -64,8 +64,8 @@ func (s *controller) readIntermediateCAWithKey(i IntermediateCA) (crt, key []byt
 	return
 }
 
-func (s *controller) generateIntermediateCAWithKey(i IntermediateCA) (crt, key []byte, err error) {
-	// create  intermediate ca with key
+func (s *controller) generateIntermediateCAWithExportedKey(i IntermediateCA) (crt, key []byte, err error) {
+	// create  intermediate ca with exported key
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
 		"ttl":         "8760h",
@@ -78,7 +78,7 @@ func (s *controller) generateIntermediateCAWithKey(i IntermediateCA) (crt, key [
 		return
 	}
 
-	// send the  intermediate ca with key's CSR to the root CA for signing
+	// send the  intermediate ca with exported key's CSR to the root CA for signing
 	icaData := map[string]interface{}{
 		"csr":    csr["csr"],
 		"format": "pem_bundle",
@@ -88,18 +88,18 @@ func (s *controller) generateIntermediateCAWithKey(i IntermediateCA) (crt, key [
 	path = i.RootPathCA + "/root/sign-intermediate"
 	ica, err := s.vault.Write(path, icaData)
 	if err != nil {
-		err = fmt.Errorf("send the intermediate ca with key's CSR to the root CA for signing CA: %w", err)
+		err = fmt.Errorf("send the intermediate ca with exported key's CSR to the root CA for signing CA: %w", err)
 		return
 	}
 
-	// publish the signed certificate back to the  intermediate ca with key
+	// publish the signed certificate back to the  intermediate ca with exported key
 	certData := map[string]interface{}{
 		"certificate": ica["certificate"],
 	}
 
 	path = i.CertPath + "/intermediate/set-signed"
 	if _, err = s.vault.Write(path, certData); err != nil {
-		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca with key: %w", err)
+		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca with exported key: %w", err)
 		return
 	}
 
@@ -107,8 +107,8 @@ func (s *controller) generateIntermediateCAWithKey(i IntermediateCA) (crt, key [
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
-func (s *controller) storeIntermediateCAWithKey(i IntermediateCA, crt, key []byte) error {
-	// saving the created  intermediate ca with key
+func (s *controller) storeIntermediateCAWithExportedKey(i IntermediateCA, crt, key []byte) error {
+	// saving the created  intermediate ca with exported key
 	storedICA := map[string]interface{}{
 		"certificate": string(crt),
 		"private_key": string(key),

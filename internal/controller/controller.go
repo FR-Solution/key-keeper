@@ -61,10 +61,10 @@ func (s *controller) workflow() {
 		wg.Add(1)
 		go func(c IntermediateCA) {
 			defer wg.Done()
-			if c.WithLocalKey {
-				s.intermediateCAWithKey(c)
+			if c.ExportedKey {
+				s.intermediateCAWithExportedKey(c)
 			} else {
-				s.intermediateCAWithoutKey(c)
+				s.intermediateCA(c)
 			}
 		}(c)
 	}
