@@ -49,6 +49,10 @@ func (s *controller) readIntermediateCA(i IntermediateCA) (crt, key []byte, err 
 		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
 		return
 	}
+	if storedICA == nil {
+		err = fmt.Errorf("not found (vault_kv %s )", s.certs.VaultKV)
+		return
+	}
 
 	crt, key = []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
 	var ca *tls.Certificate
