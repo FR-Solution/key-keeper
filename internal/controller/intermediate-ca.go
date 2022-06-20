@@ -45,13 +45,12 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 
 func (s *controller) readIntermediateCA(i IntermediateCA) (crt, key []byte, err error) {
 	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
-	if err != err {
+	if err != nil {
 		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
 		return
 	}
 
 	crt, key = []byte(storedICA["certificate"].(string)), []byte(storedICA["private_key"].(string))
-
 	var ca *tls.Certificate
 	ca, err = parseToCert(crt, key)
 	if err != nil {
