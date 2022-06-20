@@ -1,4 +1,5 @@
 test/
 key-keeper
 config.yaml
-
+role_id
+secret_id
