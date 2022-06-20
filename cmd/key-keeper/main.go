@@ -26,11 +26,11 @@ func main() {
 	flag.StringVar(&configPath, "config", "", "path to config file")
 	flag.Parse()
 
-	// if configPath == "" {
-	// 	zap.L().Fatal("not found config param")
-	// }
+	if configPath == "" {
+		zap.L().Fatal("not found config param")
+	}
 
-	cfg, err := config.Read("/home/geo/projects/irbgeo/key-keeper/config.yaml")
+	cfg, err := config.Read(configPath)
 	if err != nil {
 		zap.L().Fatal("read configuration", zap.Error(err))
 	}
