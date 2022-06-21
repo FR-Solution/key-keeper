@@ -28,10 +28,9 @@ certificates:
       cert_path:  "clusters/cluster-1/pki/kubernetes"   # Путь к сейфу Inermediate CA
       host_path: "/etc/kubernetes/pki/ca/root-ca"       # Локальный путь, где будет размещен public / private keys
       exported_key: false                               # Этот флаг заказывает Inermediate типа internal/external (в отпут придет private-key или нет)
-      read_only: false                                  # Этот флаг отвечает за сценарий создания нового CA или чтение существующего.
+      generate: false                                   # Этот флаг отвечает за сценарий создания нового CA или чтение существующего.
 
   csr:
-
     - common_name: "system:kube-apiserver-front-proxy-client"     # CN
       role: "base-role" # system_masters_client                   # Роль в которой прописаны критерии сертификата (usages,access_ip,access_san,etc)
       host_path: "/etc/kubernetes/pki/certs/kube-apiserver/cert"  # Локальный путь, где будет размещен public / private keys
