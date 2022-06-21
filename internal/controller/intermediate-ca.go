@@ -32,7 +32,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 		return
 	}
 
-	if !i.ReadOnly {
+	if i.Generate {
 		crt, err = s.generateIntermediateCA(i)
 		if err != nil {
 			zap.L().Error(
@@ -44,7 +44,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 }
 
 func (s *controller) readIntermediateCA(i IntermediateCA) (crt []byte, err error) {
-	path := i.CertPath + "/cert/ca"
+	path := i.CertPath + "/cert/ca_chain"
 	ica, err := s.vault.Read(path)
 	if ica != nil {
 		return []byte(ica["certificate"].(string)), err

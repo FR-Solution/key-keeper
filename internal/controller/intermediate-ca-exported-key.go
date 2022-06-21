@@ -33,8 +33,7 @@ func (s *controller) intermediateCAWithExportedKey(i IntermediateCA) {
 	} else {
 		return
 	}
-
-	if !i.ReadOnly {
+	if i.Generate {
 		crt, key, err = s.generateIntermediateCAWithExportedKey(i)
 		if err != nil {
 			zap.L().Error(

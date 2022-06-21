@@ -21,7 +21,7 @@ type IntermediateCA struct {
 	CommonName  string `yaml:"common_name"`
 	RootPathCA  string `yaml:"root_path_ca"`
 	CertPath    string `yaml:"cert_path"`
-	ReadOnly    bool   `yaml:"read_only"`
+	Generate    bool   `yaml:"generate"`
 	ExportedKey bool   `yaml:"exported_key"`
 	HostPath    string `yaml:"host_path"`
 }

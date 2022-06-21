@@ -22,9 +22,9 @@ certificates:
       root_path_ca: "root ca path"
       cert_path: "path for generate certificate"
       # флаг указывающий на генерацию с экспортируемым ключом
-      exporting_key: true | false
+      exported_key: true | false
       # флаг показывающий что генерация сертификата не нужна
-      read_only: true | false
+      generate: true | false
       host_path: "path for store of ca in host"
   csr:
     - common_name: "common_name"
