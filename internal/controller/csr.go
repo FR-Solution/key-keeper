@@ -11,7 +11,7 @@ import (
 
 func (s *controller) csr(i CSR) {
 	csr, err := s.readCertificate(i.HostPath)
-	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.certs.ReissueInterval {
+	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.cfg.Certificates.ReissueInterval {
 		return
 	}
 	if err != nil && !os.IsNotExist(err) {

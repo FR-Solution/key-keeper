@@ -19,13 +19,13 @@ type vault interface {
 type controller struct {
 	vault vault
 
-	certs Config
+	cfg Config
 }
 
 func New(store vault, certs Config) *controller {
 	c := &controller{
 		vault: store,
-		certs: certs,
+		cfg:   certs,
 	}
 	return c
 }
@@ -46,8 +46,8 @@ func (s *controller) Start() error {
 func (s *controller) workflow() {
 	wg := &sync.WaitGroup{}
 
-	zap.L().Debug("root-ca")
-	for _, c := range s.certs.RootCA {
+	zap.L().Debug("certificate-root-ca")
+	for _, c := range s.cfg.Certificates.RootCA {
 		wg.Add(1)
 		go func(c RootCA) {
 			defer wg.Done()
@@ -56,8 +56,8 @@ func (s *controller) workflow() {
 	}
 	wg.Wait()
 
-	zap.L().Debug("intermediate-ca")
-	for _, c := range s.certs.IntermediateCA {
+	zap.L().Debug("certificate-intermediate-ca")
+	for _, c := range s.cfg.Certificates.IntermediateCA {
 		wg.Add(1)
 		go func(c IntermediateCA) {
 			defer wg.Done()
@@ -70,10 +70,18 @@ func (s *controller) workflow() {
 	}
 	wg.Wait()
 
-	zap.L().Debug("csr")
-	for _, c := range s.certs.CSR {
+	zap.L().Debug("certificate-csr")
+	for _, c := range s.cfg.Certificates.CSR {
 		go func(c CSR) {
 			s.csr(c)
 		}(c)
 	}
+
+	zap.L().Debug("key-rsa")
+	for _, k := range s.cfg.Keys.RSA {
+		go func(k RSA) {
+			s.rsa(k)
+		}(k)
+	}
+
 }

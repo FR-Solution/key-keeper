@@ -40,6 +40,11 @@ certificates:
       role: "base-role" # system_masters_client                   # Роль в которой прописаны критерии сертификата (usages,access_ip,access_san,etc)
       host_path: "/etc/kubernetes/pki/certs/kube-apiserver/cert" # Локальный путь, где будет размещен public / private keys
       cert_path: "clusters/cluster-1/pki/kube-apiserver" # Путь к сейфу Inermediate CA где будет заказан сертификат
+keys:
+  vault_kv: ""
+
+  rsa:
+    - host_path: ""
 ```
 
 Build:

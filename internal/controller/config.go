@@ -5,6 +5,11 @@ import (
 )
 
 type Config struct {
+	Certificates Certificates `json:"certificates"`
+	Keys         Keys         `json:"keys"`
+}
+
+type Certificates struct {
 	VaultKV         string           `yaml:"vault_kv"`
 	ReissueInterval time.Duration    `yaml:"reissue_interval"`
 	RootCA          []RootCA         `yaml:"root_ca,omitempty"`
@@ -33,4 +38,13 @@ type CSR struct {
 	CertPath   string   `yaml:"cert_path"`
 	Role       string   `yaml:"role"`
 	HostPath   string   `yaml:"host_path"`
+}
+
+type Keys struct {
+	VaultKV string `yaml:"vault_kv"`
+	RSA     []RSA  `yaml:"rsa"`
+}
+
+type RSA struct {
+	HostPath string `yaml:"host_path"`
 }

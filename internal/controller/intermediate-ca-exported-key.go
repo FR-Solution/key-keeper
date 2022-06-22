@@ -45,9 +45,9 @@ func (s *controller) intermediateCAWithExportedKey(i IntermediateCA) {
 }
 
 func (s *controller) readIntermediateCAWithExportedKey(i IntermediateCA) (crt, key []byte, err error) {
-	storedICA, err := s.vault.Get(s.certs.VaultKV, i.CommonName+"-ca")
+	storedICA, err := s.vault.Get(s.cfg.Certificates.VaultKV, i.CommonName+"-ca")
 	if err != nil {
-		err = fmt.Errorf("get from vault_kv %s : %w", s.certs.VaultKV, err)
+		err = fmt.Errorf("get from vault_kv %s : %w", s.cfg.Certificates.VaultKV, err)
 		return
 	}
 
@@ -57,7 +57,7 @@ func (s *controller) readIntermediateCAWithExportedKey(i IntermediateCA) (crt, k
 	if err != nil {
 		err = fmt.Errorf("parse : %w", err)
 	}
-	if ca != nil && time.Until(ca.Leaf.NotAfter) < s.certs.ReissueInterval {
+	if ca != nil && time.Until(ca.Leaf.NotAfter) < s.cfg.Certificates.ReissueInterval {
 		err = fmt.Errorf("expired until(h) %f", time.Until(ca.Leaf.NotAfter).Hours())
 	}
 	return
@@ -112,7 +112,7 @@ func (s *controller) storeIntermediateCAWithExportedKey(i IntermediateCA, crt, k
 		"certificate": string(crt),
 		"private_key": string(key),
 	}
-	if err := s.vault.Put(s.certs.VaultKV, i.CommonName+"-ca", storedICA); err != nil {
+	if err := s.vault.Put(s.cfg.Certificates.VaultKV, i.CommonName+"-ca", storedICA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
 	}
 

@@ -7,6 +7,17 @@ import (
 	"os"
 )
 
+func (s *controller) storeKey(path string, privare, public []byte) error {
+	if err := os.WriteFile(path+".pem", privare, 0600); err != nil {
+		return fmt.Errorf("failed to save privare key with path %s: %w", path, err)
+	}
+
+	if err := os.WriteFile(path+".pub", public, 0600); err != nil {
+		return fmt.Errorf("failed to public key file: %w", err)
+	}
+	return nil
+}
+
 func (s *controller) storeCertificate(path string, crt, key []byte) error {
 	if crt != nil {
 		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {

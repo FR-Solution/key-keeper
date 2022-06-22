@@ -46,7 +46,7 @@ func main() {
 
 	cntl := controller.New(
 		v,
-		cfg.Certificates,
+		cfg.Controller,
 	)
 
 	go func() {

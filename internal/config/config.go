@@ -11,8 +11,8 @@ import (
 )
 
 type Config struct {
-	Vault        vault.Config      `yaml:"vault"`
-	Certificates controller.Config `yaml:"certificates"`
+	Vault      vault.Config      `yaml:"vault"`
+	Controller controller.Config `yaml:",inline"`
 }
 
 // Read config by path.
