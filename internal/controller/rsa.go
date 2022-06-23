@@ -16,13 +16,15 @@ func (s *controller) rsa(i RSA) {
 		zap.L().Warn(
 			"read rsa",
 			zap.String("name", i.Name),
-			zap.Error(err))
+			zap.Error(err),
+		)
 		private, public, err = s.generateRSA()
 		if err != nil {
 			zap.L().Error(
 				"generate rsa",
 				zap.String("name", i.Name),
-				zap.Error(err))
+				zap.Error(err),
+			)
 			return
 		}
 	}
