@@ -47,5 +47,6 @@ type Keys struct {
 }
 
 type RSA struct {
+	Name     string `yaml:"name"`
 	HostPath string `yaml:"host_path"`
 }

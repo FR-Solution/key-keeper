@@ -11,6 +11,7 @@ func (s *controller) rootCA(i RootCA) {
 	if err != nil {
 		zap.L().Warn(
 			"existing root-ca",
+			zap.String("common_name", i.CommonName),
 			zap.Error(err),
 		)
 	}
@@ -21,6 +22,7 @@ func (s *controller) rootCA(i RootCA) {
 	if err := s.generateRootCA(i); err != nil {
 		zap.L().Error(
 			"generate root-ca",
+			zap.String("common_name", i.CommonName),
 			zap.Error(err),
 		)
 		return

@@ -20,12 +20,22 @@ func (s *controller) csr(i CSR) {
 
 	cert, key, err := s.generateCSR(i)
 	if err != nil {
-		zap.L().Error("generate csr", zap.Error(err))
+		zap.L().Error(
+			"generate csr",
+			zap.String("common_name", i.CommonName),
+			zap.Error(err),
+		)
 	}
 
 	if err = s.storeCSR(i, cert, key); err != nil {
-		zap.L().Error("store csr", zap.Error(err))
+		zap.L().Error(
+			"store csr",
+			zap.String("common_name", i.CommonName),
+			zap.Error(err),
+		)
+		return
 	}
+	zap.L().Info("csr generated", zap.String("common_name", i.CommonName))
 }
 
 func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
@@ -40,7 +50,6 @@ func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
 	}
 
-	zap.L().Info("csr generated", zap.String("common_name", i.CommonName))
 	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
 }
 

@@ -6,20 +6,45 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"path"
 
 	"go.uber.org/zap"
 )
 
 func (s *controller) rsa(i RSA) {
-	crt, key, err := s.generateRSA()
+	private, public, err := s.readRSA(i)
 	if err != nil {
-		zap.L().Error("generate csr", zap.Error(err))
+		zap.L().Warn(
+			"read rsa",
+			zap.String("name", i.Name),
+			zap.Error(err))
+		private, public, err = s.generateRSA()
+		if err != nil {
+			zap.L().Error(
+				"generate rsa",
+				zap.String("name", i.Name),
+				zap.Error(err))
+			return
+		}
 	}
 
-	if err = s.storeRSA(i, crt, key); err != nil {
-		zap.L().Error("store csr", zap.Error(err))
+	if err = s.storeRSA(i, private, public); err != nil {
+		zap.L().Error(
+			"store rsa",
+			zap.String("name", i.Name),
+			zap.Error(err),
+		)
 	}
+}
+
+func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
+	storedRSA, err := s.vault.Get(s.cfg.Keys.VaultKV, i.Name)
+	if err != nil {
+		err = fmt.Errorf("get from vault_kv %s : %w", s.cfg.Keys.VaultKV, err)
+		return
+	}
+
+	private, public = []byte(storedRSA["certificate"].(string)), []byte(storedRSA["private_key"].(string))
+	return
 }
 
 func (s *controller) generateRSA() (private []byte, public []byte, err error) {
@@ -49,8 +74,8 @@ func (s *controller) storeRSA(i RSA, private, public []byte) error {
 		"private": string(private),
 		"public":  string(public),
 	}
-	_, name := path.Split(i.HostPath)
-	if err := s.vault.Put(s.cfg.Keys.VaultKV, name, storedRSA); err != nil {
+
+	if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
 	}
 
