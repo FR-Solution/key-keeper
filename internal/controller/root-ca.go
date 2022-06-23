@@ -7,6 +7,18 @@ import (
 )
 
 func (s *controller) rootCA(i RootCA) {
+	isExist, err := s.isExistRootCA(i)
+	if err != nil {
+		zap.L().Error(
+			"generate root-ca",
+			zap.Error(err),
+		)
+	}
+
+	if isExist {
+		return
+	}
+
 	if err := s.generateRootCA(i); err != nil {
 		zap.L().Error(
 			"generate root-ca",
@@ -15,19 +27,29 @@ func (s *controller) rootCA(i RootCA) {
 	}
 }
 
-func (s *controller) generateRootCA(i RootCA) (err error) {
+func (s *controller) isExistRootCA(i RootCA) (bool, error) {
+	path := i.RootPathCA + "/cert/ca"
+	rootCA, err := s.vault.Read(path)
+	if err != nil {
+		err = fmt.Errorf("create root CA: %w", err)
+	} else {
+		zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
+	}
+	return rootCA == nil, err
+}
+
+func (s *controller) generateRootCA(i RootCA) error {
 	// create intermediate CA
-	csrData := map[string]interface{}{
+	rootCAData := map[string]interface{}{
 		"common_name": i.CommonName,
 		"ttl":         "8760h",
 	}
 	path := i.RootPathCA + "/root/generate/internal"
-	r, err := s.vault.Write(path, csrData)
+	_, err := s.vault.Write(path, rootCAData)
 	if err != nil {
 		err = fmt.Errorf("create root CA: %w", err)
 	} else {
-		fmt.Println(r)
 		zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
 	}
-	return
+	return err
 }
