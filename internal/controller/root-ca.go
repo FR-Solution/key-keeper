@@ -34,12 +34,10 @@ func (s *controller) isExistRootCA(i RootCA) (bool, error) {
 	if err != nil {
 		err = fmt.Errorf("read root CA: %w", err)
 	}
-	fmt.Println(rootCA)
 	return rootCA != nil, err
 }
 
 func (s *controller) generateRootCA(i RootCA) error {
-	// create intermediate CA
 	rootCAData := map[string]interface{}{
 		"common_name": i.CommonName,
 		"ttl":         "8760h",

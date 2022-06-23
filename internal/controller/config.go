@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Config for work controller.
 type Config struct {
 	Certificates Certificates `json:"certificates"`
 	Keys         Keys         `json:"keys"`
