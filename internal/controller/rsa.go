@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"path"
 
 	"go.uber.org/zap"
 )
@@ -48,7 +49,8 @@ func (s *controller) storeRSA(i RSA, private, public []byte) error {
 		"private": string(private),
 		"public":  string(public),
 	}
-	if err := s.vault.Put(s.cfg.Keys.VaultKV, "rsa", storedRSA); err != nil {
+	_, name := path.Split(i.HostPath)
+	if err := s.vault.Put(s.cfg.Keys.VaultKV, name, storedRSA); err != nil {
 		return fmt.Errorf("saving in vault: %w", err)
 	}
 
