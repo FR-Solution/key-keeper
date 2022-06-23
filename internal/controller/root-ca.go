@@ -31,10 +31,9 @@ func (s *controller) isExistRootCA(i RootCA) (bool, error) {
 	path := i.RootPathCA + "/cert/ca"
 	rootCA, err := s.vault.Read(path)
 	if err != nil {
-		err = fmt.Errorf("create root CA: %w", err)
-	} else {
-		zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
+		err = fmt.Errorf("read root CA: %w", err)
 	}
+	fmt.Println(rootCA)
 	return rootCA == nil, err
 }
 
