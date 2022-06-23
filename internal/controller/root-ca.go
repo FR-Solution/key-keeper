@@ -9,12 +9,11 @@ import (
 func (s *controller) rootCA(i RootCA) {
 	isExist, err := s.isExistRootCA(i)
 	if err != nil {
-		zap.L().Error(
-			"generate root-ca",
+		zap.L().Warn(
+			"existing root-ca",
 			zap.Error(err),
 		)
 	}
-
 	if isExist {
 		return
 	}
@@ -24,7 +23,9 @@ func (s *controller) rootCA(i RootCA) {
 			"generate root-ca",
 			zap.Error(err),
 		)
+		return
 	}
+	zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
 }
 
 func (s *controller) isExistRootCA(i RootCA) (bool, error) {
@@ -34,7 +35,7 @@ func (s *controller) isExistRootCA(i RootCA) (bool, error) {
 		err = fmt.Errorf("read root CA: %w", err)
 	}
 	fmt.Println(rootCA)
-	return rootCA == nil, err
+	return rootCA != nil, err
 }
 
 func (s *controller) generateRootCA(i RootCA) error {
@@ -47,8 +48,6 @@ func (s *controller) generateRootCA(i RootCA) error {
 	_, err := s.vault.Write(path, rootCAData)
 	if err != nil {
 		err = fmt.Errorf("create root CA: %w", err)
-	} else {
-		zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
 	}
 	return err
 }
