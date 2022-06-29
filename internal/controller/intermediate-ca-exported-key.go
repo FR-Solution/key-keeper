@@ -3,6 +3,7 @@ package controller
 import (
 	"crypto/tls"
 	"fmt"
+	"path"
 	"time"
 
 	"go.uber.org/zap"
@@ -70,7 +71,7 @@ func (s *controller) generateIntermediateCAWithExportedKey(i IntermediateCA) (cr
 		"ttl":         "8760h",
 	}
 
-	path := i.CertPath + "/intermediate/generate/exported"
+	path := path.Join(i.CertPath, "intermediate/generate/exported")
 	csr, err := s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create: %w", err)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"path"
 
 	"go.uber.org/zap"
 )
@@ -31,7 +32,7 @@ func (s *controller) rootCA(i RootCA) {
 }
 
 func (s *controller) isExistRootCA(i RootCA) (bool, error) {
-	path := i.RootPathCA + "/cert/ca"
+	path := path.Join(i.RootPathCA, "cert/ca")
 	rootCA, err := s.vault.Read(path)
 	if err != nil {
 		err = fmt.Errorf("read root CA: %w", err)
@@ -44,7 +45,7 @@ func (s *controller) generateRootCA(i RootCA) error {
 		"common_name": i.CommonName,
 		"ttl":         "8760h",
 	}
-	path := i.RootPathCA + "/root/generate/internal"
+	path := path.Join(i.RootPathCA, "root/generate/internal")
 	_, err := s.vault.Write(path, rootCAData)
 	if err != nil {
 		err = fmt.Errorf("create root CA: %w", err)

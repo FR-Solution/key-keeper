@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"path"
 
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
@@ -62,7 +63,7 @@ func New(cfg Config) (*vault, error) {
 }
 
 func (s *vault) roleID(cfg Config) (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/role-id", cfg.AppRolePath, cfg.AppRoleName)
+	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "role-id")
 	approle, err := s.Read(path)
 	if err != nil {
 		if roleID, rErr := readFromFile(cfg.LocalPathToRoleID); rErr == nil {
@@ -85,7 +86,7 @@ func (s *vault) roleID(cfg Config) (string, error) {
 }
 
 func (s *vault) secretID(cfg Config) (string, error) {
-	path := fmt.Sprintf("auth/%s/role/%s/secret-id", cfg.AppRolePath, cfg.AppRoleName)
+	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "secret-id")
 	approle, err := s.Write(path, nil)
 	if err != nil {
 		if secretID, rErr := readFromFile(cfg.LocalPathToSecretID); rErr == nil {
