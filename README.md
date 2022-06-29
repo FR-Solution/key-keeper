@@ -1,5 +1,13 @@
 # key-keeper
 
+Build:
+
+    go build -o key-keeper cmd/key-keeper/main.go
+
+Run:
+
+    key-keeper -config /path/to/config
+
 Example config.yml
 
 ```yaml
@@ -46,11 +54,3 @@ keys:
   rsa:
     - host_path: ""
 ```
-
-Build:
-
-    go build -o key-keeper cmd/key-keeper/main.go
-
-Run:
-
-    key-keeper -config /path/to/config
