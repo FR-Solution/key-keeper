@@ -1,4 +1,4 @@
-module github.com/terra-cube/key-keeper
+module github.com/fraima/key-keeper
 
 go 1.18
 

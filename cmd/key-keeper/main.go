@@ -8,9 +8,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/terra-cube/key-keeper/internal/config"
-	"github.com/terra-cube/key-keeper/internal/controller"
-	"github.com/terra-cube/key-keeper/internal/vault"
+	"github.com/fraima/key-keeper/internal/config"
+	"github.com/fraima/key-keeper/internal/controller"
+	"github.com/fraima/key-keeper/internal/vault"
 )
 
 func main() {

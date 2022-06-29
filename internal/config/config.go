@@ -6,8 +6,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/terra-cube/key-keeper/internal/controller"
-	"github.com/terra-cube/key-keeper/internal/vault"
+	"github.com/fraima/key-keeper/internal/controller"
+	"github.com/fraima/key-keeper/internal/vault"
 )
 
 type Config struct {
