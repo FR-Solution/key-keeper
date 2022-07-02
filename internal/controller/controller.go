@@ -80,7 +80,7 @@ func (s *controller) workflow() {
 	zap.L().Debug("key-rsa")
 	for _, k := range s.cfg.Keys.RSA {
 		go func(k RSA) {
-			s.rsa(k)
+			s.Rsa(k)
 		}(k)
 	}
 

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) rsa(i RSA) {
+func (s *controller) Rsa(i RSA) {
 	private, public, err := s.readRSA(i)
 	if err != nil {
 		zap.L().Warn(
@@ -27,6 +27,9 @@ func (s *controller) rsa(i RSA) {
 			)
 			return
 		}
+		zap.L().Debug("rsa is created", zap.String("name", i.Name))
+	} else {
+		zap.L().Debug("rsa is read", zap.String("name", i.Name))
 	}
 
 	if err = s.storeRSA(i, private, public); err != nil {
@@ -35,6 +38,8 @@ func (s *controller) rsa(i RSA) {
 			zap.String("name", i.Name),
 			zap.Error(err),
 		)
+	} else {
+		zap.L().Debug("rsa is stored", zap.String("name", i.Name))
 	}
 }
 
