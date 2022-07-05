@@ -28,19 +28,34 @@ func (s *controller) rsa(i RSA) {
 			return
 		}
 		zap.L().Debug("rsa is created", zap.String("name", i.Name))
+		storedRSA := map[string]interface{}{
+			"private": string(private),
+			"public":  string(public),
+		}
+
+		if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
+			zap.L().Error(
+				"store rsa in kv",
+				zap.String("name", i.Name),
+				zap.String("kv", s.cfg.Keys.VaultKV),
+				zap.Error(err),
+			)
+			return
+		}
 	} else {
 		zap.L().Debug("rsa is read", zap.String("name", i.Name))
 	}
 
-	if err = s.storeRSA(i, private, public); err != nil {
+	if err := s.storeKey(i.HostPath, private, public); err != nil {
 		zap.L().Error(
-			"store rsa",
+			"store rsa in host",
 			zap.String("name", i.Name),
+			zap.String("path", i.HostPath),
 			zap.Error(err),
 		)
-	} else {
-		zap.L().Debug("rsa is stored", zap.String("name", i.Name))
+		return
 	}
+	zap.L().Debug("rsa is stored", zap.String("name", i.Name))
 }
 
 func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
@@ -74,20 +89,4 @@ func (s *controller) generateRSA() (private []byte, public []byte, err error) {
 		},
 	)
 	return
-}
-
-func (s *controller) storeRSA(i RSA, private, public []byte) error {
-	storedRSA := map[string]interface{}{
-		"private": string(private),
-		"public":  string(public),
-	}
-
-	if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
-		return fmt.Errorf("saving in vault: %w", err)
-	}
-
-	if err := s.storeKey(i.HostPath, private, public); err != nil {
-		return fmt.Errorf("host path %s : %w", i.HostPath, err)
-	}
-	return nil
 }
