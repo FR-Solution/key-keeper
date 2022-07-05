@@ -77,14 +77,14 @@ func (s *controller) generateRSA() (private []byte, public []byte, err error) {
 
 	private = pem.EncodeToMemory(
 		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
+			Type:  "PRIVATE KEY",
 			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 		},
 	)
 
 	public = pem.EncodeToMemory(
 		&pem.Block{
-			Type:  "RSA PUBLIC KEY",
+			Type:  "PUBLIC KEY",
 			Bytes: x509.MarshalPKCS1PublicKey(privateKey.Public().(*rsa.PublicKey)),
 		},
 	)
