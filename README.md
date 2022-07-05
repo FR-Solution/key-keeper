@@ -52,5 +52,6 @@ keys:
   vault_kv: ""
 
   rsa:
+    - name: ""
     - host_path: ""
 ```
