@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *controller) Rsa(i RSA) {
+func (s *controller) rsa(i RSA) {
 	private, public, err := s.readRSA(i)
 	if err != nil {
 		zap.L().Warn(
@@ -50,7 +50,7 @@ func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
 		return
 	}
 
-	private, public = []byte(storedRSA["certificate"].(string)), []byte(storedRSA["private_key"].(string))
+	private, public = []byte(storedRSA["private"].(string)), []byte(storedRSA["public"].(string))
 	return
 }
 
