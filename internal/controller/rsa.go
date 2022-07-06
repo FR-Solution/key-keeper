@@ -18,7 +18,7 @@ func (s *controller) rsa(i RSA) {
 			zap.String("name", i.Name),
 			zap.Error(err),
 		)
-		private, public, err = s.generateRSA()
+		private, public, err = s.GenerateRSA()
 		if err != nil {
 			zap.L().Error(
 				"generate rsa",
@@ -69,8 +69,8 @@ func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
 	return
 }
 
-func (s *controller) generateRSA() (private []byte, public []byte, err error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+func (s *controller) GenerateRSA() (private []byte, public []byte, err error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return
 	}
@@ -78,14 +78,18 @@ func (s *controller) generateRSA() (private []byte, public []byte, err error) {
 	private = pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+			Bytes: x509.MarshalPKCS1PrivateKey(privKey),
 		},
 	)
 
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privKey.PublicKey)
+	if err != nil {
+		return
+	}
 	public = pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "PUBLIC KEY",
-			Bytes: x509.MarshalPKCS1PublicKey(privateKey.Public().(*rsa.PublicKey)),
+			Bytes: publicKeyBytes,
 		},
 	)
 	return
