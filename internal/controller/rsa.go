@@ -77,7 +77,7 @@ func (s *controller) GenerateRSA() (private []byte, public []byte, err error) {
 
 	private = pem.EncodeToMemory(
 		&pem.Block{
-			Type:  "PRIVATE KEY",
+			Type:  "RSA PRIVATE KEY",
 			Bytes: x509.MarshalPKCS1PrivateKey(privKey),
 		},
 	)
