@@ -18,7 +18,7 @@ func (s *controller) rsa(i RSA) {
 			zap.String("name", i.Name),
 			zap.Error(err),
 		)
-		private, public, err = s.generateRSA()
+		private, public, err = s.GenerateRSA()
 		if err != nil {
 			zap.L().Error(
 				"generate rsa",
@@ -27,15 +27,35 @@ func (s *controller) rsa(i RSA) {
 			)
 			return
 		}
+		zap.L().Debug("rsa is created", zap.String("name", i.Name))
+		storedRSA := map[string]interface{}{
+			"private": string(private),
+			"public":  string(public),
+		}
+
+		if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
+			zap.L().Error(
+				"store rsa in kv",
+				zap.String("name", i.Name),
+				zap.String("kv", s.cfg.Keys.VaultKV),
+				zap.Error(err),
+			)
+			return
+		}
+	} else {
+		zap.L().Debug("rsa is read", zap.String("name", i.Name))
 	}
 
-	if err = s.storeRSA(i, private, public); err != nil {
+	if err := s.storeKey(i.HostPath, private, public); err != nil {
 		zap.L().Error(
-			"store rsa",
+			"store rsa in host",
 			zap.String("name", i.Name),
+			zap.String("path", i.HostPath),
 			zap.Error(err),
 		)
+		return
 	}
+	zap.L().Debug("rsa is stored", zap.String("name", i.Name))
 }
 
 func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
@@ -45,12 +65,12 @@ func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
 		return
 	}
 
-	private, public = []byte(storedRSA["certificate"].(string)), []byte(storedRSA["private_key"].(string))
+	private, public = []byte(storedRSA["private"].(string)), []byte(storedRSA["public"].(string))
 	return
 }
 
-func (s *controller) generateRSA() (private []byte, public []byte, err error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+func (s *controller) GenerateRSA() (private []byte, public []byte, err error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return
 	}
@@ -58,31 +78,19 @@ func (s *controller) generateRSA() (private []byte, public []byte, err error) {
 	private = pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+			Bytes: x509.MarshalPKCS1PrivateKey(privKey),
 		},
 	)
 
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privKey.PublicKey)
+	if err != nil {
+		return
+	}
 	public = pem.EncodeToMemory(
 		&pem.Block{
-			Type:  "RSA PUBLIC KEY",
-			Bytes: x509.MarshalPKCS1PublicKey(privateKey.Public().(*rsa.PublicKey)),
+			Type:  "PUBLIC KEY",
+			Bytes: publicKeyBytes,
 		},
 	)
 	return
-}
-
-func (s *controller) storeRSA(i RSA, private, public []byte) error {
-	storedRSA := map[string]interface{}{
-		"private": string(private),
-		"public":  string(public),
-	}
-
-	if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
-		return fmt.Errorf("saving in vault: %w", err)
-	}
-
-	if err := s.storeKey(i.HostPath, private, public); err != nil {
-		return fmt.Errorf("host path %s : %w", i.HostPath, err)
-	}
-	return nil
 }

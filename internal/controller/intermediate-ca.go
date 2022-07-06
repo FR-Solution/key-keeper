@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"path"
 
 	"go.uber.org/zap"
 )
@@ -44,7 +45,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 }
 
 func (s *controller) readIntermediateCA(i IntermediateCA) (crt []byte, err error) {
-	path := i.CertPath + "/cert/ca_chain"
+	path := path.Join(i.CertPath, "cert/ca_chain")
 	ica, err := s.vault.Read(path)
 	if ica != nil {
 		return []byte(ica["certificate"].(string)), err
@@ -59,7 +60,7 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt []byte, err e
 		"ttl":         "8760h",
 	}
 
-	path := i.CertPath + "/intermediate/generate/internal"
+	path := path.Join(i.CertPath, "intermediate/generate/internal")
 	csr, err := s.vault.Write(path, csrData)
 	if err != nil {
 		err = fmt.Errorf("create intermediate CA: %w", err)

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -44,7 +45,7 @@ func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
 		"alt_names":   strings.Join(i.Hosts, ","),
 		"ip_sans":     strings.Join(i.IPs, ","),
 	}
-	path := i.CertPath + "/issue/" + i.Role
+	path := path.Join(i.CertPath, "issue", i.Role)
 	cert, err := s.vault.Write(path, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
