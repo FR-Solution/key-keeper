@@ -1,6 +1,6 @@
 # key-keeper
 
-## BUILD & PUSH IMAGE
+## Build & Push image
 
 Поменять версию релиза в .release и выполнить:
 
@@ -8,13 +8,13 @@
 make build-and-push DOCKER_USER=geoirb
 ```
 
-# BUILD BIN
+# Build bin
 
 ```bash
 go build -o key-keeper cmd/key-keeper/main.go
 ```
 
-# RUN BIN
+# Run bim
 
 ```bash
 key-keeper -config /path/to/config
