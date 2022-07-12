@@ -13,6 +13,10 @@ import (
 	"github.com/fraima/key-keeper/internal/vault"
 )
 
+var (
+	Version = "undefined"
+)
+
 func main() {
 	loggerConfig := zap.NewProductionConfig()
 	loggerConfig.Level.SetLevel(zap.DebugLevel)
@@ -35,7 +39,7 @@ func main() {
 		zap.L().Fatal("read configuration", zap.Error(err))
 	}
 
-	zap.L().Debug("configuration", zap.Any("config", cfg))
+	zap.L().Debug("configuration", zap.Any("config", cfg), zap.String("version", Version))
 
 	v, err := vault.New(
 		cfg.Vault,
