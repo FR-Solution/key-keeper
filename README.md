@@ -1,12 +1,24 @@
 # key-keeper
 
-Build:
+## BUILD & PUSH IMAGE
 
-    go build -o key-keeper cmd/key-keeper/main.go
+Поменять версию релиза в .release и выполнить:
 
-Run:
+```bash
+make build-and-push DOCKER_USER=geoirb
+```
 
-    key-keeper -config /path/to/config
+# BUILD BIN
+
+```bash
+go build -o key-keeper cmd/key-keeper/main.go
+```
+
+# RUN BIN
+
+```bash
+key-keeper -config /path/to/config
+```
 
 Example config.yml
 
