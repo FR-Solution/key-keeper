@@ -39,6 +39,7 @@ type CSR struct {
 	CertPath   string   `yaml:"cert_path"`
 	Role       string   `yaml:"role"`
 	HostPath   string   `yaml:"host_path"`
+	Trigger    []string `yaml:"trigger"`
 }
 
 type Keys struct {

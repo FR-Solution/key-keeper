@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"time"
@@ -35,6 +36,17 @@ func (s *controller) csr(i CSR) {
 			zap.Error(err),
 		)
 		return
+	}
+
+	for _, command := range i.Trigger {
+		cmd := strings.Split(command, " ")
+		err := exec.Command(cmd[0], cmd[1:]...).Run()
+		zap.L().Error(
+			"csr trigger",
+			zap.String("common_name", i.CommonName),
+			zap.String("command", command),
+			zap.Error(err),
+		)
 	}
 	zap.L().Info("csr generated", zap.String("common_name", i.CommonName))
 }

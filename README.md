@@ -38,7 +38,6 @@ certificates:
   # - public and private помещается в KV с наименованием ${COMMON_NAME}
   vault_kv: "clusters/cluster-1/kv"
   reissue_interval: "1d" # интервал перевыпуск - за сутки до истечения перевыпустить. (Хардкод - проверяет раз в час)
-
   # Блок Root_CA отвечает за выпуск корневых сертификатов - на выход не получаем ни сертификат ни ключ от него
   # что бы все сертификаты выпускались только с Intermediate.
   root_ca:
@@ -60,6 +59,8 @@ certificates:
       role: "base-role" # system_masters_client                   # Роль в которой прописаны критерии сертификата (usages,access_ip,access_san,etc)
       host_path: "/etc/kubernetes/pki/certs/kube-apiserver/cert" # Локальный путь, где будет размещен public / private keys
       cert_path: "clusters/cluster-1/pki/kube-apiserver" # Путь к сейфу Inermediate CA где будет заказан сертификат
+      trigger: # Триггер выполняемый при обновлении данного csr
+        - "cmd commands"
 keys:
   vault_kv: ""
 
