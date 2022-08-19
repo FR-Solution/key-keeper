@@ -1,4 +1,4 @@
-package controller
+package resource
 
 import (
 	"fmt"
@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
-func (s *controller) csr(i CSR) {
+func (s *resource) csr(i controller.CSR) {
 	csr, err := s.readCertificate(i.HostPath)
 	if csr != nil && time.Until(csr.Leaf.NotAfter) > s.cfg.Certificates.ReissueInterval {
 		return
@@ -51,7 +53,7 @@ func (s *controller) csr(i CSR) {
 	zap.L().Info("csr generated", zap.String("common_name", i.CommonName))
 }
 
-func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
+func (s *resource) generateCSR(i controller.CSR) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
 		"common_name": i.CommonName,
 		"alt_names":   strings.Join(i.Hosts, ","),
@@ -66,7 +68,7 @@ func (s *controller) generateCSR(i CSR) ([]byte, []byte, error) {
 	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
 }
 
-func (s *controller) storeCSR(i CSR, cert, key []byte) error {
+func (s *resource) storeCSR(i controller.CSR, cert, key []byte) error {
 	if err := s.storeCertificate(i.HostPath, cert, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 	}

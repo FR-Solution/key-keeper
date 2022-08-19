@@ -1,4 +1,4 @@
-package controller
+package resource
 
 import (
 	"crypto/tls"
@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
-func (s *controller) intermediateCAWithExportedKey(i IntermediateCA) {
+func (s *resource) intermediateCAWithExportedKey(i controller.IntermediateCA) {
 	var (
 		crt, key []byte
 		err      error
@@ -45,7 +47,7 @@ func (s *controller) intermediateCAWithExportedKey(i IntermediateCA) {
 	}
 }
 
-func (s *controller) readIntermediateCAWithExportedKey(i IntermediateCA) (crt, key []byte, err error) {
+func (s *resource) readIntermediateCAWithExportedKey(i controller.IntermediateCA) (crt, key []byte, err error) {
 	storedICA, err := s.vault.Get(s.cfg.Certificates.VaultKV, i.CommonName+"-ca")
 	if err != nil {
 		err = fmt.Errorf("get from vault_kv %s : %w", s.cfg.Certificates.VaultKV, err)
@@ -64,10 +66,10 @@ func (s *controller) readIntermediateCAWithExportedKey(i IntermediateCA) (crt, k
 	return
 }
 
-func (s *controller) generateIntermediateCAWithExportedKey(i IntermediateCA) (crt, key []byte, err error) {
+func (s *resource) generateIntermediateCAWithExportedKey(i controller.IntermediateCA) (crt, key []byte, err error) {
 	// create  intermediate ca with exported key
 	csrData := map[string]interface{}{
-		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
+		"common_name": fmt.Sprintf("%s Intermediate Authority", i.CommonName),
 		"ttl":         "8760h",
 	}
 
@@ -107,7 +109,7 @@ func (s *controller) generateIntermediateCAWithExportedKey(i IntermediateCA) (cr
 	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
 
-func (s *controller) storeIntermediateCAWithExportedKey(i IntermediateCA, crt, key []byte) error {
+func (s *resource) storeIntermediateCAWithExportedKey(i controller.IntermediateCA, crt, key []byte) error {
 	// saving the created  intermediate ca with exported key
 	storedICA := map[string]interface{}{
 		"certificate": string(crt),

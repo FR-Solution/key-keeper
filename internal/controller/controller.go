@@ -1,87 +1,87 @@
 package controller
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	"go.uber.org/zap"
 )
 
-var intermediateCommonNameLayout = "%s Intermediate Authority"
+type config interface {
+	GetNewConfig() (cfgs []Config, err error)
+}
 
-type vault interface {
+type Vault interface {
 	Write(path string, data map[string]interface{}) (map[string]interface{}, error)
 	Read(path string) (map[string]interface{}, error)
 	Put(mountPath, secretePath string, data map[string]interface{}) error
 	Get(mountPath, secretePath string) (map[string]interface{}, error)
 }
 
-type controller struct {
-	vault vault
-
-	cfg Config
+type Resource interface {
+	Check()
 }
 
-func New(store vault, certs Config) *controller {
-	c := &controller{
-		vault: store,
-		cfg:   certs,
+type controller struct {
+	config         config
+	vaultConnector func(cfg VaultConfig) (Vault, error)
+
+	resourcePreparing func(vault Vault, cfg RecourceConfig) Resource
+	lock              sync.RWMutex
+	resources         []Resource
+}
+
+func New(
+	config config,
+	vaultConnector func(cfg VaultConfig) (Vault, error),
+	resourcePreparing func(vault Vault, cfg RecourceConfig) Resource,
+) *controller {
+	return &controller{
+		config:            config,
+		vaultConnector:    vaultConnector,
+		resourcePreparing: resourcePreparing,
 	}
-	return c
 }
 
 // Start controller of key-keeper.
-func (s *controller) Start() error {
-	s.workflow()
+func (s *controller) Start() {
+	go func() {
+		t := time.NewTicker(30 * time.Second)
+		defer t.Stop()
+		for range t.C {
+			if err := s.getNewRecource(); err != nil {
+				zap.L().Error("runtime", zap.Error(err))
+			}
+		}
+	}()
 
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()
 	for range t.C {
-		s.workflow()
+		s.lock.RLock()
+		for _, r := range s.resources {
+			r.Check()
+		}
+		s.lock.RUnlock()
 	}
-
-	return nil
 }
 
-func (s *controller) workflow() {
-	wg := &sync.WaitGroup{}
-
-	zap.L().Debug("certificate-root-ca")
-	for _, c := range s.cfg.Certificates.RootCA {
-		wg.Add(1)
-		go func(c RootCA) {
-			defer wg.Done()
-			s.rootCA(c)
-		}(c)
-	}
-	wg.Wait()
-
-	zap.L().Debug("certificate-intermediate-ca")
-	for _, c := range s.cfg.Certificates.IntermediateCA {
-		wg.Add(1)
-		go func(c IntermediateCA) {
-			defer wg.Done()
-			if c.ExportedKey {
-				s.intermediateCAWithExportedKey(c)
-			} else {
-				s.intermediateCA(c)
-			}
-		}(c)
-	}
-	wg.Wait()
-
-	zap.L().Debug("certificate-csr")
-	for _, c := range s.cfg.Certificates.CSR {
-		go func(c CSR) {
-			s.csr(c)
-		}(c)
+func (s *controller) getNewRecource() error {
+	cfgList, err := s.config.GetNewConfig()
+	if err != nil {
+		return fmt.Errorf("get new configs: %w", err)
 	}
 
-	zap.L().Debug("key-rsa")
-	for _, k := range s.cfg.Keys.RSA {
-		go func(k RSA) {
-			s.rsa(k)
-		}(k)
+	for _, cfg := range cfgList {
+		vaultConnect, err := s.vaultConnector(cfg.Vault)
+		if err != nil {
+			zap.L().Error("connect to vault", zap.Error(err))
+		}
+		r := s.resourcePreparing(vaultConnect, cfg.Recource)
+		s.lock.Lock()
+		s.resources = append(s.resources, r)
+		s.lock.Unlock()
 	}
-
+	return nil
 }

@@ -8,13 +8,15 @@ import (
 
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
 type vault struct {
 	cli *api.Client
 }
 
-func New(cfg Config) (*vault, error) {
+func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 	client, err := api.NewClient(
 		&api.Config{
 			Address: cfg.Address,
@@ -62,7 +64,7 @@ func New(cfg Config) (*vault, error) {
 	return s, nil
 }
 
-func (s *vault) roleID(cfg Config) (string, error) {
+func (s *vault) roleID(cfg controller.VaultConfig) (string, error) {
 	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "role-id")
 	approle, err := s.Read(path)
 	if err != nil {
@@ -85,7 +87,7 @@ func (s *vault) roleID(cfg Config) (string, error) {
 	return roleID.(string), err
 }
 
-func (s *vault) secretID(cfg Config) (string, error) {
+func (s *vault) secretID(cfg controller.VaultConfig) (string, error) {
 	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "secret-id")
 	approle, err := s.Write(path, nil)
 	if err != nil {

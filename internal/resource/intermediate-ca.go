@@ -1,13 +1,15 @@
-package controller
+package resource
 
 import (
 	"fmt"
 	"path"
 
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
-func (s *controller) intermediateCA(i IntermediateCA) {
+func (s *resource) intermediateCA(i controller.IntermediateCA) {
 	var (
 		crt []byte
 		err error
@@ -44,7 +46,7 @@ func (s *controller) intermediateCA(i IntermediateCA) {
 	}
 }
 
-func (s *controller) readIntermediateCA(i IntermediateCA) (crt []byte, err error) {
+func (s *resource) readIntermediateCA(i controller.IntermediateCA) (crt []byte, err error) {
 	path := path.Join(i.CertPath, "cert/ca_chain")
 	ica, err := s.vault.Read(path)
 	if ica != nil {
@@ -53,10 +55,10 @@ func (s *controller) readIntermediateCA(i IntermediateCA) (crt []byte, err error
 	return
 }
 
-func (s *controller) generateIntermediateCA(i IntermediateCA) (crt []byte, err error) {
+func (s *resource) generateIntermediateCA(i controller.IntermediateCA) (crt []byte, err error) {
 	// create intermediate CA
 	csrData := map[string]interface{}{
-		"common_name": fmt.Sprintf(intermediateCommonNameLayout, i.CommonName),
+		"common_name": fmt.Sprintf("%s Intermediate Authority", i.CommonName),
 		"ttl":         "8760h",
 	}
 
@@ -96,7 +98,7 @@ func (s *controller) generateIntermediateCA(i IntermediateCA) (crt []byte, err e
 	return []byte(ica["certificate"].(string)), nil
 }
 
-func (s *controller) storeIntermediateCA(i IntermediateCA, crt, key []byte) error {
+func (s *resource) storeIntermediateCA(i controller.IntermediateCA, crt, key []byte) error {
 	if err := s.storeCertificate(i.HostPath, crt, key); err != nil {
 		return fmt.Errorf("host path %s : %w", i.HostPath, err)
 	}

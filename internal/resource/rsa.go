@@ -1,4 +1,4 @@
-package controller
+package resource
 
 import (
 	"crypto/rand"
@@ -8,9 +8,11 @@ import (
 	"fmt"
 
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
-func (s *controller) rsa(i RSA) {
+func (s *resource) rsa(i controller.RSA) {
 	private, public, err := s.readRSA(i)
 	if err != nil {
 		zap.L().Warn(
@@ -58,7 +60,7 @@ func (s *controller) rsa(i RSA) {
 	zap.L().Debug("rsa is stored", zap.String("name", i.Name))
 }
 
-func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
+func (s *resource) readRSA(i controller.RSA) (private []byte, public []byte, err error) {
 	storedRSA, err := s.vault.Get(s.cfg.Keys.VaultKV, i.Name)
 	if err != nil {
 		err = fmt.Errorf("get from vault_kv %s : %w", s.cfg.Keys.VaultKV, err)
@@ -69,7 +71,7 @@ func (s *controller) readRSA(i RSA) (private []byte, public []byte, err error) {
 	return
 }
 
-func (s *controller) GenerateRSA() (private []byte, public []byte, err error) {
+func (s *resource) GenerateRSA() (private []byte, public []byte, err error) {
 	privKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return

@@ -1,13 +1,15 @@
-package controller
+package resource
 
 import (
 	"fmt"
 	"path"
 
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/controller"
 )
 
-func (s *controller) rootCA(i RootCA) {
+func (s *resource) rootCA(i controller.RootCA) {
 	isExist, err := s.isExistRootCA(i)
 	if err != nil {
 		zap.L().Warn(
@@ -31,7 +33,7 @@ func (s *controller) rootCA(i RootCA) {
 	zap.L().Info("root-ca generated", zap.String("common_name", i.CommonName))
 }
 
-func (s *controller) isExistRootCA(i RootCA) (bool, error) {
+func (s *resource) isExistRootCA(i controller.RootCA) (bool, error) {
 	path := path.Join(i.RootPathCA, "cert/ca")
 	rootCA, err := s.vault.Read(path)
 	if err != nil {
@@ -40,7 +42,7 @@ func (s *controller) isExistRootCA(i RootCA) (bool, error) {
 	return rootCA != nil, err
 }
 
-func (s *controller) generateRootCA(i RootCA) error {
+func (s *resource) generateRootCA(i controller.RootCA) error {
 	rootCAData := map[string]interface{}{
 		"common_name": i.CommonName,
 		"ttl":         "8760h",

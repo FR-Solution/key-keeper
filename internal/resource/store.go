@@ -1,4 +1,4 @@
-package controller
+package resource
 
 import (
 	"crypto/tls"
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func (s *controller) storeKey(path string, privare, public []byte) error {
+func (s *resource) storeKey(path string, privare, public []byte) error {
 	if err := os.WriteFile(path+".pem", privare, 0600); err != nil {
 		return fmt.Errorf("failed to save privare key with path %s: %w", path, err)
 	}
@@ -18,7 +18,7 @@ func (s *controller) storeKey(path string, privare, public []byte) error {
 	return nil
 }
 
-func (s *controller) storeCertificate(path string, crt, key []byte) error {
+func (s *resource) storeCertificate(path string, crt, key []byte) error {
 	if crt != nil {
 		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {
 			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
@@ -33,7 +33,7 @@ func (s *controller) storeCertificate(path string, crt, key []byte) error {
 	return nil
 }
 
-func (s *controller) readCertificate(path string) (*tls.Certificate, error) {
+func (s *resource) readCertificate(path string) (*tls.Certificate, error) {
 	crt, err := os.ReadFile(path + ".pem")
 	if err != nil {
 		return nil, err
