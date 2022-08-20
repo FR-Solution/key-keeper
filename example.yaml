@@ -19,61 +19,61 @@ issuers:
     vault:
       role: 
         name: "front-proxy-client"
-        path: "clusters/${cluster_name}/pki/front-proxy"
+        path: "clusters/cluster-1/pki/front-proxy"
 
   - name: kube-apiserver
     vault:
       role: 
         name: "kube-apiserver"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-apiserver-kubelet-client
     vault:
       role: 
         name: "kube-apiserver-kubelet-client"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-controller-manager-client
     vault:
       role: 
         name: "kube-controller-manager-client"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-controller-manager-server
     vault:
       role: 
         name: "kube-controller-manager-server"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-scheduler-client
     vault:
       role: 
         name: "kube-scheduler-client"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kubelet-client
     vault:
       role: 
         name: "kubelet-client"
-        path: "clusters/${cluster_name}/pki/kubernetes"
+        path: "clusters/cluster-1/pki/kubernetes"
 
   - name: etcd-client
     vault:
       role: 
         name: "kubelet-client"
-        path: "clusters/${cluster_name}/pki/etcd"
+        path: "clusters/cluster-1/pki/etcd"
 
   - name: etcd-peer
     vault:
       role: 
         name: "etcd-peer"
-        path: "clusters/${cluster_name}/pki/etcd"
+        path: "clusters/cluster-1/pki/etcd"
 
   - name: etcd-server
     vault:
       role: 
         name: "etcd-server"
-        path: "clusters/${cluster_name}/pki/etcd"
+        path: "clusters/cluster-1/pki/etcd"
 
   - name: root-ca
     vault:
@@ -89,7 +89,7 @@ issuers:
     vault:
       role: 
         name: "root"
-        path: "clusters/${cluster_name}/pki/etcd"
+        path: "clusters/cluster-1/pki/etcd"
         intermediate:
           rootPath: "clusters/cluster-1/pki/root"
           exportedKey: false
@@ -99,7 +99,7 @@ issuers:
     vault:
       role: 
         name: "root"
-        path: "clusters/${cluster_name}/pki/front-proxy"
+        path: "clusters/cluster-1/pki/front-proxy"
         intermediate:
           rootPath: "clusters/cluster-1/pki/root"
           exportedKey: false
@@ -131,9 +131,6 @@ certificates:
     spec:
       duration: 2160h
       renewBefore: 360h
-      subject:
-        organizations:
-          - system:masters
       commonName: system:kube-apiserver-front-proxy-client
       privateKey:
         algorithm: RSA
@@ -149,9 +146,6 @@ certificates:
     spec:
       duration: 2160h
       renewBefore: 360h
-      subject:
-        organizations:
-          - system:masters
       commonName: system:kube-apiserver-etcd-client
       privateKey:
         algorithm: RSA
@@ -217,9 +211,6 @@ certificates:
     spec:
       duration: 2160h
       renewBefore: 360h
-      subject:
-        organizations:
-          - system:masters
       commonName: system:kube-controller-manager
       privateKey:
         algorithm: RSA
@@ -263,9 +254,6 @@ certificates:
     spec:
       duration: 2160h
       renewBefore: 360h
-      subject:
-        organizations:
-          - system:masters
       commonName: system:kube-scheduler
       privateKey:
         algorithm: RSA
@@ -309,9 +297,6 @@ certificates:
     spec:
       duration: 2160h
       renewBefore: 360h
-      subject:
-        organizations:
-          - system:masters
       commonName: system:kube-scheduler
       privateKey:
         algorithm: RSA
@@ -329,7 +314,7 @@ certificates:
       renewBefore: 360h
       subject:
         organizations:
-          - system:masters
+          - system:nodes
       commonName: system:node:${ instance_name }.${ base_domain }
       privateKey:
         algorithm: RSA
@@ -417,4 +402,4 @@ keys:
       size: 2048
     public: true
     vault:
-      kv: "clusters/${cluster_name}/kv"
+      kv: "clusters/cluster-1/kv"
