@@ -1,0 +1,106 @@
+---
+global:
+  vault:
+    serever: "http://${VAULT_IP}"           # rename $address
+    caBundle: ""                            # new (сертификат для подключения к волту - при http не должен фигурировать)
+    tlsInsecure: true                       # new при указании тру скипать ssl верификацию
+    auth:
+      bootstrap:
+        tokenPath: ""                       # rename $bootstrap_token
+      appRole:
+        name: test-role                     # rename $approle_name
+        path: clusters/cluster-1/approle    # rename $approle_path
+        roleIdPath: "$PATH"                 # rename $local_path_to_role_id
+        secretIdPath: "$PATH"               # rename $local_path_to_secret_id
+    kv: "clusters/${cluster_name}/kv"
+
+issuers:
+  - name: kube-apiserver-server
+    vault:                                            # Все переменные global.Vault.* могут быть переопределены тут в блоке vault
+      path: "clusters/cluster-1/pki/kube-apiserver"   # альтернатива блоку csr[*].cert_path
+      role: "system_masters_client"                   # альтернатива блоку csr[*].role
+      serever: "http://${VAULT_IP}"                   # rename $address
+      caBundle: ""                                    # new (сертификат для подключения к волту - при http не должен фигурировать)
+      tlsInsecure: true                               # new при указании тру скипать ssl верификацию
+      auth:
+        bootstrap:
+          tokenPath: ""                               # rename $bootstrap_token
+        appRole:
+          name: test-role                             # rename $approle_name
+          path: clusters/cluster-1/approle            # rename $approle_path
+          roleIdPath: "$PATH"                         # rename $local_path_to_role_id
+          secretIdPath: "$PATH"                       # rename $local_path_to_secret_id
+
+  - name: kube-apiserver-ca
+    vault:                                            # Все переменные global.Vault.* могут быть переопределены тут в блоке vault
+      intermediate:                                   # Альтернатива блоку certificates.intermediate_ca
+        path: "clusters/cluster-1/pki/kube-apiserver" # альтернатива блоку csr[*].cert_path
+        rootPath: "clusters/cluster-1/pki/root"
+        exportedKey: false
+        generate: false
+
+certificates:
+  - name: kube-apiserver-server
+    spec:
+      duration: 2160h         # на какой промежуток времени заказывается сертификат
+      renewBefore: 360h       # за сколько до истечения надо перевыпустить
+      subject: # https://www.vaultproject.io/api-docs/secret/pki 
+        # vault write pki/issue/example_role organization="example.inc" ou="development team" country="EX"
+        organizations:
+          - system:masters
+        ous: []
+        countrys: []
+      commonName: kube-apiserver-server
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 2048
+      usages:
+        - server auth
+        - client auth
+      dnsNames:
+        - kube-apiserver-server
+        - www.example.com
+      ipAddresses:
+        - 127.0.0.1
+      issuerRef:
+        name: kube-apiserver-server
+
+    hostPathCert: "/etc/kubernetes/pki/certs/kube-apiserver/cert"
+    trigger:
+      - systemctl stop kube-apiserver.service
+    httpCheck: 127.0.0.1:6443
+
+  - name: kube-apiserver-ca
+    spec:
+      duration: 2160h         # на какой промежуток времени заказывается сертификат
+      renewBefore: 360h       # за сколько до истечения надо перевыпустить
+      subject: # https://www.vaultproject.io/api-docs/secret/pki 
+        # vault write pki/issue/example_role organization="example.inc" ou="development team" country="EX"
+        organizations: []
+        ous: []
+        countrys: []
+      commonName: kube-apiserver-ca
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 2048
+      isCa: true
+      issuerRef:
+        name: kube-apiserver-ca
+
+    hostPathCert: "/etc/kubernetes/pki/ca"
+    trigger:
+      - systemctl stop kube-apiserver.service
+    httpCheck: 127.0.0.1:6443
+
+keys:
+  - name: system:kube-apiserver-sa
+    host_path: /etc/kubernetes/pki/certs/kube-apiserver/ # join(host_path,name)
+    privateKey: # добавить возможность менять тип и сайз
+      algorithm: RSA
+      encoding: PKCS1
+      size: 2048
+    public: true  # если false генерил локально, true генерил локально и пушил в vault
+    vault:
+      kv: "clusters/${cluster_name}/kv"
