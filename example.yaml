@@ -16,11 +16,31 @@ global:
       path: "clusters/cluster-1/kv"
 
 issuers:
+  - name: front-proxy-ca
+    vault:
+      role: 
+        name: "root"
+        path: "clusters/cluster-1/pki/front-proxy"
+        intermediate:
+          rootPath: "clusters/cluster-1/pki/root"
+          exportedKey: false
+          generate: false
+
   - name: front-proxy-client
     vault:
       role: 
         name: "front-proxy-client"
         path: "clusters/cluster-1/pki/front-proxy"
+
+  - name: kube-ca
+    vault:
+      role: 
+        name: "root"
+        path: "clusters/cluster-1/pki/kubernetes"
+        intermediate:
+          rootPath: "clusters/cluster-1/pki/root"
+          exportedKey: false
+          generate: false
 
   - name: kube-apiserver
     vault:
@@ -58,6 +78,16 @@ issuers:
         name: "kubelet-client"
         path: "clusters/cluster-1/pki/kubernetes"
 
+  - name: etcd-ca
+    vault:
+      role: 
+        name: "root"
+        path: "clusters/cluster-1/pki/etcd"
+        intermediate:
+          rootPath: "clusters/cluster-1/pki/root"
+          exportedKey: false
+          generate: false
+
   - name: etcd-client
     vault:
       role: 
@@ -76,50 +106,7 @@ issuers:
         name: "etcd-server"
         path: "clusters/cluster-1/pki/etcd"
 
-  - name: root-ca
-    vault:
-      role: 
-        name: "root"
-        path: "clusters/cluster-1/pki/kubernetes"
-        intermediate:
-          rootPath: "clusters/cluster-1/pki/root"
-          exportedKey: false
-          generate: false
-
-  - name: etcd-ca
-    vault:
-      role: 
-        name: "root"
-        path: "clusters/cluster-1/pki/etcd"
-        intermediate:
-          rootPath: "clusters/cluster-1/pki/root"
-          exportedKey: false
-          generate: false
-
-  - name: front-proxy
-    vault:
-      role: 
-        name: "root"
-        path: "clusters/cluster-1/pki/front-proxy"
-        intermediate:
-          rootPath: "clusters/cluster-1/pki/root"
-          exportedKey: false
-          generate: false
-
 certificates:
-  - name: root-ca
-    spec:
-      isCa: true
-      issuerRef:
-        name: root-ca
-    hostPathCert: "/etc/kubernetes/pki/ca"
-
-  - name: etcd-ca
-    spec:
-      isCa: true
-      issuerRef:
-        name: etcd-ca
-    hostPathCert: "/etc/kubernetes/pki/ca"
 
   - name: front-proxy-ca
     spec:
@@ -143,20 +130,12 @@ certificates:
         name: front-proxy-client
     hostPathCert: "/etc/kubernetes/pki/certs/kube-apiserver/certs"
 
-  - name: system:kube-apiserver-etcd-client
+  - name: kube-ca
     spec:
-      duration: 2160h
-      renewBefore: 360h
-      commonName: system:kube-apiserver-etcd-client
-      privateKey:
-        algorithm: RSA
-        encoding: PKCS1
-        size: 2048
-      usages:
-        - client auth
+      isCa: true
       issuerRef:
-        name: etcd-client
-    hostPathCert: "/etc/kubernetes/pki/certs/kube-apiserver/certs"
+        name: root-ca
+    hostPathCert: "/etc/kubernetes/pki/ca"
 
   - name: system:kube-apiserver-server
     spec:
@@ -251,21 +230,6 @@ certificates:
       - systemctl stop kube-controller-manager.service
     httpsCheck: 127.0.0.1:6443
 
-  - name: system:kube-scheduler-client
-    spec:
-      duration: 2160h
-      renewBefore: 360h
-      commonName: system:kube-scheduler
-      privateKey:
-        algorithm: RSA
-        encoding: PKCS1
-        size: 2048
-      usages:
-        - client auth
-      issuerRef:
-        name: kube-scheduler-client
-    hostPathCert: "/etc/kubernetes/pki/certs/kube-scheduler/certs"
-
   - name: system:kube-scheduler-server
     spec:
       duration: 2160h
@@ -326,6 +290,13 @@ certificates:
       issuerRef:
         name: kubelet-client
     hostPathCert: "/etc/kubernetes/pki/certs/kubelet/certs"
+
+  - name: etcd-ca
+    spec:
+      isCa: true
+      issuerRef:
+        name: etcd-ca
+    hostPathCert: "/etc/kubernetes/pki/ca"
 
   - name: system:etcd-healthcheck-client
     spec:
@@ -393,6 +364,21 @@ certificates:
     trigger:
       - systemctl stop etcd.service
     httpsCheck: 127.0.0.1:2380
+
+  - name: system:kube-apiserver-etcd-client
+    spec:
+      duration: 2160h
+      renewBefore: 360h
+      commonName: system:kube-apiserver-etcd-client
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 2048
+      usages:
+        - client auth
+      issuerRef:
+        name: etcd-client
+    hostPathCert: "/etc/kubernetes/pki/certs/kube-apiserver/certs"
 
 keys:
   - name: system:kube-apiserver-sa
