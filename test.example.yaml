@@ -12,7 +12,8 @@ global:
         path: clusters/cluster-1/approle    # rename $approle_path
         roleIdPath: "$PATH"                 # rename $local_path_to_role_id
         secretIdPath: "$PATH"               # rename $local_path_to_secret_id
-    kv: "clusters/${cluster_name}/kv"
+    kv: 
+      path: "clusters/${cluster_name}/kv"
 
 issuers:
   - name: kube-apiserver-server
@@ -118,4 +119,5 @@ keys:
       size: 2048
     public: true  # если false генерил локально, true генерил локально и пушил в vault
     vault:
-      kv: "clusters/${cluster_name}/kv"
+      kv: 
+        path: "clusters/${cluster_name}/kv"

@@ -12,7 +12,8 @@ global:
         path: clusters/cluster-1/approle
         roleIdPath: "$PATH"
         secretIdPath: "$PATH"
-    kv: "clusters/cluster-1/kv"
+    kv: 
+      path: "clusters/cluster-1/kv"
 
 issuers:
   - name: front-proxy-client
