@@ -37,10 +37,22 @@ issuers:
       role: 
         name: "kube-apiserver-ca"                       # альтернатива блоку csr[*].role
         path: "clusters/cluster-1/pki/kube-apiserver"   # альтернатива блоку csr[*].cert_path
+        # Если в сертификате указан isCA=true то смотреть в блок intermediate за до параметрами, во всех других игнорировать.
         intermediate:                                   # Альтернатива блоку certificates.intermediate_ca
           rootPath: "clusters/cluster-1/pki/root"
           exportedKey: false
           generate: false
+            # при указании generate: false в сертификате игнорируются поля ниже т.к ЦА уже создан и нам нужен публичный ключ.
+            # subject: # https://www.vaultproject.io/api-docs/secret/pki 
+            #   # vault write pki/issue/example_role organization="example.inc" ou="development team" country="EX"
+            #   organizations: []
+            #   ous: []
+            #   countrys: []
+            # commonName: kube-apiserver-ca
+            # privateKey:
+            #   algorithm: RSA
+            #   encoding: PKCS1
+            #   size: 2048
 
 certificates:
   - name: kube-apiserver-server
@@ -72,7 +84,7 @@ certificates:
     hostPathCert: "/etc/kubernetes/pki/certs/kube-apiserver/cert"
     trigger:
       - systemctl stop kube-apiserver.service
-    httpCheck: 127.0.0.1:6443
+    httpsCheck: 127.0.0.1:6443
 
   - name: kube-apiserver-ca
     spec:
@@ -95,7 +107,7 @@ certificates:
     hostPathCert: "/etc/kubernetes/pki/ca"
     trigger:
       - systemctl stop kube-apiserver.service
-    httpCheck: 127.0.0.1:6443
+    httpsCheck: 127.0.0.1:6443
 
 keys:
   - name: system:kube-apiserver-sa
