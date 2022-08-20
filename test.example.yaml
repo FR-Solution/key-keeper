@@ -17,8 +17,9 @@ global:
 issuers:
   - name: kube-apiserver-server
     vault:                                            # Все переменные global.Vault.* могут быть переопределены тут в блоке vault
-      path: "clusters/cluster-1/pki/kube-apiserver"   # альтернатива блоку csr[*].cert_path
-      role: "system_masters_client"                   # альтернатива блоку csr[*].role
+      role: 
+        name: "system_masters_client"                 # альтернатива блоку csr[*].role
+        path: "clusters/cluster-1/pki/kube-apiserver" # альтернатива блоку csr[*].cert_path
       serever: "http://${VAULT_IP}"                   # rename $address
       caBundle: ""                                    # new (сертификат для подключения к волту - при http не должен фигурировать)
       tlsInsecure: true                               # new при указании тру скипать ssl верификацию
@@ -33,11 +34,13 @@ issuers:
 
   - name: kube-apiserver-ca
     vault:                                            # Все переменные global.Vault.* могут быть переопределены тут в блоке vault
-      intermediate:                                   # Альтернатива блоку certificates.intermediate_ca
-        path: "clusters/cluster-1/pki/kube-apiserver" # альтернатива блоку csr[*].cert_path
-        rootPath: "clusters/cluster-1/pki/root"
-        exportedKey: false
-        generate: false
+      role: 
+        name: "kube-apiserver-ca"                       # альтернатива блоку csr[*].role
+        path: "clusters/cluster-1/pki/kube-apiserver"   # альтернатива блоку csr[*].cert_path
+        intermediate:                                   # Альтернатива блоку certificates.intermediate_ca
+          rootPath: "clusters/cluster-1/pki/root"
+          exportedKey: false
+          generate: false
 
 certificates:
   - name: kube-apiserver-server
