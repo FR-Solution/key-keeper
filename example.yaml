@@ -85,7 +85,7 @@ issuers:
           exportedKey: false
           generate: false
 
-  - name: root-ca
+  - name: etcd-ca
     vault:
       role: 
         name: "root"
@@ -95,7 +95,7 @@ issuers:
           exportedKey: false
           generate: false
 
-  - name: root-ca
+  - name: front-proxy
     vault:
       role: 
         name: "root"
