@@ -43,14 +43,14 @@ certificates:                           # Описывает список дос
       duration: string                  # на какой промежуток времени заказывается сертификат
       renewBefore: string               # за сколько до истечения надо перевыпустить
       subject:                          # блок описывающий принадлежность certificate
-        countries:                      # Countries to be used on the Certificate.
-        localities:                     # Cities to be used on the Certificate.
-        organizationalUnits:            # Organizational Units to be used on the Certificate.
-        organizations:                  # Organizations to be used on the Certificate.
-        postalCodes:                    # Postal codes to be used on the Certificate.
-        provinces:                      # State/Provinces to be used on the Certificate.
-        serialNumber:                   # Serial number to be used on the Certificate
-        streetAddresses:                # Street addresses to be used on the Certificate.
+        countries: string               # Countries to be used on the Certificate.
+        localities: string              # Cities to be used on the Certificate.
+        organizationalUnits: string     # Organizational Units to be used on the Certificate.
+        organizations: string           # Organizations to be used on the Certificate.
+        postalCodes: string             # Postal codes to be used on the Certificate.
+        provinces: string               # State/Provinces to be used on the Certificate.
+        serialNumber: string            # Serial number to be used on the Certificate
+        streetAddresses: string         # Street addresses to be used on the Certificate.
       commonName: string                # CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.
       privateKey:                       # Options to control private keys used for the Certificate.
         algorithm: string               # Algorithm is the private key algorithm of the corresponding private key for this certificate. If provided, allowed values are either `RSA`,`Ed25519` or `ECDSA` If `algorithm` is specified and `size` is not provided, key size of 256 will be used for `ECDSA` key algorithm and key size of 2048 will be used for `RSA` key algorithm. key size is ignored when using the `Ed25519` key algorithm.
