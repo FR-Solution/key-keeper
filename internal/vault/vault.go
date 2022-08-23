@@ -19,7 +19,7 @@ type vault struct {
 func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 	client, err := api.NewClient(
 		&api.Config{
-			Address: cfg.Address,
+			Address: cfg.Server,
 			HttpClient: &http.Client{
 				Timeout: cfg.RequestTimeout,
 			},
@@ -28,7 +28,7 @@ func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
-	client.SetToken(cfg.BootsrapToken)
+	client.SetToken(cfg.Auth.Bootstrap.Token)
 
 	s := &vault{
 		cli: client,
@@ -48,7 +48,7 @@ func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 		&auth.SecretID{
 			FromString: secretID,
 		},
-		auth.WithMountPath(cfg.AppRolePath),
+		auth.WithMountPath(cfg.Auth.AppRole.Path),
 	)
 	if err != nil {
 		return nil, err
@@ -65,10 +65,10 @@ func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 }
 
 func (s *vault) roleID(cfg controller.VaultConfig) (string, error) {
-	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "role-id")
+	path := path.Join("auth", cfg.Auth.AppRole.Path, "role", cfg.Auth.AppRole.Name, "role-id")
 	approle, err := s.Read(path)
 	if err != nil {
-		if roleID, rErr := readFromFile(cfg.LocalPathToRoleID); rErr == nil {
+		if roleID, rErr := readFromFile(cfg.Auth.AppRole.RoleIDLocalPath); rErr == nil {
 			return string(roleID), nil
 		}
 		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
@@ -81,17 +81,17 @@ func (s *vault) roleID(cfg controller.VaultConfig) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
-	if err = writeToFile(cfg.LocalPathToRoleID, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", cfg.LocalPathToRoleID, err)
+	if err = writeToFile(cfg.Auth.AppRole.RoleIDLocalPath, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", cfg.Auth.AppRole.RoleIDLocalPath, err)
 	}
 	return roleID.(string), err
 }
 
 func (s *vault) secretID(cfg controller.VaultConfig) (string, error) {
-	path := path.Join("auth", cfg.AppRolePath, "role", cfg.AppRoleName, "secret-id")
+	path := path.Join("auth", cfg.Auth.AppRole.Path, "role", cfg.Auth.AppRole.Name, "secret-id")
 	approle, err := s.Write(path, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(cfg.LocalPathToSecretID); rErr == nil {
+		if secretID, rErr := readFromFile(cfg.Auth.AppRole.SecretIDLocalPath); rErr == nil {
 			return string(secretID), nil
 		}
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
@@ -105,8 +105,8 @@ func (s *vault) secretID(cfg controller.VaultConfig) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(cfg.LocalPathToSecretID, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", cfg.LocalPathToSecretID, err)
+	if err = writeToFile(cfg.Auth.AppRole.SecretIDLocalPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", cfg.Auth.AppRole.SecretIDLocalPath, err)
 	}
 	return secretID.(string), err
 }

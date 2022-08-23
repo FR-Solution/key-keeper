@@ -12,13 +12,13 @@ global:
         path: clusters/cluster-1/approle
         roleIdPath: "$PATH"
         secretIdPath: "$PATH"
-    kv: 
+    kv:
       path: "clusters/cluster-1/kv"
 
 issuers:
   - name: front-proxy-ca
     vault:
-      role: 
+      role:
         name: "root"
         path: "clusters/cluster-1/pki/front-proxy"
         intermediate:
@@ -28,13 +28,13 @@ issuers:
 
   - name: front-proxy-client
     vault:
-      role: 
+      role:
         name: "front-proxy-client"
         path: "clusters/cluster-1/pki/front-proxy"
 
   - name: kube-ca
     vault:
-      role: 
+      role:
         name: "root"
         path: "clusters/cluster-1/pki/kubernetes"
         intermediate:
@@ -44,43 +44,43 @@ issuers:
 
   - name: kube-apiserver
     vault:
-      role: 
+      role:
         name: "kube-apiserver"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-apiserver-kubelet-client
     vault:
-      role: 
+      role:
         name: "kube-apiserver-kubelet-client"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-controller-manager-client
     vault:
-      role: 
+      role:
         name: "kube-controller-manager-client"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-controller-manager-server
     vault:
-      role: 
+      role:
         name: "kube-controller-manager-server"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kube-scheduler-client
     vault:
-      role: 
+      role:
         name: "kube-scheduler-client"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: kubelet-client
     vault:
-      role: 
+      role:
         name: "kubelet-client"
         path: "clusters/cluster-1/pki/kubernetes"
 
   - name: etcd-ca
     vault:
-      role: 
+      role:
         name: "root"
         path: "clusters/cluster-1/pki/etcd"
         intermediate:
@@ -90,31 +90,30 @@ issuers:
 
   - name: etcd-client
     vault:
-      role: 
+      role:
         name: "kubelet-client"
         path: "clusters/cluster-1/pki/etcd"
 
   - name: etcd-peer
     vault:
-      role: 
+      role:
         name: "etcd-peer"
         path: "clusters/cluster-1/pki/etcd"
 
   - name: etcd-server
     vault:
-      role: 
+      role:
         name: "etcd-server"
         path: "clusters/cluster-1/pki/etcd"
 
 certificates:
-
   - name: front-proxy-ca
     spec:
       isCa: true
       issuerRef:
         name: front-proxy-ca
     hostPathCert: "/etc/kubernetes/pki/ca"
-    
+
   - name: system:kube-apiserver-front-proxy-client
     spec:
       duration: 2160h

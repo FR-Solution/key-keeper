@@ -9,23 +9,6 @@ type Config struct {
 	Recource RecourceConfig `yaml:",inline"`
 }
 
-// VaultConfig for work with vault
-type VaultConfig struct {
-	Address             string        `yaml:"address"`
-	BootsrapToken       string        `yaml:"bootstrap_token"`
-	AppRolePath         string        `yaml:"approle_path"`
-	AppRoleName         string        `yaml:"approle_name"`
-	LocalPathToRoleID   string        `yaml:"local_path_to_role_id"`
-	LocalPathToSecretID string        `yaml:"local_path_to_secret_id"`
-	RequestTimeout      time.Duration `yaml:"request_timeout"`
-}
-
-// RecourceConfig for work controller.
-type RecourceConfig struct {
-	Certificates Certificates `json:"certificates"`
-	Keys         Keys         `json:"keys"`
-}
-
 type Certificates struct {
 	VaultKV         string           `yaml:"vault_kv"`
 	ReissueInterval time.Duration    `yaml:"reissue_interval"`

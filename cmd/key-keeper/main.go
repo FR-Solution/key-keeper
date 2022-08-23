@@ -27,13 +27,22 @@ func main() {
 	}
 	zap.ReplaceGlobals(logger)
 
-	var configDir, configNameLayout string
+	var globalConfig, configDir, configNameLayout string
+	flag.StringVar(&globalConfig, "config-global", "", "path to global config")
 	flag.StringVar(&configDir, "config-dir", "", "path to dir with configs")
-	flag.StringVar(&configDir, "config-regexp", "", "regexp for config names")
+	flag.StringVar(&configNameLayout, "config-regexp", "", "regexp for config files names")
 	flag.Parse()
 
+	if globalConfig == "" {
+		zap.L().Fatal("not found global config param")
+	}
+
 	if configDir == "" {
-		zap.L().Fatal("not found config param")
+		zap.L().Fatal("not found config path param")
+	}
+
+	if configNameLayout == "" {
+		zap.L().Fatal("not found regexp for config file's name")
 	}
 
 	cfg, err := config.New(configDir, configNameLayout)
