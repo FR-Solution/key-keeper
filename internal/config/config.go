@@ -8,8 +8,6 @@ import (
 
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
-
-	"github.com/fraima/key-keeper/internal/controller"
 )
 
 type config struct {
@@ -34,7 +32,7 @@ func New(configDir, configNameLayout string) (*config, error) {
 }
 
 // GetNewConfig return new config from config dir.
-func (s *config) GetNewConfig() (cfgs []controller.Config, err error) {
+func (s *config) GetNewConfig() (newCfg Config, err error) {
 	list, err := s.getNewConfigFiles()
 	if err != nil {
 		return
@@ -46,13 +44,15 @@ func (s *config) GetNewConfig() (cfgs []controller.Config, err error) {
 			zap.L().Error("read config file", zap.String("path", path), zap.Error(err))
 			continue
 		}
-		var cfg controller.Config
+		var cfg Config
 		if err = yaml.Unmarshal(data, cfg); err != nil {
 			zap.L().Error("unmurshal config file", zap.String("path", path), zap.Error(err))
 			continue
 		}
 
-		cfgs = append(cfgs, cfg)
+		newCfg.Issueres = append(newCfg.Issueres, cfg.Issueres...)
+		newCfg.Resource.Certificates = append(newCfg.Resource.Certificates, cfg.Resource.Certificates...)
+		newCfg.Resource.Keys = append(newCfg.Resource.Keys, cfg.Resource.Keys...)
 		s.oldConfig[path] = struct{}{}
 	}
 

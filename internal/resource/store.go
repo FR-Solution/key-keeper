@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"path"
 )
 
 func (s *resource) storeKey(path string, privare, public []byte) error {
@@ -44,8 +45,31 @@ func (s *resource) readCertificate(path string) (*tls.Certificate, error) {
 		return nil, err
 	}
 	return parseToCert(crt, key)
-
 }
+
+func (s *resource) readCA(vaulPath string) (crt, key []byte, err error) {
+	vaulPath = path.Join(vaulPath, "cert/ca_chain")
+	ica, err := s.vault.Read(vaulPath)
+	if ica != nil {
+		if c, ok := ica["certificate"]; ok {
+			crt = []byte(c.(string))
+		}
+		if k, ok := ica["private_key"]; ok {
+			key = []byte(k.(string))
+		}
+	}
+	return
+}
+
+// func (s *resource) readCA(cert config.Certificate) (crt, key []byte, err error) {
+// 	storedICA, err := s.vault.Get(cert.Spec.CommonName + "-ca")
+// 	if err != nil {
+// 		err = fmt.Errorf("get from vault_kv : %w", err)
+// 		return
+// 	}
+
+
+// }
 
 func parseToCert(crt, key []byte) (*tls.Certificate, error) {
 	cert, err := tls.X509KeyPair(crt, key)

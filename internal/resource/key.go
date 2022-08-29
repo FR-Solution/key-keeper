@@ -6,13 +6,14 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 
-	"github.com/fraima/key-keeper/internal/controller"
+	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *resource) rsa(i controller.RSA) {
+func (s *resource) checkKey(i config.Key) {
 	private, public, err := s.readRSA(i)
 	if err != nil {
 		zap.L().Warn(
@@ -20,7 +21,7 @@ func (s *resource) rsa(i controller.RSA) {
 			zap.String("name", i.Name),
 			zap.Error(err),
 		)
-		private, public, err = s.GenerateRSA()
+		private, public, err = s.generateKey(i.PrivateKey)
 		if err != nil {
 			zap.L().Error(
 				"generate rsa",
@@ -30,20 +31,24 @@ func (s *resource) rsa(i controller.RSA) {
 			return
 		}
 		zap.L().Debug("rsa is created", zap.String("name", i.Name))
-		storedRSA := map[string]interface{}{
-			"private": string(private),
-			"public":  string(public),
+
+		if i.Public {
+			storedRSA := map[string]interface{}{
+				"private": string(private),
+				"public":  string(public),
+			}
+
+			if err := s.vault.Put(i.Name, storedRSA); err != nil {
+				zap.L().Error(
+					"store rsa in kv",
+					zap.String("name", i.Name),
+					zap.Error(err),
+				)
+				return
+			}
+			zap.L().Debug("rsa is saved in kv", zap.String("name", i.Name))
 		}
 
-		if err := s.vault.Put(s.cfg.Keys.VaultKV, i.Name, storedRSA); err != nil {
-			zap.L().Error(
-				"store rsa in kv",
-				zap.String("name", i.Name),
-				zap.String("kv", s.cfg.Keys.VaultKV),
-				zap.Error(err),
-			)
-			return
-		}
 	} else {
 		zap.L().Debug("rsa is read", zap.String("name", i.Name))
 	}
@@ -60,10 +65,10 @@ func (s *resource) rsa(i controller.RSA) {
 	zap.L().Debug("rsa is stored", zap.String("name", i.Name))
 }
 
-func (s *resource) readRSA(i controller.RSA) (private []byte, public []byte, err error) {
-	storedRSA, err := s.vault.Get(s.cfg.Keys.VaultKV, i.Name)
+func (s *resource) readRSA(i config.Key) (private []byte, public []byte, err error) {
+	storedRSA, err := s.vault.Get(i.Name)
 	if err != nil {
-		err = fmt.Errorf("get from vault_kv %s : %w", s.cfg.Keys.VaultKV, err)
+		err = fmt.Errorf("get from vault_kv : %w", err)
 		return
 	}
 
@@ -71,8 +76,16 @@ func (s *resource) readRSA(i controller.RSA) (private []byte, public []byte, err
 	return
 }
 
-func (s *resource) GenerateRSA() (private []byte, public []byte, err error) {
-	privKey, err := rsa.GenerateKey(rand.Reader, 4096)
+func (s *resource) generateKey(info config.PrivateKey) (private []byte, public []byte, err error) {
+	if strings.ToLower(info.Algorithm) != "rsa" {
+		err = fmt.Errorf("the algorithm %s is not supported", info.Algorithm)
+		return
+	}
+	return s.generateRSA(info.Size)
+}
+
+func (s *resource) generateRSA(size int) (private []byte, public []byte, err error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, size)
 	if err != nil {
 		return
 	}

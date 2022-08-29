@@ -9,19 +9,21 @@ import (
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
 
+	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 )
 
 type vault struct {
-	cli *api.Client
+	cli         *api.Client
+	kvMountPath string
 }
 
-func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
+func Connect(cfg config.Vault) (controller.Vault, error) {
 	client, err := api.NewClient(
 		&api.Config{
 			Address: cfg.Server,
 			HttpClient: &http.Client{
-				Timeout: cfg.RequestTimeout,
+				Timeout: cfg.Timeout,
 			},
 		},
 	)
@@ -29,16 +31,22 @@ func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
 	client.SetToken(cfg.Auth.Bootstrap.Token)
-
-	s := &vault{
-		cli: client,
+	if !cfg.Auth.TLSInsecure {
+		if err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle}); err != nil {
+			return nil, fmt.Errorf("configurate tls: %w", err)
+		}
 	}
 
-	roleID, err := s.roleID(cfg)
+	s := &vault{
+		cli:         client,
+		kvMountPath: cfg.KV.Path,
+	}
+
+	roleID, err := s.roleID(cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get role id: %w", err)
 	}
-	secretID, err := s.secretID(cfg)
+	secretID, err := s.secretID(cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get secret id: %w", err)
 	}
@@ -64,11 +72,11 @@ func Connect(cfg controller.VaultConfig) (controller.Vault, error) {
 	return s, nil
 }
 
-func (s *vault) roleID(cfg controller.VaultConfig) (string, error) {
-	path := path.Join("auth", cfg.Auth.AppRole.Path, "role", cfg.Auth.AppRole.Name, "role-id")
+func (s *vault) roleID(appRole config.AppRole) (string, error) {
+	path := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
 	approle, err := s.Read(path)
 	if err != nil {
-		if roleID, rErr := readFromFile(cfg.Auth.AppRole.RoleIDLocalPath); rErr == nil {
+		if roleID, rErr := readFromFile(appRole.RoleIDLocalPath); rErr == nil {
 			return string(roleID), nil
 		}
 		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
@@ -81,17 +89,17 @@ func (s *vault) roleID(cfg controller.VaultConfig) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
-	if err = writeToFile(cfg.Auth.AppRole.RoleIDLocalPath, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", cfg.Auth.AppRole.RoleIDLocalPath, err)
+	if err = writeToFile(appRole.RoleIDLocalPath, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", appRole.RoleIDLocalPath, err)
 	}
 	return roleID.(string), err
 }
 
-func (s *vault) secretID(cfg controller.VaultConfig) (string, error) {
-	path := path.Join("auth", cfg.Auth.AppRole.Path, "role", cfg.Auth.AppRole.Name, "secret-id")
+func (s *vault) secretID(appRole config.AppRole) (string, error) {
+	path := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
 	approle, err := s.Write(path, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(cfg.Auth.AppRole.SecretIDLocalPath); rErr == nil {
+		if secretID, rErr := readFromFile(appRole.SecretIDLocalPath); rErr == nil {
 			return string(secretID), nil
 		}
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
@@ -105,8 +113,8 @@ func (s *vault) secretID(cfg controller.VaultConfig) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(cfg.Auth.AppRole.SecretIDLocalPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", cfg.Auth.AppRole.SecretIDLocalPath, err)
+	if err = writeToFile(appRole.SecretIDLocalPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.SecretIDLocalPath, err)
 	}
 	return secretID.(string), err
 }
@@ -130,14 +138,14 @@ func (s *vault) Write(path string, data map[string]interface{}) (map[string]inte
 }
 
 // Put in KV.
-func (s *vault) Put(mountPath, secretePath string, data map[string]interface{}) error {
-	_, err := s.cli.KVv2(mountPath).Put(context.Background(), secretePath, data)
+func (s *vault) Put(secretePath string, data map[string]interface{}) error {
+	_, err := s.cli.KVv2(s.kvMountPath).Put(context.Background(), secretePath, data)
 	return err
 }
 
 // Get from KV.
-func (s *vault) Get(mountPath, secretePath string) (map[string]interface{}, error) {
-	sec, err := s.cli.KVv2(mountPath).Get(context.Background(), secretePath)
+func (s *vault) Get(secretePath string) (map[string]interface{}, error) {
+	sec, err := s.cli.KVv2(s.kvMountPath).Get(context.Background(), secretePath)
 	if sec != nil {
 		return sec.Data, err
 	}

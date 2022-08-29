@@ -11,7 +11,7 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 	"github.com/fraima/key-keeper/internal/resource"
-	"github.com/fraima/key-keeper/internal/vault"
+	"github.com/fraima/key-keeper/internal/issuer/vault"
 )
 
 var (
