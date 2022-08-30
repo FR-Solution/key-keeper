@@ -53,9 +53,15 @@ func (s *resource) checkCA(cert config.Certificate) {
 		if err != nil {
 			zap.L().Error(
 				"generate intermediate-ca",
+				zap.String("common_name", cert.Spec.CommonName),
 				zap.Error(err),
 			)
 			return
+		} else {
+			zap.L().Info(
+				"intermediate-ca generated",
+				zap.String("common_name", cert.Spec.CommonName),
+			)
 		}
 	}
 }
@@ -111,6 +117,5 @@ func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err err
 		key = []byte(k.(string))
 	}
 
-	zap.L().Info("intermediate-ca generated", zap.String("common_name", cert.Spec.CommonName))
 	return
 }
