@@ -7,7 +7,7 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+          token: $TOKEN
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
@@ -25,7 +25,7 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+          token: $TOKEN
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
