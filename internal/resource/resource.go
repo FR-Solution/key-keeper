@@ -25,6 +25,7 @@ func Preparing(
 }
 
 func (s *resource) Check() {
+	zap.L().Debug("checking")
 	wg := &sync.WaitGroup{}
 
 	zap.L().Debug("certificate-intermediate-ca")
@@ -51,6 +52,8 @@ func (s *resource) Check() {
 		}(key)
 	}
 	wg.Wait()
+
+	zap.L().Debug("done")
 }
 
 func (s *resource) Add(r config.Resources) {

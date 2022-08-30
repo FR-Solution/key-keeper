@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"path"
 	"time"
@@ -18,7 +18,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 	)
 
 	defer func() {
-		if err := s.storeCertificate(cert.HostPath, crt, key); err != nil {
+		if err := s.storeKeyPair(cert.HostPath, crt, key); err != nil {
 			zap.L().Error(
 				"stored intermediate-ca",
 				zap.Error(err),
@@ -28,13 +28,13 @@ func (s *resource) checkCA(cert config.Certificate) {
 
 	crt, key, err = s.readCA(cert.Vault.Path)
 	if err == nil {
-		var ca *tls.Certificate
-		ca, err = parseToCert(crt, key)
+		var ca *x509.Certificate
+		ca, err = x509.ParseCertificate(crt)
 		if err != nil {
 			err = fmt.Errorf("parse : %w", err)
 		}
-		if ca != nil && time.Until(ca.Leaf.NotAfter) < cert.RenewBefore {
-			err = fmt.Errorf("expired until(h) %f", time.Until(ca.Leaf.NotAfter).Hours())
+		if ca != nil && time.Until(ca.NotAfter) < cert.RenewBefore {
+			err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
 		}
 	}
 

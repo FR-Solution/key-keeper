@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"os"
@@ -19,7 +18,7 @@ func (s *resource) storeKey(path string, privare, public []byte) error {
 	return nil
 }
 
-func (s *resource) storeCertificate(path string, crt, key []byte) error {
+func (s *resource) storeKeyPair(path string, crt, key []byte) error {
 	if crt != nil {
 		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {
 			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
@@ -34,22 +33,18 @@ func (s *resource) storeCertificate(path string, crt, key []byte) error {
 	return nil
 }
 
-func (s *resource) readCertificate(path string) (*tls.Certificate, error) {
+func (s *resource) readCertificate(path string) (*x509.Certificate, error) {
 	crt, err := os.ReadFile(path + ".pem")
 	if err != nil {
 		return nil, err
 	}
 
-	key, err := os.ReadFile(path + "-key.pem")
-	if err != nil {
-		return nil, err
-	}
-	return parseToCert(crt, key)
+	return x509.ParseCertificate(crt)
 }
 
-func (s *resource) readCA(vaulPath string) (crt, key []byte, err error) {
-	vaulPath = path.Join(vaulPath, "cert/ca_chain")
-	ica, err := s.vault.Read(vaulPath)
+func (s *resource) readCA(vaultPath string) (crt, key []byte, err error) {
+	vaultPath = path.Join(vaultPath, "cert/ca_chain")
+	ica, err := s.vault.Read(vaultPath)
 	if ica != nil {
 		if c, ok := ica["certificate"]; ok {
 			crt = []byte(c.(string))
@@ -59,20 +54,4 @@ func (s *resource) readCA(vaulPath string) (crt, key []byte, err error) {
 		}
 	}
 	return
-}
-
-func parseToCert(crt, key []byte) (*tls.Certificate, error) {
-	cert, err := tls.X509KeyPair(crt, key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse x509 key pair: %w", err)
-	}
-	if len(cert.Certificate) == 0 {
-		return nil, fmt.Errorf("list of certificates is empty")
-	}
-
-	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
-	if err != nil {
-		return nil, err
-	}
-	return &cert, nil
 }

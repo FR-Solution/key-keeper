@@ -4,15 +4,15 @@ issuers:
     vault:
       server: "http://51.250.67.8:9200"
       auth:
-        caBundle: "approle"
+        caBundle: ""
         tlsInsecure: true
         bootstrap:
           token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
-          name: ""
-          path: "clusters/cluster-1/pki/front-proxy"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          name: "test-role"
+          path: "clusters/cluster-1/approle"
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
 certificates:
@@ -23,11 +23,13 @@ certificates:
     ca:
       exportedKey: false
       generate: false
+    spec:
+      commonName: front-proxy
     vault:
       role: ""
       path: "clusters/cluster-1/pki/front-proxy"
       rootCAPath: "clusters/cluster-1/pki/root"
-    hostPath: /tmp/front-proxy-ca
+    hostPath: /tmp/keep/certs/front-proxy-ca
     renewBefore: 24h
-    trigger: 
+    trigger:
       - ls -al

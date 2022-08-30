@@ -15,7 +15,7 @@ import (
 
 func (s *resource) checkCSR(i config.Certificate) {
 	csr, err := s.readCertificate(i.HostPath)
-	if csr != nil && time.Until(csr.Leaf.NotAfter) > i.RenewBefore {
+	if csr != nil && time.Until(csr.NotAfter) > i.RenewBefore {
 		return
 	}
 	if err != nil && !os.IsNotExist(err) {
@@ -31,7 +31,7 @@ func (s *resource) checkCSR(i config.Certificate) {
 		)
 	}
 
-	if err = s.storeCertificate(i.HostPath, cert, key); err != nil {
+	if err = s.storeKeyPair(i.HostPath, cert, key); err != nil {
 		zap.L().Error(
 			"store csr",
 			zap.String("common_name", i.Spec.CommonName),

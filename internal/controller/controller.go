@@ -62,7 +62,6 @@ func (s *controller) RefreshResource() {
 	if err := s.getNewResource(); err != nil {
 		zap.L().Error("refresh resources", zap.Error(err))
 	}
-
 	t := time.NewTicker(30 * time.Second)
 	defer t.Stop()
 	for range t.C {
