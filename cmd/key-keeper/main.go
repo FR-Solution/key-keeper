@@ -52,6 +52,7 @@ func main() {
 		vault.Connect,
 		resource.Preparing,
 	)
+	go cntl.RefreshResource()
 	go cntl.Start()
 
 	zap.L().Info("started")

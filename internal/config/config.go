@@ -45,12 +45,12 @@ func (s *config) GetNewConfig() (newCfg Config, err error) {
 			continue
 		}
 		var cfg Config
-		if err = yaml.Unmarshal(data, cfg); err != nil {
-			zap.L().Error("unmurshal config file", zap.String("path", path), zap.Error(err))
+		if err = yaml.Unmarshal(data, &cfg); err != nil {
+			zap.L().Error("unmarshal config file", zap.String("path", path), zap.Error(err))
 			continue
 		}
 
-		newCfg.Issueres = append(newCfg.Issueres, cfg.Issueres...)
+		newCfg.Issuers = append(newCfg.Issuers, cfg.Issuers...)
 		newCfg.Resource.Certificates = append(newCfg.Resource.Certificates, cfg.Resource.Certificates...)
 		newCfg.Resource.Keys = append(newCfg.Resource.Keys, cfg.Resource.Keys...)
 		s.oldConfig[path] = struct{}{}

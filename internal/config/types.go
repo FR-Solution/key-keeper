@@ -3,7 +3,7 @@ package config
 import "time"
 
 type Config struct {
-	Issueres []Issuer  `yaml:"issueres"`
+	Issuers  []Issuer  `yaml:"issuers"`
 	Resource Resources `yaml:",inline"`
 }
 

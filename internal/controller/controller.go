@@ -59,6 +59,10 @@ func (s *controller) Start() {
 }
 
 func (s *controller) RefreshResource() {
+	if err := s.getNewResource(); err != nil {
+		zap.L().Error("refresh resources", zap.Error(err))
+	}
+
 	t := time.NewTicker(30 * time.Second)
 	defer t.Stop()
 	for range t.C {
@@ -74,7 +78,7 @@ func (s *controller) getNewResource() error {
 		return fmt.Errorf("get new configs: %w", err)
 	}
 
-	for _, vaultCfg := range cfg.Issueres {
+	for _, vaultCfg := range cfg.Issuers {
 		// TODO: что делать если приходит несколько issuer с одинаковыми именами
 		_, isExist := s.resource.Load(vaultCfg.Name)
 		if isExist {
