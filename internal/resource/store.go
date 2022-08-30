@@ -2,6 +2,7 @@ package resource
 
 import (
 	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
 	"path"
@@ -39,7 +40,8 @@ func (s *resource) readCertificate(path string) (*x509.Certificate, error) {
 		return nil, err
 	}
 
-	return x509.ParseCertificate(crt)
+	pBlock, _ := pem.Decode(crt)
+	return x509.ParseCertificate(pBlock.Bytes)
 }
 
 func (s *resource) readCA(vaultPath string) (crt, key []byte, err error) {

@@ -53,17 +53,17 @@ func (s *resource) checkCSR(cert config.Certificate) {
 	zap.L().Info("csr generated", zap.String("name", cert.Name))
 }
 
-func (s *resource) generateCSR(i config.Certificate) ([]byte, []byte, error) {
+func (s *resource) generateCSR(crt config.Certificate) ([]byte, []byte, error) {
 	certData := map[string]interface{}{
-		"name": i.Name,
-		"alt_names":   strings.Join(i.Spec.Hostnames, ","),
-		"ip_sans":     strings.Join(i.Spec.IPAddresses, ","),
+		"name":      crt.Name,
+		"alt_names": strings.Join(crt.Spec.Hostnames, ","),
+		"ip_sans":   strings.Join(crt.Spec.IPAddresses, ","),
 	}
-	path := path.Join(i.Vault.Path, "issue", i.Vault.Role)
-	cert, err := s.vault.Write(path, certData)
+	path := path.Join(crt.Vault.Path, "issue", crt.Vault.Role)
+	csr, err := s.vault.Write(path, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
 	}
 
-	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
+	return []byte(csr["certificate"].(string)), []byte(csr["private_key"].(string)), nil
 }
