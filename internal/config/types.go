@@ -13,8 +13,8 @@ type Issuer struct {
 }
 
 type Resources struct {
-	Certificates []Certificate `yaml:"certificate"`
-	Keys         []Key         `yaml:"key"`
+	Certificates []Certificate `yaml:"certificates"`
+	Keys         []Key         `yaml:"keys"`
 }
 
 type Certificate struct {
@@ -47,7 +47,7 @@ type CA struct {
 }
 
 type Vault struct {
-	Server  string        `yaml:"address"`
+	Server  string        `yaml:"server"`
 	Auth    Auth          `yaml:"auth"`
 	KV      KV            `yaml:"kv"`
 	Timeout time.Duration `yaml:"timeout"`
