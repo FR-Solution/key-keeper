@@ -34,12 +34,10 @@ func (s *resource) Check() {
 		go func(c config.Certificate) {
 			defer wg.Done()
 			if c.IsCA {
-				if c.IsCA {
-					s.checkCA(c)
-				} else {
-					s.checkCSR(c)
-				}
+				s.checkCA(c)
+				return
 			}
+			s.checkCSR(c)
 		}(cert)
 	}
 	wg.Wait()

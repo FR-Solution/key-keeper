@@ -11,8 +11,26 @@ issuers:
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
+          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
+          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+      timeout: 15s
+
+  - name: kube-apiserver-server
+    vault:
+      role:
+        name: "kube-apiserver"
+        path: "clusters/cluster-1/pki/kubernetes"
+      server: "http://51.250.67.8:9200"
+      auth:
+        caBundle: ""
+        tlsInsecure: true
+        bootstrap:
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+        appRole:
+          name: "test-role"
+          path: "clusters/cluster-1/approle"
+          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
+          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
       timeout: 15s
 
 certificates:
@@ -23,13 +41,37 @@ certificates:
     ca:
       exportedKey: false
       generate: false
-    spec:
-      commonName: front-proxy
     vault:
       role: ""
       path: "clusters/cluster-1/pki/front-proxy"
       rootCAPath: "clusters/cluster-1/pki/root"
     hostPath: /tmp/keep/certs/front-proxy-ca
     renewBefore: 24h
-    trigger:
+    trigger: 
       - ls -al
+
+  - name: kube-apiserver-server
+    spec:
+      subject:
+        organizations:
+          - system:masters
+        ous: []
+        countries: []
+      commonName: kube-apiserver-server
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 2048
+      usages:
+        - server auth
+        - client auth
+      dnsNames:
+        - kube-apiserver-server
+        - www.example.com
+      ipAddresses:
+        - 127.0.0.1
+    issuerRef:
+      name: kube-apiserver-server
+    hostPath: "/tmp/keep/certs/kube-apiserver/cert"
+    trigger:
+      - systemctl stop kube-apiserver.service
