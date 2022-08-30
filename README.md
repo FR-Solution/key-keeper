@@ -17,8 +17,13 @@ go build -o key-keeper cmd/key-keeper/main.go
 # Run bim
 
 ```bash
-key-keeper -config /path/to/config
+key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 ```
+
+> config-dir - путь до каталога с конфигами
+>
+> config-regexp - регуляроное выражения для имени файлов которые содержат конфиги для key-keeper
+
 
 Example config.yml
 

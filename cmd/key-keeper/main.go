@@ -10,8 +10,8 @@ import (
 
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
-	"github.com/fraima/key-keeper/internal/resource"
 	"github.com/fraima/key-keeper/internal/issuer/vault"
+	"github.com/fraima/key-keeper/internal/resource"
 )
 
 var (
@@ -27,15 +27,10 @@ func main() {
 	}
 	zap.ReplaceGlobals(logger)
 
-	var globalConfig, configDir, configNameLayout string
-	flag.StringVar(&globalConfig, "config-global", "", "path to global config")
+	var configDir, configNameLayout string
 	flag.StringVar(&configDir, "config-dir", "", "path to dir with configs")
 	flag.StringVar(&configNameLayout, "config-regexp", "", "regexp for config files names")
 	flag.Parse()
-
-	if globalConfig == "" {
-		zap.L().Fatal("not found global config param")
-	}
 
 	if configDir == "" {
 		zap.L().Fatal("not found config path param")
