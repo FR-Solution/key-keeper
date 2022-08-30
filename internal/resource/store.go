@@ -61,16 +61,6 @@ func (s *resource) readCA(vaulPath string) (crt, key []byte, err error) {
 	return
 }
 
-// func (s *resource) readCA(cert config.Certificate) (crt, key []byte, err error) {
-// 	storedICA, err := s.vault.Get(cert.Spec.CommonName + "-ca")
-// 	if err != nil {
-// 		err = fmt.Errorf("get from vault_kv : %w", err)
-// 		return
-// 	}
-
-
-// }
-
 func parseToCert(crt, key []byte) (*tls.Certificate, error) {
 	cert, err := tls.X509KeyPair(crt, key)
 	if err != nil {

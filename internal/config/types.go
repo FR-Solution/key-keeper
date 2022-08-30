@@ -18,16 +18,15 @@ type Resources struct {
 }
 
 type Certificate struct {
-	Name            string        `yaml:"name"`
-	IssuerRef       IssuerRef     `yaml:"issuerRef"`
-	IsCA            bool          `yaml:"isCa"`
-	Spec            Spec          `yaml:"spec"`
-	HostPath        string        `yaml:"hostPath"`
-	VaultPath       string        `yaml:"vaultPath"`
-	VaultRole       string        `yaml:"vaultRole"`
-	VaultRootCAPath string        `yaml:"vaulRrootCAPath"`
-	Trigger         []string      `yaml:"trigger"`
-	RenewBefore     time.Duration `yaml:"renewBefore" `
+	Name        string        `yaml:"name"`
+	IssuerRef   IssuerRef     `yaml:"issuerRef"`
+	IsCA        bool          `yaml:"isCa"`
+	CA          CA            `yaml:"ca"`
+	Spec        Spec          `yaml:"spec"`
+	Vault       CertVault     `yaml:"vault"`
+	HostPath    string        `yaml:"hostPath"`
+	RenewBefore time.Duration `yaml:"renewBefore"`
+	Trigger     []string      `yaml:"trigger"`
 }
 
 type Key struct {
@@ -40,6 +39,11 @@ type Key struct {
 
 type IssuerRef struct {
 	Name string `yaml:"name"`
+}
+
+type CA struct {
+	ExportedKey bool `yaml:"exportedKey"`
+	Generate    bool `yaml:"generate"`
 }
 
 type Vault struct {
@@ -79,6 +83,12 @@ type Spec struct {
 	Hostnames   []string   `yaml:"hostnames"`
 	IPAddresses []string   `yaml:"ipAddresses"`
 	TTL         string     `yaml:"ttl"`
+}
+
+type CertVault struct {
+	Role       string `yaml:"role"`
+	Path       string `yaml:"path"`
+	RootCAPath string `yaml:"rootCAPath"`
 }
 
 type Subject struct {

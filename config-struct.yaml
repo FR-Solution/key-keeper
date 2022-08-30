@@ -20,6 +20,9 @@ certificates: # Описывает список доступных certificates
     issuerRef: # IssuerRef references a properly configured ACME-type Issuer which should be used to create this Order. If the Issuer does not exist, processing will be retried. If the Issuer is not an 'ACME' Issuer, an error will be returned and the Order will be marked as failed.
       name: string # Имя вызываемого ISSUER
     isCa: bool # IsCA will request to mark the certificate as valid for certificate signing when submitting to the issuer. This will automatically add the `cert sign` usage to the list of `usages`.
+    ca: # Альтернатива блоку certificates.intermediate_ca
+      exportedKey: bool # запрашивать приватный ключ или нет
+      generate: bool # генерить ЦА или запросить существующий CA
     spec: # блок описывающий certificate
       commonName: string # CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.
       subject: # блок описывающий принадлежность certificate
@@ -39,12 +42,13 @@ certificates: # Описывает список доступных certificates
       hostnames: list of string # List of DNSNames that this solver will be used to solve. If specified and a match is found, a dnsNames selector will take precedence over a dnsZones selector. If multiple solvers match with the same dnsNames value, the solver with the most matching labels in matchLabels will be selected. If neither has more matches, the solver defined earlier in the list will be selected.
       ipAddresses: list of string # IPAddresses is a list of IP addresses that should be included as part of the Order validation process. This field must match the corresponding field on the DER encoded CSR.
       ttl: string # на какой промежуток времени заказывается сертификат
+    vault:
+      role: string # альтернатива блоку csr[*].role
+      path: string # Путь к сейфу Inermediate CA где будет заказан сертификат
+      rootCAPath: string # Путь к root CA
     hostPath: string # путь, где будет размещен секрет по маске ${hostPathCert}/${certName}
-    vaultPath: string # Путь к сейфу Inermediate CA где будет заказан сертификат
-    vaultRole: string 
-    vaultRootCAPath: string # Путь к сейфу корневого CA
-    trigger: list of string # список bash команд которые применятся после обновления сертификата
     renewBefore: string # за сколько до истечения надо перевыпустить
+    trigger: list of string # список bash команд которые применятся после обновления сертификата
 
 keys: # Описывает список доступных keys
   - name: # Имя key

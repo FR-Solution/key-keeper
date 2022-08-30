@@ -59,7 +59,7 @@ func (s *resource) generateCSR(i config.Certificate) ([]byte, []byte, error) {
 		"alt_names":   strings.Join(i.Spec.Hostnames, ","),
 		"ip_sans":     strings.Join(i.Spec.IPAddresses, ","),
 	}
-	path := path.Join(i.VaultPath, "issue", i.VaultRole)
+	path := path.Join(i.Vault.Path, "issue", i.Vault.Role)
 	cert, err := s.vault.Write(path, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)

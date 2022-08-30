@@ -26,7 +26,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 		}
 	}()
 
-	crt, key, err = s.readCA(cert.VaultPath)
+	crt, key, err = s.readCA(cert.Vault.Path)
 	if err == nil {
 		var ca *tls.Certificate
 		ca, err = parseToCert(crt, key)
@@ -48,55 +48,69 @@ func (s *resource) checkCA(cert config.Certificate) {
 		return
 	}
 
-	crt, key, err = s.generateCA(cert)
-	if err != nil {
-		zap.L().Error(
-			"generate intermediate-ca",
-			zap.Error(err),
-		)
+	if cert.CA.Generate {
+		crt, key, err = s.generateCA(cert)
+		if err != nil {
+			zap.L().Error(
+				"generate intermediate-ca",
+				zap.Error(err),
+			)
+			return
+		}
 	}
-
 }
 
 func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err error) {
-	// create  intermediate ca with exported key
+	// create  intermediate ca
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf("%s Intermediate Authority", cert.Spec.CommonName),
-		"ttl":         "8760h",
+		"ttl":         cert.Spec.TTL,
 	}
 
-	vaultPath := path.Join(cert.VaultPath, "intermediate/generate/exported")
+	keyType := "internal"
+	if cert.CA.ExportedKey {
+		keyType = "exported"
+	}
+
+	vaultPath := path.Join(cert.Vault.Path, "intermediate/generate", keyType)
 	csr, err := s.vault.Write(vaultPath, csrData)
 	if err != nil {
 		err = fmt.Errorf("create: %w", err)
 		return
 	}
 
-	// send the  intermediate ca with exported key's CSR to the root CA for signing
+	// send the  intermediate ca 's CSR to the root CA for signing
 	icaData := map[string]interface{}{
 		"csr":    csr["csr"],
 		"format": "pem_bundle",
-		"ttl":    "8760h",
+		"ttl":    cert.Spec.TTL,
 	}
 
-	vaultPath = path.Join(cert.VaultRootCAPath, "root/sign-intermediate")
+	vaultPath = path.Join(cert.Vault.RootCAPath, "root/sign-intermediate")
 	ica, err := s.vault.Write(vaultPath, icaData)
 	if err != nil {
-		err = fmt.Errorf("send the intermediate ca with exported key's CSR to the root CA for signing CA: %w", err)
+		err = fmt.Errorf("send the intermediate ca CSR to the root CA for signing CA: %w", err)
 		return
 	}
 
-	// publish the signed certificate back to the  intermediate ca with exported key
+	// publish the signed certificate back to the  intermediate ca
 	certData := map[string]interface{}{
 		"certificate": ica["certificate"],
 	}
 
-	vaultPath = path.Join(cert.VaultPath, "intermediate/set-signed")
+	vaultPath = path.Join(cert.Vault.Path, "intermediate/set-signed")
 	if _, err = s.vault.Write(vaultPath, certData); err != nil {
-		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca with exported key: %w", err)
+		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca : %w", err)
 		return
 	}
 
+	if c, ok := ica["certificate"]; ok {
+		crt = []byte(c.(string))
+	}
+	if k, ok := csr["private_key"]; ok {
+		key = []byte(k.(string))
+	}
+
 	zap.L().Info("intermediate-ca generated", zap.String("common_name", cert.Spec.CommonName))
-	return []byte(ica["certificate"].(string)), []byte(csr["private_key"].(string)), nil
+	return
 }
