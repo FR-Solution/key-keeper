@@ -2,6 +2,7 @@ package resource
 
 import (
 	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"path"
 	"time"
@@ -29,7 +30,8 @@ func (s *resource) checkCA(cert config.Certificate) {
 	crt, key, err = s.readCA(cert.Vault.Path)
 	if err == nil {
 		var ca *x509.Certificate
-		ca, err = x509.ParseCertificate(crt)
+		pBlock, _ := pem.Decode(crt)
+		ca, err = x509.ParseCertificate(pBlock.Bytes)
 		if err != nil {
 			err = fmt.Errorf("parse : %w", err)
 		}
@@ -41,7 +43,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 	if err != nil {
 		zap.L().Warn(
 			"intermediate ca",
-			zap.String("common_name", cert.Spec.CommonName+"-ca"),
+			zap.String("name", cert.Name),
 			zap.Error(err),
 		)
 	} else {
@@ -53,14 +55,14 @@ func (s *resource) checkCA(cert config.Certificate) {
 		if err != nil {
 			zap.L().Error(
 				"generate intermediate-ca",
-				zap.String("common_name", cert.Spec.CommonName),
+				zap.String("name", cert.Name),
 				zap.Error(err),
 			)
 			return
 		} else {
 			zap.L().Info(
 				"intermediate-ca generated",
-				zap.String("common_name", cert.Spec.CommonName),
+				zap.String("name", cert.Name),
 			)
 		}
 	}
@@ -69,8 +71,8 @@ func (s *resource) checkCA(cert config.Certificate) {
 func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err error) {
 	// create  intermediate ca
 	csrData := map[string]interface{}{
-		"common_name": fmt.Sprintf("%s Intermediate Authority", cert.Spec.CommonName),
-		"ttl":         cert.Spec.TTL,
+		"name": fmt.Sprintf("%s Intermediate Authority", cert.Name),
+		"ttl":  cert.Spec.TTL,
 	}
 
 	keyType := "internal"
