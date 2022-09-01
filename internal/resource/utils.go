@@ -7,12 +7,10 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"math/big"
 	"net"
 	"net/url"
 	"os"
 	"path"
-	"time"
 
 	"github.com/fraima/key-keeper/internal/config"
 )
@@ -70,8 +68,7 @@ func (s *resource) readCA(vaultPath string) (crt, key []byte, err error) {
 func createCSR(spec config.Spec) (crt, key []byte) {
 	pk, _ := rsa.GenerateKey(rand.Reader, spec.PrivateKey.Size)
 
-	template := x509.Certificate{
-		SerialNumber: big.NewInt(0),
+	template := x509.CertificateRequest{
 		Subject: pkix.Name{
 			CommonName:         spec.Subject.CommonName,
 			Country:            spec.Subject.Country,
@@ -83,34 +80,26 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 			StreetAddress:      spec.Subject.StreetAddress,
 			SerialNumber:       spec.Subject.SerialNumber,
 		},
-		IPAddresses:           getIPAddresses(spec.IPAddresses),
-		URIs:                  getURLs(spec.Hostnames),
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().Add(spec.TTL),
-		BasicConstraintsValid: true,
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyAgreement | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
-		SignatureAlgorithm:    x509.SHA256WithRSA,
+		IPAddresses:        getIPAddresses(spec.IPAddresses),
+		URIs:               getURIs(spec.Hostnames),
+		SignatureAlgorithm: x509.SHA256WithRSA,
 	}
 
-	//Create certificate using templet
-	derBytes, _ := x509.CreateCertificate(rand.Reader, &template, &template, &pk.PublicKey, pk)
+	csr, _ := x509.CreateCertificateRequest(rand.Reader, &template, pk)
 
 	//pem encoding of certificate
-	crt = pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "CERTIFICATE",
-			Bytes: derBytes,
-		},
-	)
+	return pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "CERTIFICATE REQUEST",
+				Bytes: csr,
+			},
+		), pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "RSA PRIVATE KEY",
+				Bytes: x509.MarshalPKCS1PrivateKey(pk),
+			},
+		)
 
-	key = pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: derBytes,
-		},
-	)
-	return
 }
 
 func getIPAddresses(ips []string) []net.IP {
@@ -122,7 +111,7 @@ func getIPAddresses(ips []string) []net.IP {
 	return ipAddresses
 }
 
-func getURLs(hostnames []string) []*url.URL {
+func getURIs(hostnames []string) []*url.URL {
 	urls := make([]*url.URL, 0, len(hostnames))
 
 	for _, hostname := range hostnames {

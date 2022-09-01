@@ -76,12 +76,12 @@ type AppRole struct {
 }
 
 type Spec struct {
-	Subject     Subject       `yaml:"subject"`
-	PrivateKey  PrivateKey    `yaml:"privateKey"`
-	Usages      []string      `yaml:"usages"`
-	Hostnames   []string      `yaml:"hostnames"`
-	IPAddresses []string      `yaml:"ipAddresses"`
-	TTL         time.Duration `yaml:"ttl"`
+	Subject     Subject    `yaml:"subject"`
+	PrivateKey  PrivateKey `yaml:"privateKey"`
+	Usages      []string   `yaml:"usages"`
+	Hostnames   []string   `yaml:"hostnames"`
+	IPAddresses []string   `yaml:"ipAddresses"`
+	TTL         string     `yaml:"ttl"`
 }
 
 type Subject struct {

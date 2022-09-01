@@ -54,11 +54,13 @@ func (s *resource) checkCertificate(cfg config.Certificate) {
 }
 
 func (s *resource) generateCertificate(cfg config.Certificate) ([]byte, []byte, error) {
-	csr, key := createCSR(cfg.Spec)
+	csr := createCSR(cfg.Spec)
 
 	certData := map[string]interface{}{
-		"pem_bundle": fmt.Sprintf("%s%s", csr, key),
+		"csr": string(csr),
+		"ttl": cfg.Spec.TTL,
 	}
+	fmt.Println(string(csr))
 	path := path.Join(cfg.Vault.Path, "sign", cfg.Vault.Role)
 	cert, err := s.vault.Write(path, certData)
 	if err != nil {

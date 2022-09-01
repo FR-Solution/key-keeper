@@ -7,12 +7,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: front-proxy-client
@@ -22,12 +22,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kubernetes-ca
@@ -37,12 +37,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-apiserver-server
@@ -55,12 +55,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-apiserver-kubelet-client
@@ -73,12 +73,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-controller-manager-client
@@ -91,12 +91,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-controller-manager-server
@@ -109,12 +109,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-scheduler-server
@@ -127,12 +127,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kube-scheduler-client
@@ -145,12 +145,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: kubelet-client
@@ -163,12 +163,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: etcd-ca
@@ -178,12 +178,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: etcd-peer
@@ -196,12 +196,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: etcd-server
@@ -214,12 +214,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
   - name: etcd-client
@@ -232,12 +232,12 @@ issuers:
         caBundle: ""
         tlsInsecure: true
         bootstrap:
-          token: $TOKEN
+          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
         appRole:
           name: "test-role"
           path: "clusters/cluster-1/approle"
-          roleIDLocalPath:  /tmp/keep/roleIDLocalPath
-          secretIDLocalPath:  /tmp/keep/secretIDLocalPath
+          roleIDLocalPath: /tmp/keep/roleIDLocalPath
+          secretIDLocalPath: /tmp/keep/secretIDLocalPath
       timeout: 15s
 
 certificates:
@@ -260,7 +260,7 @@ certificates:
       name: front-proxy-client
     vault:
       role: "front-proxy-client"
-      path: "clusters/cluster-1/pki/front-proxy" 
+      path: "clusters/cluster-1/pki/front-proxy"
     spec:
       commonName: front-proxy-client
       privateKey:
@@ -269,10 +269,9 @@ certificates:
         size: 4096
       usages:
         - client auth
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/front-proxy-client"
-
 
   - name: kubernetes-ca
     issuerRef:
@@ -293,7 +292,7 @@ certificates:
       name: kube-apiserver-server
     vault:
       role: "kube-apiserver"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: custom:kube-apiserver-server
       privateKey:
@@ -312,7 +311,7 @@ certificates:
         - "api.cluster-1.dobry-kot.ru"
       ipAddresses:
         - 127.0.0.1
-      ttl: 100d
+      ttl: 100h
     hostPath: "/tmp/keep/certs/kube-apiserver-server"
 
   - name: kube-apiserver-kubelet-client
@@ -320,7 +319,7 @@ certificates:
       name: kube-apiserver-kubelet-client
     vault:
       role: "kube-apiserver-kubelet-client"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: custom:kube-apiserver-kubelet-client
       privateKey:
@@ -332,7 +331,7 @@ certificates:
       subject:
         organizationalUnits:
           - system:masters
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/kube-apiserver-kubelet-client"
 
@@ -341,7 +340,7 @@ certificates:
       name: kube-controller-manager-client
     vault:
       role: "kube-controller-manager-client"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: custom:kube-controller-manager-client
       privateKey:
@@ -350,7 +349,7 @@ certificates:
         size: 4096
       usages:
         - client auth
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/kube-controller-manager-client"
 
@@ -359,7 +358,7 @@ certificates:
       name: kube-controller-manager-server
     vault:
       role: "kube-controller-manager-server"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: custom:kube-controller-manager-server
       privateKey:
@@ -378,7 +377,7 @@ certificates:
         - "127.0.0.1"
         - "127.0.1.1"
         - "127.0.1.6"
-      ttl: 100d
+      ttl: 100h
     hostPath: "/tmp/keep/certs/kube-controller-manager-server"
 
   - name: kube-scheduler-server
@@ -386,7 +385,7 @@ certificates:
       name: kube-scheduler-server
     vault:
       role: "kube-scheduler-server"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: custom:kube-scheduler-server
       privateKey:
@@ -405,7 +404,7 @@ certificates:
         - "127.0.0.1"
         - "127.0.1.1"
         - "127.0.1.6"
-      ttl: 100d
+      ttl: 100h
     hostPath: "/tmp/keep/certs/kube-scheduler-server"
 
   - name: kube-scheduler-client
@@ -413,7 +412,7 @@ certificates:
       name: kube-scheduler-client
     vault:
       role: "kube-scheduler-client"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: system:kube-scheduler
       privateKey:
@@ -422,7 +421,7 @@ certificates:
         size: 4096
       usages:
         - client auth
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/kube-scheduler-client"
 
@@ -431,7 +430,7 @@ certificates:
       name: kubelet-client
     vault:
       role: "kubelet-client"
-      path: "clusters/cluster-1/pki/kubernetes" 
+      path: "clusters/cluster-1/pki/kubernetes"
     spec:
       commonName: system:node:${instance_name}
       privateKey:
@@ -443,10 +442,9 @@ certificates:
           - system:nodes
       usages:
         - client auth
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/kubelet-client"
-
 
   - name: etcd-ca
     issuerRef:
@@ -467,7 +465,7 @@ certificates:
       name: etcd-peer
     vault:
       role: "etcd-peer"
-      path: "clusters/cluster-1/pki/etcd" 
+      path: "clusters/cluster-1/pki/etcd"
     spec:
       commonName: custom:etcd-peer
       privateKey:
@@ -484,7 +482,7 @@ certificates:
         - "127.0.0.1"
         - "127.0.1.1"
         - "127.0.1.6"
-      ttl: 100d
+      ttl: 100h
     hostPath: "/tmp/keep/certs/etcd-peer"
 
   - name: etcd-server
@@ -492,7 +490,7 @@ certificates:
       name: etcd-server
     vault:
       role: "etcd-server"
-      path: "clusters/cluster-1/pki/etcd" 
+      path: "clusters/cluster-1/pki/etcd"
     spec:
       commonName: custom:etcd-server
       privateKey:
@@ -508,7 +506,7 @@ certificates:
         - "127.0.0.1"
         - "127.0.1.1"
         - "127.0.1.6"
-      ttl: 100d
+      ttl: 100h
     hostPath: "/tmp/keep/certs/etcd-server"
 
   - name: etcd-kube-apiserver-client
@@ -516,7 +514,7 @@ certificates:
       name: etcd-client
     vault:
       role: "etcd-client"
-      path: "clusters/cluster-1/pki/etcd" 
+      path: "clusters/cluster-1/pki/etcd"
     spec:
       commonName: custom:etcd-kube-apiserver-client
       privateKey:
@@ -525,7 +523,7 @@ certificates:
         size: 4096
       usages:
         - client auth
-      ttl: 100d
+      ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/etcd-kube-apiserver-client"
 
