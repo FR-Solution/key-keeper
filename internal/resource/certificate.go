@@ -54,7 +54,7 @@ func (s *resource) checkCertificate(cfg config.Certificate) {
 }
 
 func (s *resource) generateCertificate(cfg config.Certificate) ([]byte, []byte, error) {
-	csr := createCSR(cfg.Spec)
+	csr, key := createCSR(cfg.Spec)
 
 	certData := map[string]interface{}{
 		"csr": string(csr),
@@ -67,5 +67,5 @@ func (s *resource) generateCertificate(cfg config.Certificate) ([]byte, []byte, 
 		return nil, nil, fmt.Errorf("generate with path %s : %w", path, err)
 	}
 
-	return []byte(cert["certificate"].(string)), []byte(cert["private_key"].(string)), nil
+	return []byte(cert["certificate"].(string)), key, nil
 }
