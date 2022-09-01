@@ -86,13 +86,13 @@ type Spec struct {
 
 type Subject struct {
 	CommonName         string   `yaml:"commonName"`
-	Country            []string `yaml:"countries"`
-	Locality           []string `yaml:"localities"`
-	Organization       []string `yaml:"organizations"`
-	OrganizationalUnit []string `yaml:"organizationalUnits"`
-	Province           []string `yaml:"provinces"`
-	PostalCode         []string `yaml:"postalCodes"`
-	StreetAddress      []string `yaml:"streetAddresses"`
+	Country            []string `yaml:"country"`
+	Locality           []string `yaml:"locality"`
+	Organization       []string `yaml:"organization"`
+	OrganizationalUnit []string `yaml:"organizationalUnit"`
+	Province           []string `yaml:"province"`
+	PostalCode         []string `yaml:"postalCode"`
+	StreetAddress      []string `yaml:"streetAddress"`
 	SerialNumber       string   `yaml:"serialNumber"`
 }
 

@@ -26,13 +26,13 @@ certificates: # Описывает список доступных certificates
     spec: # блок описывающий certificate
       subject: # блок описывающий принадлежность certificate
         commonName: string # CommonName is the common name as specified on the DER encoded CSR. If specified, this value must also be present in `dnsNames` or `ipAddresses`. This field must match the corresponding field on the DER encoded CSR.
-        countries: list of string # Countries to be used on the Certificate.
-        localities: list of string # Cities to be used on the Certificate.
-        organizations: list of string # Organizations to be used on the Certificate.
-        organizationalUnits: list of string # Organizational Units to be used on the Certificate.
-        provinces: list of string # State/Provinces to be used on the Certificate.
-        postalCodes: list of string # Postal codes to be used on the Certificate.
-        streetAddresses: list of string # Street addresses to be used on the Certificate.
+        country: list of string # Countries to be used on the Certificate.
+        localite: list of string # Cities to be used on the Certificate.
+        organization: list of string # Organizations to be used on the Certificate.
+        organizationalUnit: list of string # Organizational Units to be used on the Certificate.
+        province: list of string # State/Provinces to be used on the Certificate.
+        postalCode: list of string # Postal codes to be used on the Certificate.
+        streetAddress: list of string # Street addresses to be used on the Certificate.
         serialNumber: string # Serial number to be used on the Certificate
       privateKey: # Options to control private keys used for the Certificate.
         algorithm: string # Algorithm is the private key algorithm of the corresponding private key for this certificate. If provided, allowed values are either `RSA`,`Ed25519` or `ECDSA` If `algorithm` is specified and `size` is not provided, key size of 256 will be used for `ECDSA` key algorithm and key size of 2048 will be used for `RSA` key algorithm. key size is ignored when using the `Ed25519` key algorithm.
