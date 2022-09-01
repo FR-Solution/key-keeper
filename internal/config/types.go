@@ -76,34 +76,34 @@ type AppRole struct {
 }
 
 type Spec struct {
-	CommonName  string     `yaml:"commonName"`
-	Subject     Subject    `yaml:"subject"`
-	PrivateKey  PrivateKey `yaml:"privateKey"`
-	Usages      []string   `yaml:"usages"`
-	Hostnames   []string   `yaml:"hostnames"`
-	IPAddresses []string   `yaml:"ipAddresses"`
-	TTL         string     `yaml:"ttl"`
-}
-
-type CertVault struct {
-	Role       string `yaml:"role"`
-	Path       string `yaml:"path"`
-	RootCAPath string `yaml:"rootCAPath"`
+	Subject     Subject       `yaml:"subject"`
+	PrivateKey  PrivateKey    `yaml:"privateKey"`
+	Usages      []string      `yaml:"usages"`
+	Hostnames   []string      `yaml:"hostnames"`
+	IPAddresses []string      `yaml:"ipAddresses"`
+	TTL         time.Duration `yaml:"ttl"`
 }
 
 type Subject struct {
-	Countries           []string `yaml:"countries"`
-	Localities          []string `yaml:"localities"`
-	OrganizationalUnits []string `yaml:"organizationalUnits"`
-	Organizations       []string `yaml:"organizations"`
-	PostalCodes         []string `yaml:"postalCodes"`
-	Provinces           []string `yaml:"provinces"`
-	SerialNumber        string   `yaml:"serialNumber"`
-	StreetAddresses     []string `yaml:"streetAddresses"`
+	CommonName         string   `yaml:"commonName"`
+	Country            []string `yaml:"countries"`
+	Locality           []string `yaml:"localities"`
+	Organization       []string `yaml:"organizations"`
+	OrganizationalUnit []string `yaml:"organizationalUnits"`
+	Province           []string `yaml:"provinces"`
+	PostalCode         []string `yaml:"postalCodes"`
+	StreetAddress      []string `yaml:"streetAddresses"`
+	SerialNumber       string   `yaml:"serialNumber"`
 }
 
 type PrivateKey struct {
 	Algorithm string `yaml:"algorithm"`
 	Encoding  string `yaml:"encoding"`
 	Size      int    `yaml:"size"`
+}
+
+type CertVault struct {
+	Role       string `yaml:"role"`
+	Path       string `yaml:"path"`
+	RootCAPath string `yaml:"rootCAPath"`
 }

@@ -37,7 +37,7 @@ func (s *resource) Check() {
 				s.checkCA(c)
 				return
 			}
-			s.checkCSR(c)
+			s.checkCertificate(c)
 		}(cert)
 	}
 	wg.Wait()

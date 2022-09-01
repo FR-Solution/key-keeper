@@ -71,8 +71,8 @@ func (s *resource) checkCA(cert config.Certificate) {
 func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err error) {
 	// create  intermediate ca
 	csrData := map[string]interface{}{
-		"name": fmt.Sprintf("%s Intermediate Authority", cert.Name),
-		"ttl":  cert.Spec.TTL,
+		"common_name": fmt.Sprintf("%s Intermediate Authority", cert.Name),
+		"ttl":         cert.Spec.TTL,
 	}
 
 	keyType := "internal"
@@ -83,7 +83,7 @@ func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err err
 	vaultPath := path.Join(cert.Vault.Path, "intermediate/generate", keyType)
 	csr, err := s.vault.Write(vaultPath, csrData)
 	if err != nil {
-		err = fmt.Errorf("create: %w", err)
+		err = fmt.Errorf("generate: %w", err)
 		return
 	}
 
