@@ -123,7 +123,11 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 				case *net.IPAddr:
 					ip = v.IP
 				}
-				ipAddresses[ip.String()] = ip
+
+				if ip.To4() != nil {
+					fmt.Printf("ip Interfaces %s\n", ip.String())
+					ipAddresses[ip.String()] = ip
+				}
 			}
 		}
 	}
@@ -131,7 +135,10 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 	for _, h := range cfg.DNSLookup {
 		ips, _ := net.LookupIP(h)
 		for _, ip := range ips {
-			ipAddresses[ip.String()] = ip
+			if ip.To4() != nil {
+				fmt.Printf("ip DNSLookup %s\n", ip.String())
+				ipAddresses[ip.String()] = ip
+			}
 		}
 	}
 
