@@ -10,7 +10,8 @@ import (
 
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
-	"github.com/fraima/key-keeper/internal/vault"
+	"github.com/fraima/key-keeper/internal/issuer/vault"
+	"github.com/fraima/key-keeper/internal/resource"
 )
 
 var (
@@ -26,38 +27,33 @@ func main() {
 	}
 	zap.ReplaceGlobals(logger)
 
-	var configPath string
-	flag.StringVar(&configPath, "config", "", "path to config file")
+	var configDir, configNameLayout string
+	flag.StringVar(&configDir, "config-dir", "", "path to dir with configs")
+	flag.StringVar(&configNameLayout, "config-regexp", "", "regexp for config files names")
 	flag.Parse()
 
-	if configPath == "" {
-		zap.L().Fatal("not found config param")
+	if configDir == "" {
+		zap.L().Fatal("not found config path param")
 	}
 
-	cfg, err := config.Read(configPath)
+	if configNameLayout == "" {
+		zap.L().Fatal("not found regexp for config file's name")
+	}
+
+	cfg, err := config.New(configDir, configNameLayout)
 	if err != nil {
 		zap.L().Fatal("read configuration", zap.Error(err))
 	}
 
 	zap.L().Debug("configuration", zap.Any("config", cfg), zap.String("version", Version))
 
-	v, err := vault.New(
-		cfg.Vault,
-	)
-	if err != nil {
-		zap.L().Fatal("init vault", zap.Error(err))
-	}
-
 	cntl := controller.New(
-		v,
-		cfg.Controller,
+		cfg,
+		vault.Connect,
+		resource.Preparing,
 	)
-
-	go func() {
-		if err := cntl.Start(); err != nil {
-			zap.L().Fatal("start", zap.Error(err))
-		}
-	}()
+	go cntl.RefreshResource()
+	go cntl.Start()
 
 	zap.L().Info("started")
 

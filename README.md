@@ -17,8 +17,13 @@ go build -o key-keeper cmd/key-keeper/main.go
 # Run bim
 
 ```bash
-key-keeper -config /path/to/config
+key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 ```
+
+> config-dir - путь до каталога с конфигами
+>
+> config-regexp - регуляроное выражения для имени файлов которые содержат конфиги для key-keeper
+
 
 Example config.yml
 
@@ -48,7 +53,7 @@ certificates:
   # Все сертификаты выпускаются в этих сейфах
   intermediate_ca:
     - common_name: "kubernetes" # CN
-      root_path_ca: "clusters/cluster-1/pki/root" # Путь к сейфу корневого CA
+      root_path_ca: "clusters/cluster-1/pki/root" 
       cert_path: "clusters/cluster-1/pki/kubernetes" # Путь к сейфу Inermediate CA
       host_path: "/etc/kubernetes/pki/ca/root-ca" # Локальный путь, где будет размещен public / private keys
       exported_key: false # Этот флаг заказывает Inermediate типа internal/external (в отпут придет private-key или нет)
