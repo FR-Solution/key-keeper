@@ -81,7 +81,7 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 			SerialNumber:       spec.Subject.SerialNumber,
 		},
 		IPAddresses:        getIPAddresses(spec.IPAddresses),
-		URIs:               getURIs(spec.Hostnames),
+		DNSNames:           spec.Hostnames,
 		SignatureAlgorithm: x509.SHA256WithRSA,
 	}
 
