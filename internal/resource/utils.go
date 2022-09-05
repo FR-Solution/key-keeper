@@ -108,7 +108,7 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 	for _, ip := range cfg.Static {
 		ip := net.IP(ip)
 		if ip.To4() != nil {
-			fmt.Printf("ip DNSLookup %s\n", ip.String())
+			fmt.Printf("ip static %s\n", ip.String())
 			ipAddresses[ip.String()] = ip
 		}
 	}
