@@ -103,10 +103,10 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 }
 
 func getIPAddresses(cfg config.IPAddresses) []net.IP {
-	ipAddresses := make(map[string]net.IP)
+	ipAddresses := make(map[string]struct{})
 
 	for _, ip := range cfg.Static {
-		ipAddresses[ip] = net.IP(ip)
+		ipAddresses[ip] = struct{}{}
 	}
 
 	ifaces, _ := net.Interfaces()
@@ -125,7 +125,7 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 				}
 
 				if ip.To4() != nil {
-					ipAddresses[ip.String()] = ip
+					ipAddresses[ip.String()] = struct{}{}
 				}
 			}
 		}
@@ -135,14 +135,14 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 		ips, _ := net.LookupIP(h)
 		for _, ip := range ips {
 			if ip.To4() != nil {
-				ipAddresses[ip.String()] = ip
+				ipAddresses[ip.String()] = struct{}{}
 			}
 		}
 	}
 
 	r := make([]net.IP, 0, len(ipAddresses))
-	for _, ip := range ipAddresses {
-		r = append(r, ip)
+	for ip := range ipAddresses {
+		r = append(r, net.IP(ip))
 	}
 	return r
 }
