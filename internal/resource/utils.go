@@ -150,7 +150,7 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 
 func inSlice(str string, sl []string) bool {
 	for _, s := range sl {
-		if regexp.MustCompile(s).Match([]byte(s)) {
+		if regexp.MustCompile(s).MatchString(str) {
 			return true
 		}
 	}

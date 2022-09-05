@@ -310,15 +310,15 @@ certificates:
         - "kubernetes.default.svc.cluster"
         - "kubernetes.default.svc.cluster.local"
         - "api.cluster-1.dobry-kot.ru"
-      ipAddresses: 
+      ipAddresses:
         static:
           - 127.0.0.1
           - 10.10.10.0
         interfaces:
-          - wlp0s20f3
+          - lo
         dnsLookup:
           - dk-HP-ProBook-440-G6
-        
+
       ttl: 100h
     hostPath: "/tmp/keep/certs/kube-apiserver-server"
 
@@ -342,7 +342,6 @@ certificates:
       ttl: 100h
     renewBefore: 360h
     hostPath: "/tmp/keep/certs/kube-apiserver-kubelet-client"
-
 #   - name: kube-controller-manager-client
 #     issuerRef:
 #       name: kube-controller-manager-client
@@ -381,7 +380,7 @@ certificates:
 #         - "kube-controller-manager.default.svc"
 #         - "kube-controller-manager.default.svc.cluster"
 #         - "kube-controller-manager.default.svc.cluster.local"
-#       ipAddresses: 
+#       ipAddresses:
 #         static:
 #           - 127.0.0.1
 #         interfaces:
@@ -411,7 +410,7 @@ certificates:
 #         - "kube-scheduler.default.svc"
 #         - "kube-scheduler.default.svc.cluster"
 #         - "kube-scheduler.default.svc.cluster.local"
-#       ipAddresses: 
+#       ipAddresses:
 #         static:
 #           - 127.0.0.1
 #       ttl: 100h
@@ -488,7 +487,7 @@ certificates:
 #       hostnames:
 #         - "localhost"
 #         - "${ instance_name }.${base_domain}"
-#       ipAddresses: 
+#       ipAddresses:
 #         static:
 #           - 127.0.0.1
 #         dnsLookup:
@@ -513,7 +512,7 @@ certificates:
 #       hostnames:
 #         - "localhost"
 #         - "${ instance_name }.${base_domain}"
-#       ipAddresses: 
+#       ipAddresses:
 #         static:
 #           - 127.0.0.1
 #         dnsLookup:
