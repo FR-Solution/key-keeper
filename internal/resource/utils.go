@@ -102,13 +102,44 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 
 }
 
-func getIPAddresses(ips []string) []net.IP {
-	ipAddresses := make([]net.IP, 0, len(ips))
+func getIPAddresses(cfg config.IPAddresses) []net.IP {
+	ipAddresses := make(map[string]net.IP)
 
-	for _, ip := range ips {
-		ipAddresses = append(ipAddresses, net.IP(ip))
+	for _, ip := range cfg.Static {
+		ipAddresses[ip] = net.IP(ip)
 	}
-	return ipAddresses
+
+	ifaces, _ := net.Interfaces()
+	// TODO: handle err
+	for _, i := range ifaces {
+		if inSlice(i.Name, cfg.Interfaces) {
+			addrs, _ := i.Addrs()
+			// TODO: handle err
+			for _, addr := range addrs {
+				var ip net.IP
+				switch v := addr.(type) {
+				case *net.IPNet:
+					ip = v.IP
+				case *net.IPAddr:
+					ip = v.IP
+				}
+				ipAddresses[ip.String()] = ip
+			}
+		}
+	}
+
+	for _, h := range cfg.DNSLookup {
+		ips, _ := net.LookupIP(h)
+		for _, ip := range ips {
+			ipAddresses[ip.String()] = ip
+		}
+	}
+
+	r := make([]net.IP, len(ipAddresses))
+	for _, ip := range ipAddresses {
+		r = append(r, ip)
+	}
+	return r
 }
 
 func getURIs(hostnames []string) []*url.URL {
@@ -120,4 +151,13 @@ func getURIs(hostnames []string) []*url.URL {
 		urls = append(urls, url)
 	}
 	return urls
+}
+
+func inSlice(str string, sl []string) bool {
+	for _, s := range sl {
+		if str == s {
+			return true
+		}
+	}
+	return false
 }

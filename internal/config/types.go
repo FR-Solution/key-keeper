@@ -74,11 +74,11 @@ type AppRole struct {
 }
 
 type Spec struct {
-	Subject     Subject    `yaml:"subject"`
-	PrivateKey  PrivateKey `yaml:"privateKey"`
-	Hostnames   []string   `yaml:"hostnames"`
-	IPAddresses []string   `yaml:"ipAddresses"`
-	TTL         string     `yaml:"ttl"`
+	Subject     Subject     `yaml:"subject"`
+	PrivateKey  PrivateKey  `yaml:"privateKey"`
+	Hostnames   []string    `yaml:"hostnames"`
+	IPAddresses IPAddresses `yaml:"ipAddresses"`
+	TTL         string      `yaml:"ttl"`
 }
 
 type Subject struct {
@@ -97,6 +97,12 @@ type PrivateKey struct {
 	Algorithm string `yaml:"algorithm"`
 	Encoding  string `yaml:"encoding"`
 	Size      int    `yaml:"size"`
+}
+
+type IPAddresses struct {
+	Static     []string `yaml:"static"`
+	Interfaces []string `yaml:"interfaces"`
+	DNSLookup  []string `yaml:"dnsLookup"`
 }
 
 type CertVault struct {
