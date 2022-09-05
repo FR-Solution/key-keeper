@@ -19,7 +19,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 	)
 
 	defer func() {
-		if err := s.storeKeyPair(cert.HostPath, crt, key); err != nil {
+		if err := s.storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
 			zap.L().Error(
 				"stored intermediate-ca",
 				zap.Error(err),

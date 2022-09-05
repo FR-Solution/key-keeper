@@ -241,51 +241,50 @@ issuers:
       timeout: 15s
 
 certificates:
-  # - name: front-proxy-ca
-  #   issuerRef:
-  #     name: front-proxy-ca
-  #   isCa: true
-  #   ca:
-  #     exportedKey: false
-  #     generate: false
-  #   vault:
-  #     role: ""
-  #     path: "clusters/cluster-1/pki/front-proxy"
-  #     rootCAPath: "clusters/cluster-1/pki/root"
-  #   hostPath: /tmp/keep/certs/front-proxy-ca
-  #   renewBefore: 2160h
+  - name: front-proxy-ca
+    issuerRef:
+      name: front-proxy-ca
+    isCa: true
+    ca:
+      exportedKey: false
+      generate: false
+    vault:
+      role: ""
+      path: "clusters/cluster-1/pki/front-proxy"
+      rootCAPath: "clusters/cluster-1/pki/root"
+    hostPath: /tmp/keep/certs/
 
-  # - name: front-proxy-client
-  #   issuerRef:
-  #     name: front-proxy-client
-  #   vault:
-  #     role: "front-proxy-client"
-  #     path: "clusters/cluster-1/pki/front-proxy"
-  #   spec:
-  #     commonName: front-proxy-client
-  #     privateKey:
-  #       algorithm: RSA
-  #       encoding: PKCS1
-  #       size: 4096
-  #     usages:
-  #       - client auth
-  #     ttl: 100h
-  #   renewBefore: 360h
-  #   hostPath: "/tmp/keep/certs/front-proxy-client"
+  - name: front-proxy-client
+    issuerRef:
+      name: front-proxy-client
+    vault:
+      role: "front-proxy-client"
+      path: "clusters/cluster-1/pki/front-proxy"
+    spec:
+      subject:
+        commonName: custom:front-proxy-client
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - client auth
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-  # - name: kubernetes-ca
-  #   issuerRef:
-  #     name: kubernetes-ca
-  #   isCa: true
-  #   ca:
-  #     exportedKey: false
-  #     generate: false
-  #   vault:
-  #     role: ""
-  #     path: "clusters/cluster-1/pki/kubernetes"
-  #     rootCAPath: "clusters/cluster-1/pki/root"
-  #   hostPath: /tmp/keep/certs/kubernetes-ca
-  #   renewBefore: 2160h
+  - name: kubernetes-ca
+    issuerRef:
+      name: kubernetes-ca
+    isCa: true
+    ca:
+      exportedKey: false
+      generate: false
+    vault:
+      role: ""
+      path: "clusters/cluster-1/pki/kubernetes"
+      rootCAPath: "clusters/cluster-1/pki/root"
+    hostPath: /tmp/keep/certs/
 
   - name: kube-apiserver-server
     issuerRef:
@@ -317,10 +316,10 @@ certificates:
         interfaces:
           - lo
         dnsLookup:
-          - dk-HP-ProBook-440-G6
+          - yandex.ru
 
       ttl: 100h
-    hostPath: "/tmp/keep/certs/kube-apiserver-server"
+    hostPath: "/tmp/keep/certs/"
 
   - name: kube-apiserver-kubelet-client
     issuerRef:
@@ -340,211 +339,218 @@ certificates:
         organizationalUnits:
           - system:masters
       ttl: 100h
-    renewBefore: 360h
-    hostPath: "/tmp/keep/certs/kube-apiserver-kubelet-client"
-#   - name: kube-controller-manager-client
-#     issuerRef:
-#       name: kube-controller-manager-client
-#     vault:
-#       role: "kube-controller-manager-client"
-#       path: "clusters/cluster-1/pki/kubernetes"
-#     spec:
-#       commonName: custom:kube-controller-manager-client
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - client auth
-#       ttl: 100h
-#     renewBefore: 360h
-#     hostPath: "/tmp/keep/certs/kube-controller-manager-client"
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: kube-controller-manager-server
-#     issuerRef:
-#       name: kube-controller-manager-server
-#     vault:
-#       role: "kube-controller-manager-server"
-#       path: "clusters/cluster-1/pki/kubernetes"
-#     spec:
-#       commonName: custom:kube-controller-manager-server
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - server auth
-#       hostnames:
-#         - "localhost"
-#         - "kube-controller-manager.default"
-#         - "kube-controller-manager.default.svc"
-#         - "kube-controller-manager.default.svc.cluster"
-#         - "kube-controller-manager.default.svc.cluster.local"
-#       ipAddresses:
-#         static:
-#           - 127.0.0.1
-#         interfaces:
-#           - wlp0s20f3
-#         dnsLookup:
-#           - yandex.ru
-#       ttl: 100h
-#     hostPath: "/tmp/keep/certs/kube-controller-manager-server"
+  - name: kube-controller-manager-client
+    issuerRef:
+      name: kube-controller-manager-client
+    vault:
+      role: "kube-controller-manager-client"
+      path: "clusters/cluster-1/pki/kubernetes"
+    spec:
+      subject:
+        commonName: system:kube-controller-manager
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - client auth
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: kube-scheduler-server
-#     issuerRef:
-#       name: kube-scheduler-server
-#     vault:
-#       role: "kube-scheduler-server"
-#       path: "clusters/cluster-1/pki/kubernetes"
-#     spec:
-#       commonName: custom:kube-scheduler-server
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - server auth
-#       hostnames:
-#         - "localhost"
-#         - "kube-scheduler.default"
-#         - "kube-scheduler.default.svc"
-#         - "kube-scheduler.default.svc.cluster"
-#         - "kube-scheduler.default.svc.cluster.local"
-#       ipAddresses:
-#         static:
-#           - 127.0.0.1
-#       ttl: 100h
-#     hostPath: "/tmp/keep/certs/kube-scheduler-server"
+  - name: kube-controller-manager-server
+    issuerRef:
+      name: kube-controller-manager-server
+    vault:
+      role: "kube-controller-manager-server"
+      path: "clusters/cluster-1/pki/kubernetes"
+    spec:
+      subject:
+        commonName: system:kube-controller-manager
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - server auth
+      hostnames:
+        - "localhost"
+        - "kube-controller-manager.default"
+        - "kube-controller-manager.default.svc"
+        - "kube-controller-manager.default.svc.cluster"
+        - "kube-controller-manager.default.svc.cluster.local"
+      ipAddresses:
+        static:
+          - 127.0.0.1
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: kube-scheduler-client
-#     issuerRef:
-#       name: kube-scheduler-client
-#     vault:
-#       role: "kube-scheduler-client"
-#       path: "clusters/cluster-1/pki/kubernetes"
-#     spec:
-#       commonName: system:kube-scheduler
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - client auth
-#       ttl: 100h
-#     renewBefore: 360h
-#     hostPath: "/tmp/keep/certs/kube-scheduler-client"
+  - name: kube-scheduler-server
+    issuerRef:
+      name: kube-scheduler-server
+    vault:
+      role: "kube-scheduler-server"
+      path: "clusters/cluster-1/pki/kubernetes"
+    spec:
+      subject:
+        commonName: system:kube-scheduler
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - server auth
+      hostnames:
+        - "localhost"
+        - "kube-scheduler.default"
+        - "kube-scheduler.default.svc"
+        - "kube-scheduler.default.svc.cluster"
+        - "kube-scheduler.default.svc.cluster.local"
+      ipAddresses:
+        static:
+          - 127.0.0.1
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: kubelet-client
-#     issuerRef:
-#       name: kubelet-client
-#     vault:
-#       role: "kubelet-client"
-#       path: "clusters/cluster-1/pki/kubernetes"
-#     spec:
-#       commonName: system:node:${instance_name}
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       subject:
-#         organizations:
-#           - system:nodes
-#       usages:
-#         - client auth
-#       ttl: 100h
-#     renewBefore: 360h
-#     hostPath: "/tmp/keep/certs/kubelet-client"
+  - name: kube-scheduler-client
+    issuerRef:
+      name: kube-scheduler-client
+    vault:
+      role: "kube-scheduler-client"
+      path: "clusters/cluster-1/pki/kubernetes"
+    spec:
+      subject:
+        commonName: system:kube-scheduler
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - client auth
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: etcd-ca
-#     issuerRef:
-#       name: etcd-ca
-#     isCa: true
-#     ca:
-#       exportedKey: false
-#       generate: false
-#     vault:
-#       role: ""
-#       path: "clusters/cluster-1/pki/etcd"
-#       rootCAPath: "clusters/cluster-1/pki/root"
-#     hostPath: /tmp/keep/certs/etcd-ca
-#     renewBefore: 2160h
+  - name: kubelet-client
+    issuerRef:
+      name: kubelet-client
+    vault:
+      role: "kubelet-client"
+      path: "clusters/cluster-1/pki/kubernetes"
+    spec:
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      subject:
+        commonName: system:node:${instance_name}
+        organizations:
+          - system:nodes
+      usages:
+        - client auth
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: etcd-peer
-#     issuerRef:
-#       name: etcd-peer
-#     vault:
-#       role: "etcd-peer"
-#       path: "clusters/cluster-1/pki/etcd"
-#     spec:
-#       commonName: custom:etcd-peer
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - server auth
-#         - client auth
-#       hostnames:
-#         - "localhost"
-#         - "${ instance_name }.${base_domain}"
-#       ipAddresses:
-#         static:
-#           - 127.0.0.1
-#         dnsLookup:
-#           - "${ instance_name }.${base_domain}"
-#       ttl: 100h
-#     hostPath: "/tmp/keep/certs/etcd-peer"
+  - name: etcd-ca
+    issuerRef:
+      name: etcd-ca
+    isCa: true
+    ca:
+      exportedKey: false
+      generate: false
+    vault:
+      role: ""
+      path: "clusters/cluster-1/pki/etcd"
+      rootCAPath: "clusters/cluster-1/pki/root"
+    hostPath: /tmp/keep/certs/
 
-#   - name: etcd-server
-#     issuerRef:
-#       name: etcd-server
-#     vault:
-#       role: "etcd-server"
-#       path: "clusters/cluster-1/pki/etcd"
-#     spec:
-#       commonName: custom:etcd-server
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - server auth
-#       hostnames:
-#         - "localhost"
-#         - "${ instance_name }.${base_domain}"
-#       ipAddresses:
-#         static:
-#           - 127.0.0.1
-#         dnsLookup:
-#           - "${ instance_name }.${base_domain}"
-#       ttl: 100h
-#     hostPath: "/tmp/keep/certs/etcd-server"
+  - name: etcd-peer
+    issuerRef:
+      name: etcd-peer
+    vault:
+      role: "etcd-peer"
+      path: "clusters/cluster-1/pki/etcd"
+    spec:
+      subject:
+        commonName: custom:etcd-peer
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - server auth
+        - client auth
+      hostnames:
+        - "localhost"
+        # - "${ instance_name }.${base_domain}"
+      ipAddresses:
+        static:
+          - 127.0.0.1
+        # dnsLookup:
+        #   - "${ instance_name }.${base_domain}"
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-#   - name: etcd-kube-apiserver-client
-#     issuerRef:
-#       name: etcd-client
-#     vault:
-#       role: "etcd-client"
-#       path: "clusters/cluster-1/pki/etcd"
-#     spec:
-#       commonName: custom:etcd-kube-apiserver-client
-#       privateKey:
-#         algorithm: RSA
-#         encoding: PKCS1
-#         size: 4096
-#       usages:
-#         - client auth
-#       ttl: 100h
-#     renewBefore: 360h
-#     hostPath: "/tmp/keep/certs/etcd-kube-apiserver-client"
+  - name: etcd-server
+    issuerRef:
+      name: etcd-server
+    vault:
+      role: "etcd-server"
+      path: "clusters/cluster-1/pki/etcd"
+    spec:
+      subject:
+        commonName: custom:etcd-server
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - server auth
+      hostnames:
+        - "localhost"
+        # - "${ instance_name }.${base_domain}"
+      ipAddresses:
+        static:
+          - 127.0.0.1
+        # dnsLookup:
+        #   - "${ instance_name }.${base_domain}"
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
 
-# # keys:
-# #   - name: kube-sa
-# #     host_path: /tmp/keep/certs/kube-sa
-# #     privateKey:
-# #       algorithm: RSA
-# #       encoding: PKCS1
-# #       size: 2048
-# #     public: true
-# #     vault:
-# #       kv: "clusters/cluster-1/kv"
+  - name: etcd-kube-apiserver-client
+    issuerRef:
+      name: etcd-client
+    vault:
+      role: "etcd-client"
+      path: "clusters/cluster-1/pki/etcd"
+    spec:
+      subject:
+        commonName: custom:etcd-kube-apiserver-client
+      privateKey:
+        algorithm: RSA
+        encoding: PKCS1
+        size: 4096
+      usages:
+        - client auth
+      ttl: 100h
+    renewBefore: 50h
+    hostPath: "/tmp/keep/certs/"
+
+# keys:
+#   - name: kube-sa
+#     host_path: /tmp/keep/certs/kube-sa
+#     privateKey:
+#       algorithm: RSA
+#       encoding: PKCS1
+#       size: 2048
+#     public: true
+#     vault:
+#       kv: "clusters/cluster-1/kv"
