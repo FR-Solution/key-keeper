@@ -30,11 +30,9 @@ type Certificate struct {
 }
 
 type Key struct {
-	Name       string     `yaml:"name"`
-	IssuerRef  IssuerRef  `yaml:"issuerRef"`
-	PrivateKey PrivateKey `yaml:"privateKey"`
-	Public     bool       `yaml:"public"`
-	HostPath   string     `yaml:"hostPath"`
+	Name      string    `yaml:"name"`
+	IssuerRef IssuerRef `yaml:"issuerRef"`
+	HostPath  string    `yaml:"hostPath"`
 }
 
 type IssuerRef struct {
@@ -78,7 +76,6 @@ type AppRole struct {
 type Spec struct {
 	Subject     Subject    `yaml:"subject"`
 	PrivateKey  PrivateKey `yaml:"privateKey"`
-	Usages      []string   `yaml:"usages"`
 	Hostnames   []string   `yaml:"hostnames"`
 	IPAddresses []string   `yaml:"ipAddresses"`
 	TTL         string     `yaml:"ttl"`
