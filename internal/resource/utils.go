@@ -137,6 +137,7 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 
 	r := make([]net.IP, len(ipAddresses))
 	for _, ip := range ipAddresses {
+		fmt.Println("ip", ip.String())
 		r = append(r, ip)
 	}
 	return r
