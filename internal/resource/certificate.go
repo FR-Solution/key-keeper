@@ -57,8 +57,9 @@ func (s *resource) generateCertificate(cfg config.Certificate) ([]byte, []byte, 
 	csr, key := createCSR(cfg.Spec)
 
 	certData := map[string]interface{}{
-		"csr": string(csr),
-		"ttl": cfg.Spec.TTL,
+		"csr":     string(csr),
+		"ip_sans": strings.Join(cfg.Spec.IPAddresses.Static, ","),
+		"ttl":     cfg.Spec.TTL,
 	}
 	fmt.Println(string(csr))
 	path := path.Join(cfg.Vault.Path, "sign", cfg.Vault.Role)
