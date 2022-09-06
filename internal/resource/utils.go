@@ -26,23 +26,23 @@ func (s *resource) storeKey(path string, privare, public []byte) error {
 	return nil
 }
 
-func (s *resource) storeKeyPair(path string, crt, key []byte) error {
+func (s *resource) storeKeyPair(path string, name string, crt, key []byte) error {
 	if crt != nil {
-		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {
+		if err := os.WriteFile(path+"/"+name+".pem", crt, 0644); err != nil {
 			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
 		}
 	}
 
 	if key != nil {
-		if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
+		if err := os.WriteFile(path+"/"+name+"-key.pem", key, 0600); err != nil {
 			return fmt.Errorf("failed to save key file: %w", err)
 		}
 	}
 	return nil
 }
 
-func (s *resource) readCertificate(path string) (*x509.Certificate, error) {
-	crt, err := os.ReadFile(path + ".pem")
+func (s *resource) readCertificate(path string, name string) (*x509.Certificate, error) {
+	crt, err := os.ReadFile(path + "/" + name + ".pem")
 	if err != nil {
 		return nil, err
 	}
@@ -103,10 +103,13 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 }
 
 func getIPAddresses(cfg config.IPAddresses) []net.IP {
-	ipAddresses := make(map[string]struct{})
+	ipAddresses := make(map[string]net.IP)
 
 	for _, ip := range cfg.Static {
-		ipAddresses[ip] = struct{}{}
+		ip := net.IP(ip)
+		if ip.To4() != nil {
+			ipAddresses[ip.String()] = ip
+		}
 	}
 
 	ifaces, _ := net.Interfaces()
@@ -125,7 +128,7 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 				}
 
 				if ip.To4() != nil {
-					ipAddresses[ip.String()] = struct{}{}
+					ipAddresses[ip.String()] = ip
 				}
 			}
 		}
@@ -135,15 +138,14 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 		ips, _ := net.LookupIP(h)
 		for _, ip := range ips {
 			if ip.To4() != nil {
-				ipAddresses[ip.String()] = struct{}{}
+				ipAddresses[ip.String()] = ip
 			}
 		}
 	}
 
 	r := make([]net.IP, 0, len(ipAddresses))
-	for ip := range ipAddresses {
-		fmt.Println(ip)
-		r = append(r, net.IP(ip))
+	for _, ip := range ipAddresses {
+		r = append(r, ip)
 	}
 	return r
 }
