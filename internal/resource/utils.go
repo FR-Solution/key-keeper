@@ -106,9 +106,9 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 	ipAddresses := make(map[string]net.IP)
 
 	for _, ip := range cfg.Static {
-		ip := net.IP(ip)
-		if ip.To4() != nil {
-			ipAddresses[ip.String()] = ip
+		netIP := net.IP(ip)
+		if netIP.To4() != nil {
+			ipAddresses[ip] = netIP
 		}
 	}
 
@@ -143,9 +143,11 @@ func getIPAddresses(cfg config.IPAddresses) []net.IP {
 		}
 	}
 
-	r := make([]net.IP, 0, len(ipAddresses))
+	r := make([]net.IP, len(ipAddresses))
+	i := 0
 	for _, ip := range ipAddresses {
-		r = append(r, ip)
+		copy(r[i], ip)
+		i++
 	}
 	return r
 }
