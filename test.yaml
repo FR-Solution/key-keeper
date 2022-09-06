@@ -1,49 +1,49 @@
 ---
 issuers:
-  - name: front-proxy-ca
-    vault:
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: front-proxy-ca
+  #   vault:
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: front-proxy-client
-    vault:
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: front-proxy-client
+  #   vault:
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kubernetes-ca
-    vault:
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kubernetes-ca
+  #   vault:
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
   - name: kube-apiserver-server
     vault:
@@ -61,184 +61,186 @@ issuers:
           path: "clusters/cluster-1/approle"
           roleIDLocalPath: /tmp/keep/roleIDLocalPath
           secretIDLocalPath: /tmp/keep/secretIDLocalPath
+      kv:
+        path: "path"
       timeout: 15s
 
-  - name: kube-apiserver-kubelet-client
-    vault:
-      role:
-        name: "kube-apiserver"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kube-apiserver-kubelet-client
+  #   vault:
+  #     role:
+  #       name: "kube-apiserver"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kube-controller-manager-client
-    vault:
-      role:
-        name: "kube-controller-manager-client"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kube-controller-manager-client
+  #   vault:
+  #     role:
+  #       name: "kube-controller-manager-client"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kube-controller-manager-server
-    vault:
-      role:
-        name: "kube-controller-manager-server"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kube-controller-manager-server
+  #   vault:
+  #     role:
+  #       name: "kube-controller-manager-server"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kube-scheduler-server
-    vault:
-      role:
-        name: "kube-scheduler-server"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kube-scheduler-server
+  #   vault:
+  #     role:
+  #       name: "kube-scheduler-server"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kube-scheduler-client
-    vault:
-      role:
-        name: "kube-scheduler-client"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kube-scheduler-client
+  #   vault:
+  #     role:
+  #       name: "kube-scheduler-client"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: kubelet-client
-    vault:
-      role:
-        name: "kubelet-client"
-        path: "clusters/cluster-1/pki/kubernetes"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: kubelet-client
+  #   vault:
+  #     role:
+  #       name: "kubelet-client"
+  #       path: "clusters/cluster-1/pki/kubernetes"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: etcd-ca
-    vault:
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: etcd-ca
+  #   vault:
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: etcd-peer
-    vault:
-      role:
-        name: "etcd-peer"
-        path: "clusters/cluster-1/pki/etcd"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: etcd-peer
+  #   vault:
+  #     role:
+  #       name: "etcd-peer"
+  #       path: "clusters/cluster-1/pki/etcd"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: etcd-server
-    vault:
-      role:
-        name: "etcd-server"
-        path: "clusters/cluster-1/pki/etcd"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: etcd-server
+  #   vault:
+  #     role:
+  #       name: "etcd-server"
+  #       path: "clusters/cluster-1/pki/etcd"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
-  - name: etcd-client
-    vault:
-      role:
-        name: "etcd-client"
-        path: "clusters/cluster-1/pki/etcd"
-      server: "http://51.250.67.8:9200"
-      auth:
-        caBundle: ""
-        tlsInsecure: true
-        bootstrap:
-          token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
-        appRole:
-          name: "test-role"
-          path: "clusters/cluster-1/approle"
-          roleIDLocalPath: /tmp/keep/roleIDLocalPath
-          secretIDLocalPath: /tmp/keep/secretIDLocalPath
-      timeout: 15s
+  # - name: etcd-client
+  #   vault:
+  #     role:
+  #       name: "etcd-client"
+  #       path: "clusters/cluster-1/pki/etcd"
+  #     server: "http://51.250.67.8:9200"
+  #     auth:
+  #       caBundle: ""
+  #       tlsInsecure: true
+  #       bootstrap:
+  #         token: hvs.RzuJmHubW1V8vj7jFAbZtKLJ
+  #       appRole:
+  #         name: "test-role"
+  #         path: "clusters/cluster-1/approle"
+  #         roleIDLocalPath: /tmp/keep/roleIDLocalPath
+  #         secretIDLocalPath: /tmp/keep/secretIDLocalPath
+  #     timeout: 15s
 
 certificates:
   # - name: front-proxy-ca

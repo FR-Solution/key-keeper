@@ -59,7 +59,7 @@ type Auth struct {
 }
 
 type KV struct {
-	Path string `yaml:"paths"`
+	Path string `yaml:"path"`
 }
 
 type Bootstrap struct {
