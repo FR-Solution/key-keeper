@@ -2,6 +2,7 @@ package resource
 
 import (
 	"fmt"
+	"path"
 
 	"go.uber.org/zap"
 
@@ -20,7 +21,7 @@ func (s *resource) checkKey(i config.Key) {
 		zap.L().Debug("rsa is read", zap.String("name", i.Name))
 	}
 
-	if err := s.storeKey(i.HostPath, private, public); err != nil {
+	if err := s.storeKey(path.Join(i.HostPath, i.Name), private, public); err != nil {
 		zap.L().Error(
 			"store rsa in host",
 			zap.String("name", i.Name),
@@ -39,6 +40,7 @@ func (s *resource) readKey(i config.Key) (private []byte, public []byte, err err
 		return
 	}
 
+	// TODO: check
 	private, public = []byte(storedRSA["private"].(string)), []byte(storedRSA["public"].(string))
 	return
 }

@@ -15,6 +15,7 @@ type Issuer struct {
 type Resources struct {
 	Certificates []Certificate `yaml:"certificates"`
 	Keys         []Key         `yaml:"keys"`
+	Secrets      []Secret      `yaml:"secret"`
 }
 
 type Certificate struct {
@@ -35,13 +36,11 @@ type Key struct {
 	HostPath  string    `yaml:"hostPath"`
 }
 
-type IssuerRef struct {
-	Name string `yaml:"name"`
-}
-
-type CA struct {
-	ExportedKey bool `yaml:"exportedKey"`
-	Generate    bool `yaml:"generate"`
+type Secret struct {
+	Name      string    `yaml:"name"`
+	IssuerRef IssuerRef `yaml:"issuerRef"`
+	Key       string    `yaml:"key"`
+	HostPath  string    `yaml:"hostPath"`
 }
 
 type Vault struct {
@@ -58,10 +57,6 @@ type Auth struct {
 	AppRole     AppRole   `yaml:"appRole"`
 }
 
-type KV struct {
-	Path string `yaml:"path"`
-}
-
 type Bootstrap struct {
 	Token string `yaml:"token"`
 }
@@ -71,6 +66,19 @@ type AppRole struct {
 	Path              string `yaml:"path"`
 	RoleIDLocalPath   string `yaml:"roleIDLocalPath"`
 	SecretIDLocalPath string `yaml:"secretIDLocalPath"`
+}
+
+type KV struct {
+	Path string `yaml:"path"`
+}
+
+type IssuerRef struct {
+	Name string `yaml:"name"`
+}
+
+type CA struct {
+	ExportedKey bool `yaml:"exportedKey"`
+	Generate    bool `yaml:"generate"`
 }
 
 type Spec struct {
@@ -93,6 +101,12 @@ type Subject struct {
 	SerialNumber       string   `yaml:"serialNumber"`
 }
 
+type CertVault struct {
+	Role       string `yaml:"role"`
+	Path       string `yaml:"path"`
+	RootCAPath string `yaml:"rootCAPath"`
+}
+
 type PrivateKey struct {
 	Algorithm string `yaml:"algorithm"`
 	Encoding  string `yaml:"encoding"`
@@ -103,10 +117,4 @@ type IPAddresses struct {
 	Static     []string `yaml:"static"`
 	Interfaces []string `yaml:"interfaces"`
 	DNSLookup  []string `yaml:"dnsLookup"`
-}
-
-type CertVault struct {
-	Role       string `yaml:"role"`
-	Path       string `yaml:"path"`
-	RootCAPath string `yaml:"rootCAPath"`
 }
