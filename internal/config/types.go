@@ -15,7 +15,7 @@ type Issuer struct {
 type Resources struct {
 	Certificates []Certificate `yaml:"certificates"`
 	Keys         []Key         `yaml:"keys"`
-	Secrets      []Secret      `yaml:"secret"`
+	Secrets      []Secret      `yaml:"secrets"`
 }
 
 type Certificate struct {
