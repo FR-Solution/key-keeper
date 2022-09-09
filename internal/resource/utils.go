@@ -8,9 +8,9 @@ import (
 	"encoding/pem"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
 	"path"
+	"regexp"
 
 	"github.com/fraima/key-keeper/internal/config"
 )
@@ -26,23 +26,23 @@ func (s *resource) storeKey(path string, privare, public []byte) error {
 	return nil
 }
 
-func (s *resource) storeKeyPair(path string, crt, key []byte) error {
+func (s *resource) storeKeyPair(path string, name string, crt, key []byte) error {
 	if crt != nil {
-		if err := os.WriteFile(path+".pem", crt, 0644); err != nil {
+		if err := os.WriteFile(path+"/"+name+".pem", crt, 0644); err != nil {
 			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
 		}
 	}
 
 	if key != nil {
-		if err := os.WriteFile(path+"-key.pem", key, 0600); err != nil {
+		if err := os.WriteFile(path+"/"+name+"-key.pem", key, 0600); err != nil {
 			return fmt.Errorf("failed to save key file: %w", err)
 		}
 	}
 	return nil
 }
 
-func (s *resource) readCertificate(path string) (*x509.Certificate, error) {
-	crt, err := os.ReadFile(path + ".pem")
+func (s *resource) readCertificate(path string, name string) (*x509.Certificate, error) {
+	crt, err := os.ReadFile(path + "/" + name + ".pem")
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 			SerialNumber:       spec.Subject.SerialNumber,
 		},
 		IPAddresses:        getIPAddresses(spec.IPAddresses),
-		URIs:               getURIs(spec.Hostnames),
+		DNSNames:           spec.Hostnames,
 		SignatureAlgorithm: x509.SHA256WithRSA,
 	}
 
@@ -102,22 +102,59 @@ func createCSR(spec config.Spec) (crt, key []byte) {
 
 }
 
-func getIPAddresses(ips []string) []net.IP {
-	ipAddresses := make([]net.IP, 0, len(ips))
+func getIPAddresses(cfg config.IPAddresses) []net.IP {
+	ipAddresses := make(map[string]net.IP)
 
-	for _, ip := range ips {
-		ipAddresses = append(ipAddresses, net.IP(ip))
+	for _, ip := range cfg.Static {
+		netIP := net.ParseIP(ip)
+		if netIP.To4() != nil {
+			ipAddresses[ip] = netIP
+		}
 	}
-	return ipAddresses
+
+	ifaces, _ := net.Interfaces()
+	// TODO: handle err
+	for _, i := range ifaces {
+		if inSlice(i.Name, cfg.Interfaces) {
+			addrs, _ := i.Addrs()
+			// TODO: handle err
+			for _, addr := range addrs {
+				var ip net.IP
+				switch v := addr.(type) {
+				case *net.IPNet:
+					ip = v.IP
+				case *net.IPAddr:
+					ip = v.IP
+				}
+
+				if ip.To4() != nil {
+					ipAddresses[ip.String()] = ip
+				}
+			}
+		}
+	}
+
+	for _, h := range cfg.DNSLookup {
+		ips, _ := net.LookupIP(h)
+		for _, ip := range ips {
+			if ip.To4() != nil {
+				ipAddresses[ip.String()] = ip
+			}
+		}
+	}
+
+	r := make([]net.IP, 0, len(ipAddresses))
+	for _, ip := range ipAddresses {
+		r = append(r, ip)
+	}
+	return r
 }
 
-func getURIs(hostnames []string) []*url.URL {
-	urls := make([]*url.URL, 0, len(hostnames))
-
-	for _, hostname := range hostnames {
-		// TODO: error handler
-		url, _ := url.Parse(hostname)
-		urls = append(urls, url)
+func inSlice(str string, sl []string) bool {
+	for _, s := range sl {
+		if regexp.MustCompile(s).MatchString(str) {
+			return true
+		}
 	}
-	return urls
+	return false
 }

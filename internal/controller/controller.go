@@ -137,5 +137,11 @@ func (s *controller) separateResources(cfg config.Resources) map[string]config.R
 		resources.Keys = append(resources.Keys, key)
 		r[key.IssuerRef.Name] = resources
 	}
+
+	for _, secret := range cfg.Secrets {
+		resources := r[secret.IssuerRef.Name]
+		resources.Secrets = append(resources.Secrets, secret)
+		r[secret.IssuerRef.Name] = resources
+	}
 	return r
 }

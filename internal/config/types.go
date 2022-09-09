@@ -15,6 +15,7 @@ type Issuer struct {
 type Resources struct {
 	Certificates []Certificate `yaml:"certificates"`
 	Keys         []Key         `yaml:"keys"`
+	Secrets      []Secret      `yaml:"secrets"`
 }
 
 type Certificate struct {
@@ -35,13 +36,11 @@ type Key struct {
 	HostPath  string    `yaml:"hostPath"`
 }
 
-type IssuerRef struct {
-	Name string `yaml:"name"`
-}
-
-type CA struct {
-	ExportedKey bool `yaml:"exportedKey"`
-	Generate    bool `yaml:"generate"`
+type Secret struct {
+	Name      string    `yaml:"name"`
+	IssuerRef IssuerRef `yaml:"issuerRef"`
+	Key       string    `yaml:"key"`
+	HostPath  string    `yaml:"hostPath"`
 }
 
 type Vault struct {
@@ -58,10 +57,6 @@ type Auth struct {
 	AppRole     AppRole   `yaml:"appRole"`
 }
 
-type KV struct {
-	Path string `yaml:"paths"`
-}
-
 type Bootstrap struct {
 	Token string `yaml:"token"`
 }
@@ -73,12 +68,25 @@ type AppRole struct {
 	SecretIDLocalPath string `yaml:"secretIDLocalPath"`
 }
 
+type KV struct {
+	Path string `yaml:"path"`
+}
+
+type IssuerRef struct {
+	Name string `yaml:"name"`
+}
+
+type CA struct {
+	ExportedKey bool `yaml:"exportedKey"`
+	Generate    bool `yaml:"generate"`
+}
+
 type Spec struct {
-	Subject     Subject    `yaml:"subject"`
-	PrivateKey  PrivateKey `yaml:"privateKey"`
-	Hostnames   []string   `yaml:"hostnames"`
-	IPAddresses []string   `yaml:"ipAddresses"`
-	TTL         string     `yaml:"ttl"`
+	Subject     Subject     `yaml:"subject"`
+	PrivateKey  PrivateKey  `yaml:"privateKey"`
+	Hostnames   []string    `yaml:"hostnames"`
+	IPAddresses IPAddresses `yaml:"ipAddresses"`
+	TTL         string      `yaml:"ttl"`
 }
 
 type Subject struct {
@@ -93,14 +101,20 @@ type Subject struct {
 	SerialNumber       string   `yaml:"serialNumber"`
 }
 
+type CertVault struct {
+	Role       string `yaml:"role"`
+	Path       string `yaml:"path"`
+	RootCAPath string `yaml:"rootCAPath"`
+}
+
 type PrivateKey struct {
 	Algorithm string `yaml:"algorithm"`
 	Encoding  string `yaml:"encoding"`
 	Size      int    `yaml:"size"`
 }
 
-type CertVault struct {
-	Role       string `yaml:"role"`
-	Path       string `yaml:"path"`
-	RootCAPath string `yaml:"rootCAPath"`
+type IPAddresses struct {
+	Static     []string `yaml:"static"`
+	Interfaces []string `yaml:"interfaces"`
+	DNSLookup  []string `yaml:"dnsLookup"`
 }

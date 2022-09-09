@@ -53,6 +53,7 @@ func (s *config) GetNewConfig() (newCfg Config, err error) {
 		newCfg.Issuers = append(newCfg.Issuers, cfg.Issuers...)
 		newCfg.Resource.Certificates = append(newCfg.Resource.Certificates, cfg.Resource.Certificates...)
 		newCfg.Resource.Keys = append(newCfg.Resource.Keys, cfg.Resource.Keys...)
+		newCfg.Resource.Secrets = append(newCfg.Resource.Secrets, cfg.Resource.Secrets...)
 		s.oldConfig[path] = struct{}{}
 	}
 

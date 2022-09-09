@@ -14,7 +14,7 @@ import (
 )
 
 func (s *resource) checkCertificate(cfg config.Certificate) {
-	cert, err := s.readCertificate(cfg.HostPath)
+	cert, err := s.readCertificate(cfg.HostPath, cfg.Name)
 	if cert != nil && time.Until(cert.NotAfter) > cfg.RenewBefore {
 		return
 	}
@@ -31,7 +31,7 @@ func (s *resource) checkCertificate(cfg config.Certificate) {
 		)
 	}
 
-	if err = s.storeKeyPair(cfg.HostPath, crt, key); err != nil {
+	if err = s.storeKeyPair(cfg.HostPath, cfg.Name, crt, key); err != nil {
 		zap.L().Error(
 			"store csr",
 			zap.String("name", cfg.Name),
@@ -60,7 +60,7 @@ func (s *resource) generateCertificate(cfg config.Certificate) ([]byte, []byte, 
 		"csr": string(csr),
 		"ttl": cfg.Spec.TTL,
 	}
-	fmt.Println(string(csr))
+
 	path := path.Join(cfg.Vault.Path, "sign", cfg.Vault.Role)
 	cert, err := s.vault.Write(path, certData)
 	if err != nil {

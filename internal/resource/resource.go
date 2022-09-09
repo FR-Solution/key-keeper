@@ -12,6 +12,7 @@ type resource struct {
 	vault       controller.Vault
 	certificate map[string]config.Certificate
 	key         map[string]config.Key
+	secret      map[string]config.Secret
 }
 
 func Preparing(
@@ -21,6 +22,7 @@ func Preparing(
 		vault:       vault,
 		certificate: make(map[string]config.Certificate),
 		key:         make(map[string]config.Key),
+		secret:      make(map[string]config.Secret),
 	}
 }
 
@@ -49,6 +51,14 @@ func (s *resource) Check() {
 			s.checkKey(k)
 		}(key)
 	}
+
+	zap.L().Debug("secrets")
+	for _, secret := range s.secret {
+		wg.Add(1)
+		go func(secret config.Secret) {
+			s.checkSecret(secret)
+		}(secret)
+	}
 	wg.Wait()
 
 	zap.L().Debug("done")
@@ -60,6 +70,9 @@ func (s *resource) Add(r config.Resources) {
 	}
 	for _, key := range r.Keys {
 		s.key[key.Name] = key
+	}
+	for _, secret := range r.Secrets {
+		s.secret[secret.Name] = secret
 	}
 	s.Check()
 }
