@@ -28,7 +28,7 @@ type Resource interface {
 
 type controller struct {
 	config         Config
-	vaultConnector func(cfg config.Vault) (Vault, error)
+	vaultConnector func(name string, cfg config.Vault) (Vault, error)
 
 	newResource func(vault Vault) Resource
 	resource    sync.Map
@@ -36,7 +36,7 @@ type controller struct {
 
 func New(
 	config Config,
-	vaultConnector func(cfg config.Vault) (Vault, error),
+	vaultConnector func(name string, cfg config.Vault) (Vault, error),
 	newResource func(vault Vault) Resource,
 ) *controller {
 	return &controller{
@@ -77,23 +77,23 @@ func (s *controller) getNewResource() error {
 		return fmt.Errorf("get new configs: %w", err)
 	}
 
-	for _, vaultCfg := range cfg.Issuers {
+	for _, iCfg := range cfg.Issuers {
 		// TODO: что делать если приходит несколько issuer с одинаковыми именами
-		_, isExist := s.resource.Load(vaultCfg.Name)
+		_, isExist := s.resource.Load(iCfg.Name)
 		if isExist {
 			zap.L().Warn(
 				"preparing resource",
-				zap.String("issuer_name", vaultCfg.Name),
+				zap.String("issuer_name", iCfg.Name),
 				zap.String("step", "connect to issuer"),
 				zap.Error(errors.New("issuer is exist")),
 			)
 			continue
 		}
-		vaultConnection, err := s.vaultConnector(vaultCfg.Vault)
+		vaultConnection, err := s.vaultConnector(iCfg.Name, iCfg.Vault)
 		if err != nil {
 			zap.L().Error(
 				"preparing resource",
-				zap.String("issuer_name", vaultCfg.Name),
+				zap.String("issuer_name", iCfg.Name),
 				zap.String("step", "connect to issuer"),
 				zap.Error(err),
 			)
@@ -101,7 +101,7 @@ func (s *controller) getNewResource() error {
 		}
 
 		r := s.newResource(vaultConnection)
-		s.resource.Store(vaultCfg.Name, r)
+		s.resource.Store(iCfg.Name, r)
 	}
 
 	resources := s.separateResources(cfg.Resource)
