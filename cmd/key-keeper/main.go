@@ -11,7 +11,6 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 	"github.com/fraima/key-keeper/internal/issuer/vault"
-	"github.com/fraima/key-keeper/internal/resource"
 )
 
 var (
@@ -50,7 +49,6 @@ func main() {
 	cntl := controller.New(
 		cfg,
 		vault.Connect,
-		resource.Preparing,
 	)
 	go cntl.RefreshResource()
 	go cntl.Start()
