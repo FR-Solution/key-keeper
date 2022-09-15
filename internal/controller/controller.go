@@ -12,24 +12,24 @@ import (
 )
 
 type Config interface {
-	GetNewConfig() (cfgs config.Config, err error)
+	GetNewConfig() (config.Config, error)
 }
 
 type Issuer interface {
-	AddResource(r config.Resources)
+	AddResource(config.Resources)
 	CheckResource()
 }
 
 type controller struct {
 	config          Config
-	issuerConnector func(cfg config.Vault) (Issuer, error)
+	issuerConnector func(config.Vault) (Issuer, error)
 
 	issuer sync.Map
 }
 
 func New(
 	config Config,
-	vaultConnector func(cfg config.Vault) (Issuer, error),
+	vaultConnector func(config.Vault) (Issuer, error),
 ) *controller {
 	return &controller{
 		config:          config,
