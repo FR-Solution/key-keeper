@@ -14,12 +14,19 @@ import (
 )
 
 type vault struct {
-	cli         *api.Client
-	name        string
+	cli *api.Client
+
+	role        string
+	caPath      string
+	rootCAPath  string
 	kvMountPath string
+
+	certificate map[string]config.Certificate
+	key         map[string]config.Key
+	secret      map[string]config.Secret
 }
 
-func Connect(name string, cfg config.Vault) (controller.Vault, error) {
+func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 	client, err := api.NewClient(
 		&api.Config{
 			Address: cfg.Server,
@@ -39,16 +46,23 @@ func Connect(name string, cfg config.Vault) (controller.Vault, error) {
 	}
 
 	s := &vault{
-		cli:         client,
-		name:        name,
+		cli: client,
+
+		role:        cfg.Certificate.Role,
+		caPath:      cfg.Certificate.CAPath,
+		rootCAPath:  cfg.Certificate.RootCAPath,
 		kvMountPath: cfg.KV.Path,
+
+		certificate: make(map[string]config.Certificate),
+		key:         make(map[string]config.Key),
+		secret:      make(map[string]config.Secret),
 	}
 
-	roleID, err := s.roleID(cfg.Auth.AppRole)
+	roleID, err := s.roleID(name, cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get role id: %w", err)
 	}
-	secretID, err := s.secretID(cfg.Auth.AppRole)
+	secretID, err := s.secretID(name, cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get secret id: %w", err)
 	}
@@ -74,9 +88,9 @@ func Connect(name string, cfg config.Vault) (controller.Vault, error) {
 	return s, nil
 }
 
-func (s *vault) roleID(appRole config.AppRole) (string, error) {
+func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
-	localPath := path.Join(appRole.LocalPath, "role-id-", s.name)
+	localPath := path.Join(appRole.LocalPath, "role-id-"+name)
 
 	approle, err := s.Read(vaultPath)
 	if err != nil {
@@ -100,9 +114,9 @@ func (s *vault) roleID(appRole config.AppRole) (string, error) {
 	return roleID.(string), err
 }
 
-func (s *vault) secretID(appRole config.AppRole) (string, error) {
+func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
-	localPath := path.Join(appRole.LocalPath, "secret-id-", s.name)
+	localPath := path.Join(appRole.LocalPath, "secret-id-"+name)
 
 	approle, err := s.Write(vaultPath, nil)
 	if err != nil {
@@ -145,14 +159,14 @@ func (s *vault) Write(path string, data map[string]interface{}) (map[string]inte
 }
 
 // Put in KV.
-func (s *vault) Put(secretePath string, data map[string]interface{}) error {
-	_, err := s.cli.KVv2(s.kvMountPath).Put(context.Background(), secretePath, data)
+func (s *vault) Put(kvMountPath, secretePath string, data map[string]interface{}) error {
+	_, err := s.cli.KVv2(kvMountPath).Put(context.Background(), secretePath, data)
 	return err
 }
 
 // Get from KV.
-func (s *vault) Get(secretePath string) (map[string]interface{}, error) {
-	sec, err := s.cli.KVv2(s.kvMountPath).Get(context.Background(), secretePath)
+func (s *vault) Get(kvMountPath, secretePath string) (map[string]interface{}, error) {
+	sec, err := s.cli.KVv2(kvMountPath).Get(context.Background(), secretePath)
 	if sec != nil {
 		return sec.Data, err
 	}

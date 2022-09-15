@@ -14,6 +14,10 @@ issuers: # Описывает список доступных issuers
           localPath: string # rename $local_path_to_role_id
       kv:
         path: string
+      certificate:
+        role: string # альтернатива блоку csr[*].role
+        CAPath: string # Путь к сейфу Inermediate CA где будет заказан сертификат
+        rootCAPath: string # Путь к root CA
       timeout: string # строка формата "1s", таймаут для любого обращения к issuer
 
 certificates: # Описывает список доступных certificates
@@ -45,10 +49,6 @@ certificates: # Описывает список доступных certificates
         interfaces: list of string
         dnsLookup: list of string
       ttl: string # на какой промежуток времени заказывается сертификат
-    vault:
-      role: string # альтернатива блоку csr[*].role
-      path: string # Путь к сейфу Inermediate CA где будет заказан сертификат
-      rootCAPath: string # Путь к root CA
     hostPath: string # путь, где будет размещен секрет по маске ${hostPathCert}/${certName}
     renewBefore: string # за сколько до истечения надо перевыпустить
     trigger: list of string # список bash команд которые применятся после обновления сертификата
