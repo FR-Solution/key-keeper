@@ -6,43 +6,34 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fraima/key-keeper/internal/config"
 	"go.uber.org/zap"
+
+	"github.com/fraima/key-keeper/internal/config"
 )
 
 type Config interface {
 	GetNewConfig() (cfgs config.Config, err error)
 }
 
-type Vault interface {
-	Write(path string, data map[string]interface{}) (map[string]interface{}, error)
-	Read(path string) (map[string]interface{}, error)
-	Put(secretePath string, data map[string]interface{}) error
-	Get(secretePath string) (map[string]interface{}, error)
-}
-
-type Resource interface {
-	Add(r config.Resources)
-	Check()
+type Issuer interface {
+	AddResource(r config.Resources)
+	CheckResource()
 }
 
 type controller struct {
-	config         Config
-	vaultConnector func(cfg config.Vault) (Vault, error)
+	config          Config
+	issuerConnector func(cfg config.Vault) (Issuer, error)
 
-	newResource func(vault Vault) Resource
-	resource    sync.Map
+	issuer sync.Map
 }
 
 func New(
 	config Config,
-	vaultConnector func(cfg config.Vault) (Vault, error),
-	newResource func(vault Vault) Resource,
+	vaultConnector func(cfg config.Vault) (Issuer, error),
 ) *controller {
 	return &controller{
-		config:         config,
-		vaultConnector: vaultConnector,
-		newResource:    newResource,
+		config:          config,
+		issuerConnector: vaultConnector,
 	}
 }
 
@@ -51,8 +42,8 @@ func (s *controller) Start() {
 	t := time.NewTicker(time.Hour)
 	defer t.Stop()
 	for range t.C {
-		s.resource.Range(func(key, value any) bool {
-			value.(Resource).Check()
+		s.issuer.Range(func(key, value any) bool {
+			value.(Issuer).CheckResource()
 			return true
 		})
 	}
@@ -77,36 +68,35 @@ func (s *controller) getNewResource() error {
 		return fmt.Errorf("get new configs: %w", err)
 	}
 
-	for _, vaultCfg := range cfg.Issuers {
+	for _, iCfg := range cfg.Issuers {
 		// TODO: что делать если приходит несколько issuer с одинаковыми именами
-		_, isExist := s.resource.Load(vaultCfg.Name)
+		_, isExist := s.issuer.Load(iCfg.Name)
 		if isExist {
 			zap.L().Warn(
 				"preparing resource",
-				zap.String("issuer_name", vaultCfg.Name),
+				zap.String("issuer_name", iCfg.Name),
 				zap.String("step", "connect to issuer"),
 				zap.Error(errors.New("issuer is exist")),
 			)
 			continue
 		}
-		vaultConnection, err := s.vaultConnector(vaultCfg.Vault)
+		conn, err := s.issuerConnector(iCfg.Vault)
 		if err != nil {
 			zap.L().Error(
 				"preparing resource",
-				zap.String("issuer_name", vaultCfg.Name),
+				zap.String("issuer_name", iCfg.Name),
 				zap.String("step", "connect to issuer"),
 				zap.Error(err),
 			)
 			continue
 		}
 
-		r := s.newResource(vaultConnection)
-		s.resource.Store(vaultCfg.Name, r)
+		s.issuer.Store(iCfg.Name, conn)
 	}
 
 	resources := s.separateResources(cfg.Resource)
-	for issuerName, resourceCfg := range resources {
-		r, isExist := s.resource.Load(issuerName)
+	for issuerName, rCfg := range resources {
+		r, isExist := s.issuer.Load(issuerName)
 		if !isExist {
 			zap.L().Warn(
 				"preparing resource",
@@ -116,7 +106,7 @@ func (s *controller) getNewResource() error {
 			)
 			continue
 		}
-		r.(Resource).Add(resourceCfg)
+		r.(Issuer).AddResource(rCfg)
 	}
 
 	return nil

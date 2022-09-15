@@ -1,4 +1,4 @@
-package resource
+package vault
 
 import (
 	"crypto/x509"
@@ -12,14 +12,14 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *resource) checkCA(cert config.Certificate) {
+func (s *vault) checkCA(cert config.Certificate) {
 	var (
 		crt, key []byte
 		err      error
 	)
 
 	defer func() {
-		if err := s.storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
+		if err := storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
 			zap.L().Error(
 				"stored intermediate-ca",
 				zap.Error(err),
@@ -27,7 +27,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 		}
 	}()
 
-	crt, key, err = s.readCA(cert.Vault.Path)
+	crt, key, err = s.readCA(s.caPath)
 	if err == nil {
 		var ca *x509.Certificate
 		pBlock, _ := pem.Decode(crt)
@@ -68,8 +68,7 @@ func (s *resource) checkCA(cert config.Certificate) {
 	}
 }
 
-func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err error) {
-	// create  intermediate ca
+func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error) {
 	csrData := map[string]interface{}{
 		"common_name": fmt.Sprintf("%s Intermediate Authority", cert.Name),
 		"ttl":         cert.Spec.TTL,
@@ -80,8 +79,8 @@ func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err err
 		keyType = "exported"
 	}
 
-	vaultPath := path.Join(cert.Vault.Path, "intermediate/generate", keyType)
-	csr, err := s.vault.Write(vaultPath, csrData)
+	vaultPath := path.Join(s.caPath, "intermediate/generate", keyType)
+	csr, err := s.Write(vaultPath, csrData)
 	if err != nil {
 		err = fmt.Errorf("generate: %w", err)
 		return
@@ -94,20 +93,19 @@ func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err err
 		"ttl":    cert.Spec.TTL,
 	}
 
-	vaultPath = path.Join(cert.Vault.RootCAPath, "root/sign-intermediate")
-	ica, err := s.vault.Write(vaultPath, icaData)
+	vaultPath = path.Join(s.rootCAPath, "root/sign-intermediate")
+	ica, err := s.Write(vaultPath, icaData)
 	if err != nil {
 		err = fmt.Errorf("send the intermediate ca CSR to the root CA for signing CA: %w", err)
 		return
 	}
 
-	// publish the signed certificate back to the  intermediate ca
 	certData := map[string]interface{}{
 		"certificate": ica["certificate"],
 	}
 
-	vaultPath = path.Join(cert.Vault.Path, "intermediate/set-signed")
-	if _, err = s.vault.Write(vaultPath, certData); err != nil {
+	vaultPath = path.Join(s.caPath, "intermediate/set-signed")
+	if _, err = s.Write(vaultPath, certData); err != nil {
 		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca : %w", err)
 		return
 	}
@@ -118,6 +116,19 @@ func (s *resource) generateCA(cert config.Certificate) (crt, key []byte, err err
 	if k, ok := csr["private_key"]; ok {
 		key = []byte(k.(string))
 	}
+	return
+}
 
+func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
+	vaultPath = path.Join(vaultPath, "cert/ca_chain")
+	ica, err := s.Read(vaultPath)
+	if ica != nil {
+		if c, ok := ica["certificate"]; ok {
+			crt = []byte(c.(string))
+		}
+		if k, ok := ica["private_key"]; ok {
+			key = []byte(k.(string))
+		}
+	}
 	return
 }

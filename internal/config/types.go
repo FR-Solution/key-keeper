@@ -24,7 +24,6 @@ type Certificate struct {
 	IsCA        bool          `yaml:"isCa"`
 	CA          CA            `yaml:"ca"`
 	Spec        Spec          `yaml:"spec"`
-	Vault       CertVault     `yaml:"vault"`
 	HostPath    string        `yaml:"hostPath"`
 	RenewBefore time.Duration `yaml:"renewBefore"`
 	Trigger     []string      `yaml:"trigger"`
@@ -44,10 +43,11 @@ type Secret struct {
 }
 
 type Vault struct {
-	Server  string        `yaml:"server"`
-	Auth    Auth          `yaml:"auth"`
-	KV      KV            `yaml:"kv"`
-	Timeout time.Duration `yaml:"timeout"`
+	Server      string        `yaml:"server"`
+	Auth        Auth          `yaml:"auth"`
+	Certificate CertVault     `yaml:"certificate"`
+	KV          KV            `yaml:"kv"`
+	Timeout     time.Duration `yaml:"timeout"`
 }
 
 type Auth struct {
@@ -55,6 +55,12 @@ type Auth struct {
 	CABundle    string    `yaml:"caBundle"`
 	Bootstrap   Bootstrap `yaml:"bootstrap"`
 	AppRole     AppRole   `yaml:"appRole"`
+}
+
+type CertVault struct {
+	Role       string `yaml:"role"`
+	CAPath     string `yaml:"CAPath"`
+	RootCAPath string `yaml:"rootCAPath"`
 }
 
 type Bootstrap struct {
@@ -99,12 +105,6 @@ type Subject struct {
 	PostalCode         []string `yaml:"postalCode"`
 	StreetAddress      []string `yaml:"streetAddress"`
 	SerialNumber       string   `yaml:"serialNumber"`
-}
-
-type CertVault struct {
-	Role       string `yaml:"role"`
-	Path       string `yaml:"path"`
-	RootCAPath string `yaml:"rootCAPath"`
 }
 
 type PrivateKey struct {

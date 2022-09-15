@@ -14,11 +14,19 @@ import (
 )
 
 type vault struct {
-	cli         *api.Client
+	cli *api.Client
+
+	role        string
+	caPath      string
+	rootCAPath  string
 	kvMountPath string
+
+	certificate map[string]config.Certificate
+	key         map[string]config.Key
+	secret      map[string]config.Secret
 }
 
-func Connect(cfg config.Vault) (controller.Vault, error) {
+func Connect(cfg config.Vault) (controller.Issuer, error) {
 	client, err := api.NewClient(
 		&api.Config{
 			Address: cfg.Server,
@@ -38,8 +46,16 @@ func Connect(cfg config.Vault) (controller.Vault, error) {
 	}
 
 	s := &vault{
-		cli:         client,
+		cli: client,
+
+		role:        cfg.Certificate.Role,
+		caPath:      cfg.Certificate.CAPath,
+		rootCAPath:  cfg.Certificate.RootCAPath,
 		kvMountPath: cfg.KV.Path,
+
+		certificate: make(map[string]config.Certificate),
+		key:         make(map[string]config.Key),
+		secret:      make(map[string]config.Secret),
 	}
 
 	roleID, err := s.roleID(cfg.Auth.AppRole)
@@ -138,14 +154,14 @@ func (s *vault) Write(path string, data map[string]interface{}) (map[string]inte
 }
 
 // Put in KV.
-func (s *vault) Put(secretePath string, data map[string]interface{}) error {
-	_, err := s.cli.KVv2(s.kvMountPath).Put(context.Background(), secretePath, data)
+func (s *vault) Put(kvMountPath, secretePath string, data map[string]interface{}) error {
+	_, err := s.cli.KVv2(kvMountPath).Put(context.Background(), secretePath, data)
 	return err
 }
 
 // Get from KV.
-func (s *vault) Get(secretePath string) (map[string]interface{}, error) {
-	sec, err := s.cli.KVv2(s.kvMountPath).Get(context.Background(), secretePath)
+func (s *vault) Get(kvMountPath, secretePath string) (map[string]interface{}, error) {
+	sec, err := s.cli.KVv2(kvMountPath).Get(context.Background(), secretePath)
 	if sec != nil {
 		return sec.Data, err
 	}
