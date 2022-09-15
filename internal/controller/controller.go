@@ -12,11 +12,11 @@ import (
 )
 
 type Config interface {
-	GetNewConfig() (cfgs config.Config, err error)
+	GetNewConfig() (config.Config, error)
 }
 
 type Issuer interface {
-	AddResource(r config.Resources)
+	AddResource(config.Resources)
 	CheckResource()
 }
 
