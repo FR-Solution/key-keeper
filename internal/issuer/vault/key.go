@@ -3,7 +3,6 @@ package vault
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"go.uber.org/zap"
 
@@ -23,7 +22,7 @@ func (s *vault) checkKeyPair(i config.Key) {
 		zap.L().Debug("key is read", zap.String("name", i.Name))
 	}
 
-	if err := s.saveKeyOnHost(path.Join(i.HostPath, i.Name), private, public); err != nil {
+	if err := s.saveKeyOnHost(i.HostPath, private, public); err != nil {
 		zap.L().Error(
 			"save key in host",
 			zap.String("name", i.Name),
@@ -36,7 +35,7 @@ func (s *vault) checkKeyPair(i config.Key) {
 }
 
 func (s *vault) readKey(i config.Key) (private []byte, public []byte, err error) {
-	storedKye, err := s.Get(s.kvMountPath,i.Name)
+	storedKye, err := s.Get(s.kvMountPath, i.Name)
 	if err != nil {
 		err = fmt.Errorf("get from vault_kv : %w", err)
 		return

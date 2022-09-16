@@ -22,7 +22,7 @@ func (s *vault) checkSecret(i config.Secret) {
 		zap.L().Debug("secret is read", zap.String("name", i.Name))
 	}
 
-	if err := s.storeSecret(path.Join(i.HostPath, i.Name), secret); err != nil {
+	if err := s.storeSecret(i.HostPath, secret); err != nil {
 		zap.L().Error(
 			"store secrete in host",
 			zap.String("name", i.Name),

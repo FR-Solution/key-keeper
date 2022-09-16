@@ -97,6 +97,7 @@ func createCSR(spec config.Spec) (crt, key []byte, err error) {
 		err = fmt.Errorf("get ip addresses: %w", err)
 		return
 	}
+
 	template := x509.CertificateRequest{
 		Subject: pkix.Name{
 			CommonName:         spec.Subject.CommonName,
