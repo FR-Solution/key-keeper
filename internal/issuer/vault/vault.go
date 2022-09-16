@@ -26,7 +26,7 @@ type vault struct {
 	secret      map[string]config.Secret
 }
 
-func Connect(cfg config.Vault) (controller.Issuer, error) {
+func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 	client, err := api.NewClient(
 		&api.Config{
 			Address: cfg.Server,
@@ -41,7 +41,7 @@ func Connect(cfg config.Vault) (controller.Issuer, error) {
 	client.SetToken(cfg.Auth.Bootstrap.Token)
 	if !cfg.Auth.TLSInsecure {
 		if err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle}); err != nil {
-			return nil, fmt.Errorf("configurate tls: %w", err)
+			return nil, fmt.Errorf("configuring tls: %w", err)
 		}
 	}
 
@@ -58,11 +58,11 @@ func Connect(cfg config.Vault) (controller.Issuer, error) {
 		secret:      make(map[string]config.Secret),
 	}
 
-	roleID, err := s.roleID(cfg.Auth.AppRole)
+	roleID, err := s.roleID(name, cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get role id: %w", err)
 	}
-	secretID, err := s.secretID(cfg.Auth.AppRole)
+	secretID, err := s.secretID(name, cfg.Auth.AppRole)
 	if err != nil {
 		return nil, fmt.Errorf("get secret id: %w", err)
 	}
@@ -88,14 +88,16 @@ func Connect(cfg config.Vault) (controller.Issuer, error) {
 	return s, nil
 }
 
-func (s *vault) roleID(appRole config.AppRole) (string, error) {
-	path := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
-	approle, err := s.Read(path)
+func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
+	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
+	localPath := path.Join(appRole.LocalPath, "role-id-"+name)
+
+	approle, err := s.Read(vaultPath)
 	if err != nil {
-		if roleID, rErr := readFromFile(appRole.RoleIDLocalPath); rErr == nil {
+		if roleID, rErr := readFromFile(localPath); rErr == nil {
 			return string(roleID), nil
 		}
-		return "", fmt.Errorf("read role_id for path: %s : %w", path, err)
+		return "", fmt.Errorf("read role_id for path: %s : %w", vaultPath, err)
 	}
 	if approle == nil {
 		return "", fmt.Errorf("no role_id info was returned")
@@ -105,20 +107,23 @@ func (s *vault) roleID(appRole config.AppRole) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
-	if err = writeToFile(appRole.RoleIDLocalPath, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", appRole.RoleIDLocalPath, err)
+
+	if err = writeToFile(localPath, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", localPath, err)
 	}
 	return roleID.(string), err
 }
 
-func (s *vault) secretID(appRole config.AppRole) (string, error) {
-	path := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
-	approle, err := s.Write(path, nil)
+func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
+	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
+	localPath := path.Join(appRole.LocalPath, "secret-id-"+name)
+
+	approle, err := s.Write(vaultPath, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(appRole.SecretIDLocalPath); rErr == nil {
+		if secretID, rErr := readFromFile(localPath); rErr == nil {
 			return string(secretID), nil
 		}
-		return "", fmt.Errorf("read secrete_id for path: %s : %w", path, err)
+		return "", fmt.Errorf("read secrete_id for path: %s : %w", vaultPath, err)
 	}
 	if approle == nil {
 		return "", fmt.Errorf("no secrete_id info was returned")
@@ -129,8 +134,8 @@ func (s *vault) secretID(appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(appRole.SecretIDLocalPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.SecretIDLocalPath, err)
+	if err = writeToFile(localPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", localPath, err)
 	}
 	return secretID.(string), err
 }
