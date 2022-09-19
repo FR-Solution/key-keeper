@@ -11,7 +11,8 @@ issuers: # Описывает список доступных issuers
         appRole: # блок авторизации в Vault по аппроли
           name: string # rename $approle_name
           path: string # rename $approle_path
-          localPath: string # rename $local_path_to_role_id
+          roleIDLocalPath: string # rename $local_path_to_role_id
+          secretIDLocalPath: string
       kv:
         path: string
       certificate:

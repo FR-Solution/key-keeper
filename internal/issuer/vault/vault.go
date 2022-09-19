@@ -89,7 +89,7 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 }
 
 func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
-	if roleID, rErr := readFromFile(appRole.LocalPath); rErr == nil {
+	if roleID, rErr := readFromFile(appRole.RoleIDLocalPath); rErr == nil {
 		return string(roleID), nil
 	}
 
@@ -107,14 +107,14 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found role_id")
 	}
 
-	if err = writeToFile(appRole.LocalPath, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", appRole.LocalPath, err)
+	if err = writeToFile(appRole.RoleIDLocalPath, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", appRole.RoleIDLocalPath, err)
 	}
 	return roleID.(string), err
 }
 
 func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
-	if secretID, rErr := readFromFile(appRole.LocalPath); rErr == nil {
+	if secretID, rErr := readFromFile(appRole.SecretIDLocalPath); rErr == nil {
 		return string(secretID), nil
 	}
 
@@ -132,8 +132,8 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(appRole.LocalPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.LocalPath, err)
+	if err = writeToFile(appRole.RoleIDLocalPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.RoleIDLocalPath, err)
 	}
 	return secretID.(string), err
 }

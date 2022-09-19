@@ -68,9 +68,10 @@ type Bootstrap struct {
 }
 
 type AppRole struct {
-	Name      string `yaml:"name"`
-	Path      string `yaml:"path"`
-	LocalPath string `yaml:"localPath"`
+	Name              string `yaml:"name"`
+	Path              string `yaml:"path"`
+	RoleIDLocalPath   string `yaml:"roleIDLocalPath"`
+	SecretIDLocalPath string `yaml:"secreteIDLocalPath"`
 }
 
 type KV struct {
