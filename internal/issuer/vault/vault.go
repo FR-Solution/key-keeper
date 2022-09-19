@@ -108,7 +108,7 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 	}
 
 	if err = writeToFile(appRole.RoleIDLocalPath, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", appRole.RoleIDLocalPath, err)
+		return "", fmt.Errorf("save role id path: %s : %w", appRole.RoleIDLocalPath, err)
 	}
 	return roleID.(string), err
 }
@@ -133,7 +133,7 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 	}
 
 	if err = writeToFile(appRole.RoleIDLocalPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.RoleIDLocalPath, err)
+		return "", fmt.Errorf("save secret id path: %s : %w", appRole.RoleIDLocalPath, err)
 	}
 	return secretID.(string), err
 }
