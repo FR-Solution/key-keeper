@@ -3,7 +3,6 @@ package vault
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"go.uber.org/zap"
 

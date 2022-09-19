@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/hashicorp/vault/api"
@@ -89,14 +90,17 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 }
 
 func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
-	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
-	localPath := path.Join(appRole.LocalPath, "role-id-"+name)
+	if roleID, rErr := readFromFile(appRole.LocalPath); rErr == nil {
+		return string(roleID), nil
+	}
 
+	if err := os.MkdirAll(appRole.LocalPath, 0600); err != nil {
+		return "", fmt.Errorf("mkdir all %s : %w", appRole.LocalPath, err)
+	}
+
+	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
 	approle, err := s.Read(vaultPath)
 	if err != nil {
-		if roleID, rErr := readFromFile(localPath); rErr == nil {
-			return string(roleID), nil
-		}
 		return "", fmt.Errorf("read role_id for path: %s : %w", vaultPath, err)
 	}
 	if approle == nil {
@@ -108,21 +112,24 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found role_id")
 	}
 
-	if err = writeToFile(localPath, roleID.(string)); err != nil {
-		return "", fmt.Errorf("save role id path: %s id: %w", localPath, err)
+	if err = writeToFile(appRole.LocalPath, roleID.(string)); err != nil {
+		return "", fmt.Errorf("save role id path: %s id: %w", appRole.LocalPath, err)
 	}
 	return roleID.(string), err
 }
 
 func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
-	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
-	localPath := path.Join(appRole.LocalPath, "secret-id-"+name)
+	if secretID, rErr := readFromFile(appRole.LocalPath); rErr == nil {
+		return string(secretID), nil
+	}
 
+	if err := os.MkdirAll(appRole.LocalPath, 0600); err != nil {
+		return "", fmt.Errorf("mkdir all %s : %w", appRole.LocalPath, err)
+	}
+
+	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
 	approle, err := s.Write(vaultPath, nil)
 	if err != nil {
-		if secretID, rErr := readFromFile(localPath); rErr == nil {
-			return string(secretID), nil
-		}
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", vaultPath, err)
 	}
 	if approle == nil {
@@ -134,8 +141,8 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(localPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s id: %w", localPath, err)
+	if err = writeToFile(appRole.LocalPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s id: %w", appRole.LocalPath, err)
 	}
 	return secretID.(string), err
 }
