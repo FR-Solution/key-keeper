@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,7 +38,7 @@ func (s *config) GetNewConfig() (newCfg Config, err error) {
 	}
 
 	for _, path := range list {
-		data, err := ioutil.ReadFile(path)
+		data, err := os.ReadFile(path)
 		if err != nil {
 			zap.L().Error("read config file", zap.String("path", path), zap.Error(err))
 			continue

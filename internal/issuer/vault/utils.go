@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
+	"path"
 )
 
 func storeKeyPair(path string, name string, crt, key []byte) error {
@@ -40,9 +41,10 @@ func readFromFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-func writeToFile(path, date string) error {
-	if err := os.MkdirAll(path, 0644); err != nil {
-		return fmt.Errorf("mkdir all %s : %w", path, err)
+func writeToFile(filepath, date string) error {
+	dir := path.Dir(filepath)
+	if err := os.MkdirAll(dir, 0644); err != nil {
+		return fmt.Errorf("mkdir all %s : %w", dir, err)
 	}
-	return os.WriteFile(path, []byte(date), 0644)
+	return os.WriteFile(filepath, []byte(date), 0644)
 }

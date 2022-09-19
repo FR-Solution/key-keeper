@@ -71,7 +71,7 @@ type AppRole struct {
 	Name              string `yaml:"name"`
 	Path              string `yaml:"path"`
 	RoleIDLocalPath   string `yaml:"roleIDLocalPath"`
-	SecretIDLocalPath string `yaml:"secreteIDLocalPath"`
+	SecretIDLocalPath string `yaml:"secretIDLocalPath"`
 }
 
 type KV struct {
