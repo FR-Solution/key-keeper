@@ -132,8 +132,8 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(appRole.RoleIDLocalPath, secretID.(string)); err != nil {
-		return "", fmt.Errorf("save secret id path: %s : %w", appRole.RoleIDLocalPath, err)
+	if err = writeToFile(appRole.SecretIDLocalPath, secretID.(string)); err != nil {
+		return "", fmt.Errorf("save secret id path: %s : %w", appRole.SecretIDLocalPath, err)
 	}
 	return secretID.(string), err
 }
