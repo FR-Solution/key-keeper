@@ -8,7 +8,7 @@ import (
 )
 
 func storeKeyPair(path string, name string, crt, key []byte) error {
-	if err := os.MkdirAll(path, 0600); err != nil {
+	if err := os.MkdirAll(path, 0644); err != nil {
 		return fmt.Errorf("mkdir all %s : %w", path, err)
 	}
 
@@ -41,7 +41,7 @@ func readFromFile(path string) ([]byte, error) {
 }
 
 func writeToFile(path, date string) error {
-	if err := os.MkdirAll(path, 0600); err != nil {
+	if err := os.MkdirAll(path, 0644); err != nil {
 		return fmt.Errorf("mkdir all %s : %w", path, err)
 	}
 	return os.WriteFile(path, []byte(date), 0644)
