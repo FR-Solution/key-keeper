@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"path"
 
 	"github.com/hashicorp/vault/api"
@@ -94,10 +93,6 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 		return string(roleID), nil
 	}
 
-	if err := os.MkdirAll(appRole.LocalPath, 0600); err != nil {
-		return "", fmt.Errorf("mkdir all %s : %w", appRole.LocalPath, err)
-	}
-
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
 	approle, err := s.Read(vaultPath)
 	if err != nil {
@@ -121,10 +116,6 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 	if secretID, rErr := readFromFile(appRole.LocalPath); rErr == nil {
 		return string(secretID), nil
-	}
-
-	if err := os.MkdirAll(appRole.LocalPath, 0600); err != nil {
-		return "", fmt.Errorf("mkdir all %s : %w", appRole.LocalPath, err)
 	}
 
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
