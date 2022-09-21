@@ -25,7 +25,7 @@ func (s *vault) CheckResource() {
 	zap.L().Debug("checking")
 	wg := &sync.WaitGroup{}
 
-	zap.L().Debug("certificate-intermediate-ca")
+	zap.L().Debug("certificate-ca")
 	for _, cert := range s.certificate {
 		wg.Add(1)
 		go func(c config.Certificate) {
