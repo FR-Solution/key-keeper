@@ -90,6 +90,11 @@ func (s *controller) getNewResource() error {
 			)
 			continue
 		}
+		zap.L().Info(
+			"preparing resource",
+			zap.String("issuer_name", issuer.Name),
+			zap.String("step", "connect to issuer"),
+		)
 
 		s.issuer.Store(issuer.Name, conn)
 	}
