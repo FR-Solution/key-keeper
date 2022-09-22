@@ -39,7 +39,7 @@ func New(
 
 // Start controller of key-keeper.
 func (s *controller) Start() {
-	t := time.NewTicker(time.Hour)
+	t := time.NewTicker(5 * time.Minute)
 	defer t.Stop()
 	for range t.C {
 		s.issuer.Range(func(key, value any) bool {
