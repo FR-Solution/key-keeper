@@ -24,6 +24,7 @@ import (
 func (s *vault) checkCertificate(certCfg config.Certificate) {
 	cert, err := readCertificate(certCfg.HostPath, certCfg.Name)
 	if cert != nil && time.Until(cert.NotAfter) > certCfg.RenewBefore {
+		zap.L().Info("read certificate", zap.Float64("remaining time", time.Until(cert.NotAfter).Hours()))
 		return
 	}
 	if err != nil && !os.IsNotExist(err) {
