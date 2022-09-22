@@ -2,7 +2,6 @@ package vault
 
 import (
 	"fmt"
-	"sync"
 
 	"go.uber.org/zap"
 
@@ -23,13 +22,9 @@ func (s *vault) AddResource(r config.Resources) {
 
 func (s *vault) CheckResource() {
 	zap.L().Debug("checking")
-	wg := &sync.WaitGroup{}
 
-	zap.L().Debug("certificate-ca")
 	for _, cert := range s.certificate {
-		wg.Add(1)
 		go func(c config.Certificate) {
-			defer wg.Done()
 			if c.IsCA {
 				s.checkCA(c)
 				return
@@ -37,17 +32,12 @@ func (s *vault) CheckResource() {
 			s.checkCertificate(c)
 		}(cert)
 	}
-	wg.Wait()
 
-	zap.L().Debug("secrets")
 	for _, secret := range s.secret {
-		wg.Add(1)
 		go func(secret config.Secret) {
-			defer wg.Done()
 			s.checkSecret(secret)
 		}(secret)
 	}
-	wg.Wait()
 
 	zap.L().Debug("done")
 }
