@@ -43,6 +43,7 @@ func (s *vault) CheckResource() {
 	for _, secret := range s.secret {
 		wg.Add(1)
 		go func(secret config.Secret) {
+			defer wg.Done()
 			s.checkSecret(secret)
 		}(secret)
 	}
