@@ -2,7 +2,6 @@ package vault
 
 import (
 	"fmt"
-	"os"
 
 	"go.uber.org/zap"
 
@@ -21,7 +20,7 @@ func (s *vault) checkSecret(i config.Secret) {
 		zap.L().Debug("secret is read", zap.String("name", i.Name))
 	}
 
-	if err := s.storeSecret(i.HostPath, secret); err != nil {
+	if err := writeToFile(i.HostPath, secret); err != nil {
 		zap.L().Error(
 			"store secrete in host",
 			zap.String("name", i.Name),
@@ -44,11 +43,4 @@ func (s *vault) readSecret(i config.Secret) (secrete []byte, err error) {
 		secrete = []byte(data.(string))
 	}
 	return
-}
-
-func (s *vault) storeSecret(path string, secret []byte) error {
-	if err := os.WriteFile(path, secret, 0600); err != nil {
-		return fmt.Errorf("failed to save secrete with path %s: %w", path, err)
-	}
-	return nil
 }

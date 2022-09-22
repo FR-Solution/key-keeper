@@ -22,7 +22,6 @@ type vault struct {
 	kvMountPath string
 
 	certificate map[string]config.Certificate
-	key         map[string]config.Key
 	secret      map[string]config.Secret
 }
 
@@ -54,7 +53,6 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 		kvMountPath: cfg.KV.Path,
 
 		certificate: make(map[string]config.Certificate),
-		key:         make(map[string]config.Key),
 		secret:      make(map[string]config.Secret),
 	}
 
@@ -107,7 +105,7 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found role_id")
 	}
 
-	if err = writeToFile(appRole.RoleIDLocalPath, roleID.(string)); err != nil {
+	if err = writeToFile(appRole.RoleIDLocalPath, []byte(roleID.(string))); err != nil {
 		return "", fmt.Errorf("save role id path: %s : %w", appRole.RoleIDLocalPath, err)
 	}
 	return roleID.(string), err
@@ -132,7 +130,7 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("not found secrete_id")
 	}
 
-	if err = writeToFile(appRole.SecretIDLocalPath, secretID.(string)); err != nil {
+	if err = writeToFile(appRole.SecretIDLocalPath, []byte(secretID.(string))); err != nil {
 		return "", fmt.Errorf("save secret id path: %s : %w", appRole.SecretIDLocalPath, err)
 	}
 	return secretID.(string), err

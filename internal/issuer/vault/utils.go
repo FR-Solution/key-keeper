@@ -41,10 +41,10 @@ func readFromFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-func writeToFile(filepath, date string) error {
+func writeToFile(filepath string, date []byte) error {
 	dir := path.Dir(filepath)
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath, []byte(date), 0644)
+	return os.WriteFile(filepath, date, 0644)
 }

@@ -14,7 +14,6 @@ type Issuer struct {
 
 type Resources struct {
 	Certificates []Certificate `yaml:"certificates"`
-	Keys         []Key         `yaml:"keys"`
 	Secrets      []Secret      `yaml:"secrets"`
 }
 
@@ -27,12 +26,6 @@ type Certificate struct {
 	HostPath    string        `yaml:"hostPath"`
 	RenewBefore time.Duration `yaml:"renewBefore"`
 	Trigger     []string      `yaml:"trigger"`
-}
-
-type Key struct {
-	Name      string    `yaml:"name"`
-	IssuerRef IssuerRef `yaml:"issuerRef"`
-	HostPath  string    `yaml:"hostPath"`
 }
 
 type Secret struct {

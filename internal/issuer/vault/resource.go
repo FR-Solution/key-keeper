@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -12,11 +13,9 @@ func (s *vault) AddResource(r config.Resources) {
 	for _, cert := range r.Certificates {
 		s.certificate[cert.Name] = cert
 	}
-	for _, key := range r.Keys {
-		s.key[key.Name] = key
-	}
-	for _, secret := range r.Secrets {
-		s.secret[secret.Name] = secret
+	for i, secret := range r.Secrets {
+		name := fmt.Sprintf("%s-%d", secret.Name, i)
+		s.secret[name] = secret
 	}
 	s.CheckResource()
 }
@@ -38,14 +37,6 @@ func (s *vault) CheckResource() {
 		}(cert)
 	}
 	wg.Wait()
-
-	zap.L().Debug("keys")
-	for _, key := range s.key {
-		wg.Add(1)
-		go func(k config.Key) {
-			s.checkKeyPair(k)
-		}(key)
-	}
 
 	zap.L().Debug("secrets")
 	for _, secret := range s.secret {

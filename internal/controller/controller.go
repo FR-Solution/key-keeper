@@ -122,12 +122,6 @@ func (s *controller) separateResources(cfg config.Resources) map[string]config.R
 		r[cert.IssuerRef.Name] = resources
 	}
 
-	for _, key := range cfg.Keys {
-		resources := r[key.IssuerRef.Name]
-		resources.Keys = append(resources.Keys, key)
-		r[key.IssuerRef.Name] = resources
-	}
-
 	for _, secret := range cfg.Secrets {
 		resources := r[secret.IssuerRef.Name]
 		resources.Secrets = append(resources.Secrets, secret)
