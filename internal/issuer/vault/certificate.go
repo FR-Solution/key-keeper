@@ -193,13 +193,13 @@ func inSlice(str string, sl []string) bool {
 	return false
 }
 
-func trigger(name string, trigger []string) {
+func trigger(name string, trigger [][]string) {
 	for _, command := range trigger {
-		if err := exec.Command(command).Run(); err != nil {
+		if err := exec.Command(command[0]).Run(); err != nil {
 			zap.L().Error(
 				"certificate trigger",
 				zap.String("name", name),
-				zap.String("command", command),
+				zap.Strings("command", command),
 				zap.Error(err),
 			)
 			continue
@@ -207,7 +207,7 @@ func trigger(name string, trigger []string) {
 		zap.L().Info(
 			"certificate trigger",
 			zap.String("name", name),
-			zap.String("command", command),
+			zap.Strings("command", command),
 		)
 	}
 }

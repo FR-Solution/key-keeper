@@ -25,7 +25,7 @@ type Certificate struct {
 	Spec        Spec          `yaml:"spec"`
 	HostPath    string        `yaml:"hostPath"`
 	RenewBefore time.Duration `yaml:"renewBefore"`
-	Trigger     []string      `yaml:"trigger"`
+	Trigger     [][]string    `yaml:"trigger"`
 }
 
 type Secret struct {
