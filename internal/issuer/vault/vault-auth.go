@@ -39,13 +39,13 @@ func (s *vault) auth(name string, a config.Auth) error {
 	}
 
 	go func() {
-		t := time.NewTimer(ttl)
+		t := time.NewTimer(ttl / 2)
 		for range t.C {
 			ttl, err := s.updateAuthToken(appRoleAuth)
 			if err != nil {
 				zap.L().Error("update auth token", zap.Error(err))
 			}
-			t.Reset(ttl)
+			t.Reset(ttl / 2)
 		}
 	}()
 	return nil
@@ -57,15 +57,15 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 	}
 
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "role-id")
-	approle, err := s.Read(vaultPath)
+	role, err := s.Read(vaultPath)
 	if err != nil {
 		return "", fmt.Errorf("read role_id for path: %s : %w", vaultPath, err)
 	}
-	if approle == nil {
+	if role == nil {
 		return "", fmt.Errorf("no role_id info was returned")
 	}
 
-	roleID, ok := approle["role_id"]
+	roleID, ok := role["role_id"]
 	if !ok {
 		return "", fmt.Errorf("not found role_id")
 	}
@@ -82,15 +82,15 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 	}
 
 	vaultPath := path.Join("auth", appRole.Path, "role", appRole.Name, "secret-id")
-	approle, err := s.Write(vaultPath, nil)
+	secret, err := s.Write(vaultPath, nil)
 	if err != nil {
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", vaultPath, err)
 	}
-	if approle == nil {
+	if secret == nil {
 		return "", fmt.Errorf("no secrete_id info was returned")
 	}
 
-	secretID, ok := approle["secret_id"]
+	secretID, ok := secret["secret_id"]
 	if !ok {
 		return "", fmt.Errorf("not found secrete_id")
 	}
