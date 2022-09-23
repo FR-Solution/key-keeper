@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
-	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -49,16 +48,7 @@ func (s *vault) checkCertificate(certCfg config.Certificate) {
 		return
 	}
 
-	for _, command := range certCfg.Trigger {
-		cmd := strings.Split(command, " ")
-		err := exec.Command(cmd[0], cmd[1:]...).Run()
-		zap.L().Error(
-			"certificate trigger",
-			zap.String("name", certCfg.Name),
-			zap.String("command", command),
-			zap.Error(err),
-		)
-	}
+	trigger(certCfg.Name, certCfg.Trigger)
 	zap.L().Info("certificate generated", zap.String("name", certCfg.Name))
 }
 
@@ -201,4 +191,23 @@ func inSlice(str string, sl []string) bool {
 		}
 	}
 	return false
+}
+
+func trigger(name string, trigger []string) {
+	for _, command := range trigger {
+		if err := exec.Command(command).Run(); err != nil {
+			zap.L().Error(
+				"certificate trigger",
+				zap.String("name", name),
+				zap.String("command", command),
+				zap.Error(err),
+			)
+			continue
+		}
+		zap.L().Info(
+			"certificate trigger",
+			zap.String("name", name),
+			zap.String("command", command),
+		)
+	}
 }
