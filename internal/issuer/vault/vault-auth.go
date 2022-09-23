@@ -27,6 +27,7 @@ func (s *vault) auth(name string, a config.Auth) error {
 		&auth.SecretID{
 			FromString: secretID,
 		},
+		auth.WithMountPath(a.AppRole.Path),
 	)
 	if err != nil {
 		return err
