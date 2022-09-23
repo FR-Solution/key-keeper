@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"time"
 
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
+	"go.uber.org/zap"
 
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
@@ -83,6 +85,8 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 	if authInfo == nil {
 		return nil, fmt.Errorf("no auth info was returned after login")
 	}
+
+	go s.authWorker(authInfo)
 	return s, nil
 }
 
@@ -134,6 +138,34 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("save secret id path: %s : %w", appRole.SecretIDLocalPath, err)
 	}
 	return secretID.(string), err
+}
+
+func (s *vault) authWorker(auth *api.Secret) {
+	token, err := auth.TokenID()
+	if err != nil {
+		zap.L().Error("get token from vault", zap.Error(err))
+	}
+	s.cli.SetToken(token)
+
+	ttl, err := auth.TokenTTL()
+	if err != nil {
+		zap.L().Error("get token ttl from vault", zap.Error(err))
+	}
+
+	t := time.NewTimer(ttl)
+	for range t.C {
+		token, err := auth.TokenID()
+		if err != nil {
+			zap.L().Error("get token from vault", zap.Error(err))
+		}
+		s.cli.SetToken(token)
+
+		ttl, err := auth.TokenTTL()
+		if err != nil {
+			zap.L().Error("get token ttl from vault", zap.Error(err))
+		}
+		t.Reset(ttl)
+	}
 }
 
 // Read secret from vault by path.
