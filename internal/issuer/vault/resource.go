@@ -13,9 +13,10 @@ func (s *vault) AddResource(r config.Resources) {
 		name := fmt.Sprintf("%s-%d", cert.Name, i)
 		s.certificate[name] = cert
 	}
-	for i, secret := range r.Secrets {
-		name := fmt.Sprintf("%s-%d", secret.Name, i)
-		s.secret[name] = secret
+	for _, secret := range r.Secrets {
+		go func(secret config.Secret) {
+			s.checkSecret(secret)
+		}(secret)
 	}
 	s.CheckResource()
 }
@@ -31,12 +32,6 @@ func (s *vault) CheckResource() {
 			}
 			s.checkCertificate(c)
 		}(cert)
-	}
-
-	for _, secret := range s.secret {
-		go func(secret config.Secret) {
-			s.checkSecret(secret)
-		}(secret)
 	}
 
 	zap.L().Debug("done")

@@ -20,7 +20,6 @@ type vault struct {
 	kvMountPath string
 
 	certificate map[string]config.Certificate
-	secret      map[string]config.Secret
 }
 
 func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
@@ -51,7 +50,6 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 		kvMountPath: cfg.KV.Path,
 
 		certificate: make(map[string]config.Certificate),
-		secret:      make(map[string]config.Secret),
 	}
 	return s, s.auth(name, cfg.Auth)
 }
