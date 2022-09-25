@@ -4,7 +4,9 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"os"
 	"path"
+	"reflect"
 	"time"
 
 	"go.uber.org/zap"
@@ -19,11 +21,13 @@ func (s *vault) checkCA(cert config.Certificate) {
 	)
 
 	defer func() {
-		if err := storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
-			zap.L().Error(
-				"stored intermediate-ca",
-				zap.Error(err),
-			)
+		if isInfoChanged(cert.HostPath, cert.Name, crt, key) {
+			if err := storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
+				zap.L().Error(
+					"stored intermediate-ca",
+					zap.Error(err),
+				)
+			}
 		}
 	}()
 
@@ -131,4 +135,19 @@ func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
 		}
 	}
 	return
+}
+
+func isInfoChanged(storePath string, name string, crt, key []byte) bool {
+	if crt != nil {
+		if data, err := os.ReadFile(path.Join(storePath, name+".pem")); err != nil || reflect.DeepEqual(crt, data) {
+			return true
+		}
+	}
+
+	if key != nil {
+		if data, err := os.ReadFile(path.Join(storePath, name+"-key.pem")); err != nil || reflect.DeepEqual(key, data) {
+			return true
+		}
+	}
+	return false
 }

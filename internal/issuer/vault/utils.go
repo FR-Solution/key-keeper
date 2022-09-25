@@ -8,19 +8,19 @@ import (
 	"path"
 )
 
-func storeKeyPair(path string, name string, crt, key []byte) error {
-	if err := os.MkdirAll(path, 0644); err != nil {
-		return fmt.Errorf("mkdir all %s : %w", path, err)
+func storeKeyPair(storePath string, name string, crt, key []byte) error {
+	if err := os.MkdirAll(storePath, 0644); err != nil {
+		return fmt.Errorf("mkdir all %s : %w", storePath, err)
 	}
 
 	if crt != nil {
-		if err := os.WriteFile(path+"/"+name+".pem", crt, 0644); err != nil {
-			return fmt.Errorf("failed to save certificate with path %s: %w", path, err)
+		if err := os.WriteFile(path.Join(storePath, name+".pem"), crt, 0644); err != nil {
+			return fmt.Errorf("failed to save certificate with path %s: %w", storePath, err)
 		}
 	}
 
 	if key != nil {
-		if err := os.WriteFile(path+"/"+name+"-key.pem", key, 0600); err != nil {
+		if err := os.WriteFile(path.Join(storePath, name+"-key.pem"), key, 0600); err != nil {
 			return fmt.Errorf("failed to save key file: %w", err)
 		}
 	}
