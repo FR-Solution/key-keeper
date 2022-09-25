@@ -195,7 +195,14 @@ func inSlice(str string, sl []string) bool {
 
 func trigger(name string, trigger [][]string) {
 	for _, command := range trigger {
-		if err := exec.Command(command[0]).Run(); err != nil {
+		var err error
+		if len(command) == 1 {
+			err = exec.Command(command[0]).Run()
+		} else {
+			err = exec.Command(command[0], command[1:]...).Run()
+		}
+
+		if err != nil {
 			zap.L().Error(
 				"certificate trigger",
 				zap.String("name", name),
