@@ -30,7 +30,7 @@ func (s *vault) checkCertificate(certCfg config.Certificate) {
 		zap.L().Error("read", zap.String("path", certCfg.HostPath), zap.Error(err))
 	}
 
-	if os.IsNotExist(err) && certCfg.WithUpdate {
+	if os.IsNotExist(err) || certCfg.WithUpdate {
 		crt, key, err := s.generateCertificate(certCfg.Spec)
 		if err != nil {
 			zap.L().Error(
