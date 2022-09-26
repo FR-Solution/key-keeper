@@ -51,7 +51,8 @@ certificates: # Описывает список доступных certificates
         dnsLookup: list of string
       ttl: string # на какой промежуток времени заказывается сертификат
     hostPath: string # путь, где будет размещен секрет по маске ${hostPathCert}/${certName}
-    renewBefore: string # за сколько до истечения надо перевыпустить
+    withUpdate: bool
+    updateBefore: string # за сколько до истечения надо перевыпустить
     trigger: list of list of string # список bash команд которые применятся после обновления сертификата
 
 secrets: # Описывает список доступных secrete

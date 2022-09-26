@@ -39,7 +39,7 @@ func (s *vault) checkCA(cert config.Certificate) {
 		if err != nil {
 			err = fmt.Errorf("parse : %w", err)
 		}
-		if ca != nil && time.Until(ca.NotAfter) < cert.RenewBefore {
+		if ca != nil && time.Until(ca.NotAfter) < cert.UpdateBefore {
 			err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
 		}
 	}

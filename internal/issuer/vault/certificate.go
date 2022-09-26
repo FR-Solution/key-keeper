@@ -22,34 +22,37 @@ import (
 
 func (s *vault) checkCertificate(certCfg config.Certificate) {
 	cert, err := readCertificate(certCfg.HostPath, certCfg.Name)
-	if cert != nil && time.Until(cert.NotAfter) > certCfg.RenewBefore {
-		zap.L().Info("read certificate", zap.Float64("remaining time", time.Until(cert.NotAfter).Hours()))
+	if cert != nil && time.Until(cert.NotAfter) > certCfg.UpdateBefore {
+		zap.L().Info("read", zap.Float64("remaining time", time.Until(cert.NotAfter).Hours()))
 		return
 	}
 	if err != nil && !os.IsNotExist(err) {
-		zap.L().Error("read certificate", zap.String("path", certCfg.HostPath), zap.Error(err))
+		zap.L().Error("read", zap.String("path", certCfg.HostPath), zap.Error(err))
 	}
 
-	crt, key, err := s.generateCertificate(certCfg.Spec)
-	if err != nil {
-		zap.L().Error(
-			"generate certificate",
-			zap.String("name", certCfg.Name),
-			zap.Error(err),
-		)
-	}
+	if os.IsNotExist(err) && certCfg.WithUpdate {
+		crt, key, err := s.generateCertificate(certCfg.Spec)
+		if err != nil {
+			zap.L().Error(
+				"generate",
+				zap.String("certificate_name", certCfg.Name),
+				zap.Error(err),
+			)
+		}
 
-	if err = storeKeyPair(certCfg.HostPath, certCfg.Name, crt, key); err != nil {
-		zap.L().Error(
-			"store certificate",
-			zap.String("name", certCfg.Name),
-			zap.Error(err),
-		)
-		return
-	}
+		err = storeKeyPair(certCfg.HostPath, certCfg.Name, crt, key)
+		if err != nil {
+			zap.L().Error(
+				"store",
+				zap.String("certificate_name", certCfg.Name),
+				zap.Error(err),
+			)
+			return
+		}
 
-	trigger(certCfg.Name, certCfg.Trigger)
-	zap.L().Info("certificate generated", zap.String("name", certCfg.Name))
+		trigger(certCfg.Name, certCfg.Trigger)
+		zap.L().Info("generated", zap.String("certificate_name", certCfg.Name))
+	}
 }
 
 func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error) {
@@ -108,7 +111,7 @@ func createCSR(spec config.Spec) (crt, key []byte, err error) {
 
 	csr, err := x509.CreateCertificateRequest(rand.Reader, &template, pk)
 	if err != nil {
-		err = fmt.Errorf("create certificate request: %w", err)
+		err = fmt.Errorf("create request: %w", err)
 		return
 	}
 
@@ -204,16 +207,16 @@ func trigger(name string, trigger [][]string) {
 
 		if err != nil {
 			zap.L().Error(
-				"certificate trigger",
-				zap.String("name", name),
+				"trigger",
+				zap.String("certificate_name", name),
 				zap.Strings("command", command),
 				zap.Error(err),
 			)
 			continue
 		}
 		zap.L().Info(
-			"certificate trigger",
-			zap.String("name", name),
+			"trigger",
+			zap.String("certificate_name", name),
 			zap.Strings("command", command),
 		)
 	}

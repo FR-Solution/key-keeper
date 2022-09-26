@@ -12,24 +12,22 @@ func (s *vault) checkSecret(i config.Secret) {
 	secret, err := s.readSecret(i)
 	if err != nil {
 		zap.L().Warn(
-			"read secret",
-			zap.String("name", i.Name),
+			"read",
+			zap.String("secret_name", i.Name),
 			zap.Error(err),
 		)
-	} else {
-		zap.L().Debug("secret is read", zap.String("name", i.Name))
 	}
 
 	if err := writeToFile(i.HostPath, secret); err != nil {
 		zap.L().Error(
-			"store secrete in host",
-			zap.String("name", i.Name),
+			"store in host",
+			zap.String("secret_name", i.Name),
 			zap.String("path", i.HostPath),
 			zap.Error(err),
 		)
 		return
 	}
-	zap.L().Debug("secret is stored", zap.String("name", i.Name))
+	zap.L().Debug("secret is stored", zap.String("secret_name", i.Name))
 }
 
 func (s *vault) readSecret(i config.Secret) (secrete []byte, err error) {
