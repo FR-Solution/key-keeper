@@ -22,6 +22,7 @@ type vault struct {
 	certificate map[string]config.Certificate
 }
 
+// Connect to vault issuer.
 func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 	client, err := api.NewClient(
 		&api.Config{

@@ -22,6 +22,7 @@ type controller struct {
 	issuer sync.Map
 }
 
+// New returns controller.
 func New(
 	config func() (config.Config, error),
 	vaultConnector func(name string, cfg config.Vault) (Issuer, error),
@@ -32,12 +33,13 @@ func New(
 	}
 }
 
-// Start controller of key-keeper.
+// Start controller.
 func (s *controller) Start() error {
 	if err := s.getNewResource(); err != nil {
 		return err
 	}
 
+	// start getting new resources and issuers
 	go func() {
 		for range time.NewTicker(30 * time.Second).C {
 			if err := s.getNewResource(); err != nil {
@@ -46,6 +48,7 @@ func (s *controller) Start() error {
 		}
 	}()
 
+	// start resource checking
 	go func() {
 		for range time.NewTicker(time.Hour).C {
 			s.issuer.Range(func(key, value any) bool {
@@ -78,43 +81,25 @@ func (s *controller) getNewResource() error {
 
 		conn, err := s.issuerConnector(issuer.Name, issuer.Vault)
 		if err != nil {
-			zap.L().Error(
-				"issuer_connect",
-				zap.String("issuer_name", issuer.Name),
-				zap.String("status", "failed"),
-				zap.Error(err),
-			)
+			zap.L().Error("issuer_connect", zap.String("issuer_name", issuer.Name), zap.Error(err))
 			continue
 		}
 
 		s.issuer.Store(issuer.Name, conn)
 
-		zap.L().Debug(
-			"issuer_connect",
-			zap.String("issuer_name", issuer.Name),
-			zap.String("status", "success"),
-		)
+		zap.L().Debug("issuer_connect", zap.String("issuer_name", issuer.Name))
 	}
 
 	resources := s.separateResourcesByIssuers(cfg.Resource)
 	for issuerName, rCfg := range resources {
 		issuer, isExist := s.issuer.Load(issuerName)
 		if !isExist {
-			zap.L().Error(
-				"add_resource",
-				zap.String("issuer_name", issuerName),
-				zap.String("status", "failed"),
-				zap.Error(errIssuerIsNotExist),
-			)
+			zap.L().Error("add_resource", zap.String("issuer_name", issuerName), zap.Error(errIssuerIsNotExist))
 			continue
 		}
 		issuer.(Issuer).AddResource(rCfg)
 
-		zap.L().Debug(
-			"add_resource",
-			zap.String("issuer_name", issuerName),
-			zap.String("status", "success"),
-		)
+		zap.L().Debug("add_resource", zap.String("issuer_name", issuerName))
 	}
 	return nil
 }

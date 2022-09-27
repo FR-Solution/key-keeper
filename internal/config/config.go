@@ -16,6 +16,7 @@ type config struct {
 	oldConfig map[string]struct{}
 }
 
+// New return interface for work with config.
 func New(configDir, configNameLayout string) (*config, error) {
 	reg, err := regexp.Compile(configNameLayout)
 	if err != nil {
