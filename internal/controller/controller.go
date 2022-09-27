@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -11,114 +10,116 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-type Config interface {
-	GetNewConfig() (config.Config, error)
-}
-
 type Issuer interface {
 	AddResource(config.Resources)
 	CheckResource()
 }
 
 type controller struct {
-	config          Config
+	getConfig       func() (config.Config, error)
 	issuerConnector func(name string, cfg config.Vault) (Issuer, error)
 
 	issuer sync.Map
 }
 
 func New(
-	config Config,
+	config func() (config.Config, error),
 	vaultConnector func(name string, cfg config.Vault) (Issuer, error),
 ) *controller {
 	return &controller{
-		config:          config,
+		getConfig:       config,
 		issuerConnector: vaultConnector,
 	}
 }
 
 // Start controller of key-keeper.
-func (s *controller) Start() {
-	t := time.NewTicker(5 * time.Minute)
-	defer t.Stop()
-	for range t.C {
-		s.issuer.Range(func(key, value any) bool {
-			value.(Issuer).CheckResource()
-			return true
-		})
-	}
-}
-
-func (s *controller) RefreshResource() {
+func (s *controller) Start() error {
 	if err := s.getNewResource(); err != nil {
-		zap.L().Error("refresh resources", zap.Error(err))
+		return err
 	}
-	t := time.NewTicker(30 * time.Second)
-	defer t.Stop()
-	for range t.C {
-		if err := s.getNewResource(); err != nil {
-			zap.L().Error("refresh resources", zap.Error(err))
+
+	go func() {
+		for range time.NewTicker(30 * time.Second).C {
+			if err := s.getNewResource(); err != nil {
+				zap.L().Error("refresh_resources", zap.Error(err))
+			}
 		}
-	}
+	}()
+
+	go func() {
+		for range time.NewTicker(time.Hour).C {
+			s.issuer.Range(func(key, value any) bool {
+				value.(Issuer).CheckResource()
+				return true
+			})
+		}
+	}()
+
+	return nil
 }
 
 func (s *controller) getNewResource() error {
-	cfg, err := s.config.GetNewConfig()
+	cfg, err := s.getConfig()
 	if err != nil {
 		return fmt.Errorf("get new configs: %w", err)
 	}
 
 	for _, issuer := range cfg.Issuers {
-		// TODO: что делать если приходит несколько issuer с одинаковыми именами
 		_, isExist := s.issuer.Load(issuer.Name)
 		if isExist {
-			zap.L().Warn(
-				"preparing resource",
+			zap.L().Error(
+				"issuer_connect",
 				zap.String("issuer_name", issuer.Name),
-				zap.String("step", "connect to issuer"),
-				zap.Error(errors.New("issuer is exist")),
+				zap.String("status", "failed"),
+				zap.Error(errIssuerIsExist),
 			)
 			continue
 		}
+
 		conn, err := s.issuerConnector(issuer.Name, issuer.Vault)
 		if err != nil {
 			zap.L().Error(
-				"preparing resource",
+				"issuer_connect",
 				zap.String("issuer_name", issuer.Name),
-				zap.String("step", "connect to issuer"),
+				zap.String("status", "failed"),
 				zap.Error(err),
 			)
 			continue
 		}
-		zap.L().Info(
-			"preparing resource",
-			zap.String("issuer_name", issuer.Name),
-			zap.String("step", "connect to issuer"),
-		)
 
 		s.issuer.Store(issuer.Name, conn)
+
+		zap.L().Debug(
+			"issuer_connect",
+			zap.String("issuer_name", issuer.Name),
+			zap.String("status", "success"),
+		)
 	}
 
-	resources := s.separateResources(cfg.Resource)
+	resources := s.separateResourcesByIssuers(cfg.Resource)
 	for issuerName, rCfg := range resources {
-		r, isExist := s.issuer.Load(issuerName)
+		issuer, isExist := s.issuer.Load(issuerName)
 		if !isExist {
-			zap.L().Warn(
-				"preparing resource",
+			zap.L().Error(
+				"add_resource",
 				zap.String("issuer_name", issuerName),
-				zap.String("step", "add recource"),
-				zap.Error(errors.New("issuer is not exist")),
+				zap.String("status", "failed"),
+				zap.Error(errIssuerIsNotExist),
 			)
 			continue
 		}
-		r.(Issuer).AddResource(rCfg)
-	}
+		issuer.(Issuer).AddResource(rCfg)
 
+		zap.L().Debug(
+			"add_resource",
+			zap.String("issuer_name", issuerName),
+			zap.String("status", "success"),
+		)
+	}
 	return nil
 }
 
-func (s *controller) separateResources(cfg config.Resources) map[string]config.Resources {
-	// TODO: что делать если приходит несколько ресурсов с одинаковыми именами для одного issuer
+func (s *controller) separateResourcesByIssuers(cfg config.Resources) map[string]config.Resources {
 	r := make(map[string]config.Resources)
 
 	for _, cert := range cfg.Certificates {

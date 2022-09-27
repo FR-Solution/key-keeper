@@ -1,17 +1,14 @@
 package vault
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 
 	"github.com/fraima/key-keeper/internal/config"
 )
 
 func (s *vault) AddResource(r config.Resources) {
-	for i, cert := range r.Certificates {
-		name := fmt.Sprintf("%s-%d", cert.Name, i)
-		s.certificate[name] = cert
+	for _, cert := range r.Certificates {
+		s.certificate[cert.Name] = cert
 	}
 	for _, secret := range r.Secrets {
 		go func(secret config.Secret) {

@@ -47,15 +47,19 @@ func main() {
 	zap.L().Debug("configuration", zap.Any("config", cfg), zap.String("version", Version))
 
 	cntl := controller.New(
-		cfg,
+		cfg.GetNewConfig,
 		vault.Connect,
 	)
-	go cntl.RefreshResource()
-	go cntl.Start()
+
+	if err := cntl.Start(); err != nil {
+		zap.L().Fatal("start controller", zap.Error(err))
+	}
 
 	zap.L().Info("started")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 	<-ch
+
+	zap.L().Info("goodbye")
 }

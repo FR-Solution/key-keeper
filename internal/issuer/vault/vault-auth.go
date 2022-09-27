@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	"fmt"
+	"os"
 	"path"
 	"time"
 
@@ -43,7 +44,7 @@ func (s *vault) auth(name string, a config.Auth) error {
 		for range t.C {
 			ttl, err := s.updateAuthToken(appRoleAuth)
 			if err != nil {
-				zap.L().Error("update auth token", zap.Error(err))
+				zap.L().Error("update auth token", zap.String("issuer_name", name), zap.Error(err))
 			}
 			t.Reset(ttl / 2)
 		}
@@ -52,7 +53,7 @@ func (s *vault) auth(name string, a config.Auth) error {
 }
 
 func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
-	if roleID, rErr := readFromFile(appRole.RoleIDLocalPath); rErr == nil {
+	if roleID, rErr := os.ReadFile(appRole.RoleIDLocalPath); rErr == nil {
 		return string(roleID), nil
 	}
 
@@ -77,7 +78,7 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 }
 
 func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
-	if secretID, rErr := readFromFile(appRole.SecretIDLocalPath); rErr == nil {
+	if secretID, rErr := os.ReadFile(appRole.SecretIDLocalPath); rErr == nil {
 		return string(secretID), nil
 	}
 

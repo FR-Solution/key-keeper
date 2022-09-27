@@ -2,11 +2,8 @@ package vault
 
 import (
 	"crypto/x509"
-	"encoding/pem"
 	"fmt"
-	"os"
 	"path"
-	"reflect"
 	"time"
 
 	"go.uber.org/zap"
@@ -15,60 +12,44 @@ import (
 )
 
 func (s *vault) checkCA(cert config.Certificate) {
+	logger := zap.L().With(zap.String("resource_type", "intermediate_ca"), zap.String("name", cert.Name))
+
 	var (
 		crt, key []byte
 		err      error
 	)
 
 	defer func() {
-		if isInfoChanged(cert.HostPath, cert.Name, crt, key) {
-			if err := storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
-				zap.L().Error(
-					"stored intermediate-ca",
-					zap.Error(err),
-				)
-			}
+		if err := storeKeyPair(cert.HostPath, cert.Name, crt, key); err != nil {
+			logger.Error("store", zap.Error(err))
 		}
+		logger.Debug("store")
 	}()
 
 	crt, key, err = s.readCA(s.caPath)
 	if err == nil {
 		var ca *x509.Certificate
-		pBlock, _ := pem.Decode(crt)
-		ca, err = x509.ParseCertificate(pBlock.Bytes)
-		if err != nil {
-			err = fmt.Errorf("parse : %w", err)
-		}
-		if ca != nil && time.Until(ca.NotAfter) < cert.UpdateBefore {
-			err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
+		ca, err = parseCertificate(crt)
+		if err == nil {
+			logger.Debug("ttl", zap.Float64("remaining time(h)", time.Until(ca.NotAfter).Hours()))
+			if time.Until(ca.NotAfter) < cert.UpdateBefore {
+				err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
+			}
 		}
 	}
 
-	if err != nil {
-		zap.L().Warn(
-			"intermediate ca",
-			zap.String("name", cert.Name),
-			zap.Error(err),
-		)
-	} else {
+	if err == nil {
 		return
 	}
+	logger.Warn("check", zap.Error(err))
 
 	if cert.CA.Generate {
 		crt, key, err = s.generateCA(cert)
 		if err != nil {
-			zap.L().Error(
-				"generate intermediate-ca",
-				zap.String("name", cert.Name),
-				zap.Error(err),
-			)
+			logger.Error("generate", zap.Error(err))
 			return
-		} else {
-			zap.L().Info(
-				"intermediate-ca generated",
-				zap.String("name", cert.Name),
-			)
 		}
+		zap.L().Info("generated")
 	}
 }
 
@@ -90,7 +71,6 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 		return
 	}
 
-	// send the  intermediate ca 's CSR to the root CA for signing
 	icaData := map[string]interface{}{
 		"csr":    csr["csr"],
 		"format": "pem_bundle",
@@ -114,11 +94,11 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 		return
 	}
 
-	if c, ok := ica["certificate"]; ok {
-		crt = []byte(c.(string))
+	if data, ok := ica["certificate"]; ok {
+		crt = []byte(data.(string))
 	}
-	if k, ok := csr["private_key"]; ok {
-		key = []byte(k.(string))
+	if data, ok := csr["private_key"]; ok {
+		key = []byte(data.(string))
 	}
 	return
 }
@@ -135,19 +115,4 @@ func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
 		}
 	}
 	return
-}
-
-func isInfoChanged(storePath string, name string, crt, key []byte) bool {
-	if crt != nil {
-		if data, err := os.ReadFile(path.Join(storePath, name+".pem")); err != nil || reflect.DeepEqual(crt, data) {
-			return true
-		}
-	}
-
-	if key != nil {
-		if data, err := os.ReadFile(path.Join(storePath, name+"-key.pem")); err != nil || reflect.DeepEqual(key, data) {
-			return true
-		}
-	}
-	return false
 }

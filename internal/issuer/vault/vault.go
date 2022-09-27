@@ -34,9 +34,11 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
+
 	client.SetToken(cfg.Auth.Bootstrap.Token)
 	if !cfg.Auth.TLSInsecure {
-		if err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle}); err != nil {
+		err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle})
+		if err != nil {
 			return nil, fmt.Errorf("configuring tls: %w", err)
 		}
 	}
@@ -72,13 +74,13 @@ func (s *vault) Write(path string, data map[string]interface{}) (map[string]inte
 	return nil, err
 }
 
-// Put in KV.
+// Put in Vault KV.
 func (s *vault) Put(kvMountPath, secretePath string, data map[string]interface{}) error {
 	_, err := s.cli.KVv2(kvMountPath).Put(context.Background(), secretePath, data)
 	return err
 }
 
-// Get from KV.
+// Get from Vault KV.
 func (s *vault) Get(kvMountPath, secretePath string) (map[string]interface{}, error) {
 	sec, err := s.cli.KVv2(kvMountPath).Get(context.Background(), secretePath)
 	if sec != nil {

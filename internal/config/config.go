@@ -31,7 +31,7 @@ func New(configDir, configNameLayout string) (*config, error) {
 }
 
 // GetNewConfig return new config from config dir.
-func (s *config) GetNewConfig() (newCfg Config, err error) {
+func (s *config) GetNewConfig() (cfg Config, err error) {
 	list, err := s.getNewConfigFiles()
 	if err != nil {
 		return
@@ -43,15 +43,16 @@ func (s *config) GetNewConfig() (newCfg Config, err error) {
 			zap.L().Error("read config file", zap.String("path", path), zap.Error(err))
 			continue
 		}
-		var cfg Config
-		if err = yaml.Unmarshal(data, &cfg); err != nil {
+
+		var tmpCfg Config
+		if err = yaml.Unmarshal(data, &tmpCfg); err != nil {
 			zap.L().Error("unmarshal config file", zap.String("path", path), zap.Error(err))
 			continue
 		}
 
-		newCfg.Issuers = append(newCfg.Issuers, cfg.Issuers...)
-		newCfg.Resource.Certificates = append(newCfg.Resource.Certificates, cfg.Resource.Certificates...)
-		newCfg.Resource.Secrets = append(newCfg.Resource.Secrets, cfg.Resource.Secrets...)
+		cfg.Issuers = append(cfg.Issuers, tmpCfg.Issuers...)
+		cfg.Resource.Certificates = append(cfg.Resource.Certificates, tmpCfg.Resource.Certificates...)
+		cfg.Resource.Secrets = append(cfg.Resource.Secrets, tmpCfg.Resource.Secrets...)
 		s.oldConfig[path] = struct{}{}
 	}
 

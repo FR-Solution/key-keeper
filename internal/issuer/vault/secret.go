@@ -9,36 +9,27 @@ import (
 )
 
 func (s *vault) checkSecret(i config.Secret) {
+	logger := zap.L().With(zap.String("resource_type", "secret"), zap.String("name", i.Name))
+
 	secret, err := s.readSecret(i)
 	if err != nil {
-		zap.L().Warn(
-			"read",
-			zap.String("secret_name", i.Name),
-			zap.Error(err),
-		)
+		logger.Warn("read", zap.Error(err))
 	}
 
-	if err := writeToFile(i.HostPath, secret); err != nil {
-		zap.L().Error(
-			"store in host",
-			zap.String("secret_name", i.Name),
-			zap.String("path", i.HostPath),
-			zap.Error(err),
-		)
-		return
+	err = writeToFile(i.HostPath, secret)
+	if err != nil {
+		zap.L().Error("store", zap.String("path", i.HostPath), zap.Error(err))
 	}
-	zap.L().Debug("secret is stored", zap.String("secret_name", i.Name))
 }
 
-func (s *vault) readSecret(i config.Secret) (secrete []byte, err error) {
+func (s *vault) readSecret(i config.Secret) ([]byte, error) {
 	storedSecrete, err := s.Get(s.kvMountPath, i.Name)
 	if err != nil {
-		err = fmt.Errorf("get from vault_kv : %w", err)
-		return
+		return nil, fmt.Errorf("get from vault_kv : %w", err)
 	}
 
 	if data, ok := storedSecrete[i.Key]; ok {
-		secrete = []byte(data.(string))
+		return []byte(data.(string)), nil
 	}
-	return
+	return nil, fmt.Errorf("secrete not found : %w", err)
 }

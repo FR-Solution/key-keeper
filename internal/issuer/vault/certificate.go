@@ -20,38 +20,36 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *vault) checkCertificate(certCfg config.Certificate) {
-	cert, err := readCertificate(certCfg.HostPath, certCfg.Name)
-	if cert != nil && time.Until(cert.NotAfter) > certCfg.UpdateBefore {
-		zap.L().Info("read", zap.Float64("remaining time", time.Until(cert.NotAfter).Hours()))
+func (s *vault) checkCertificate(cert config.Certificate) {
+	logger := zap.L().With(zap.String("resource_type", "certificate"), zap.String("name", cert.Name))
+
+	crt, err := readCertificate(cert.HostPath, cert.Name)
+	if crt != nil {
+		logger.Debug("ttl", zap.Float64("remaining time(h)", time.Until(crt.NotAfter).Hours()))
+		if time.Until(crt.NotAfter) < cert.UpdateBefore {
+			err = fmt.Errorf("expired until(h) %f", time.Until(crt.NotAfter).Hours())
+		}
+	}
+
+	if err == nil {
 		return
 	}
-	if err != nil && !os.IsNotExist(err) {
-		zap.L().Error("read", zap.String("path", certCfg.HostPath), zap.Error(err))
-	}
+	zap.L().Warn("check", zap.Error(err))
 
-	if os.IsNotExist(err) || certCfg.WithUpdate {
-		crt, key, err := s.generateCertificate(certCfg.Spec)
+	if os.IsNotExist(err) || cert.WithUpdate {
+		crt, key, err := s.generateCertificate(cert.Spec)
 		if err != nil {
-			zap.L().Error(
-				"generate",
-				zap.String("certificate_name", certCfg.Name),
-				zap.Error(err),
-			)
+			zap.L().Error("generate", zap.Error(err))
 		}
 
-		err = storeKeyPair(certCfg.HostPath, certCfg.Name, crt, key)
+		err = storeKeyPair(cert.HostPath, cert.Name, crt, key)
 		if err != nil {
-			zap.L().Error(
-				"store",
-				zap.String("certificate_name", certCfg.Name),
-				zap.Error(err),
-			)
+			zap.L().Error("store", zap.Error(err))
 			return
 		}
 
-		trigger(certCfg.Name, certCfg.Trigger)
-		zap.L().Info("generated", zap.String("certificate_name", certCfg.Name))
+		trigger(cert.Trigger, logger)
+		zap.L().Debug("generated")
 	}
 }
 
@@ -196,7 +194,7 @@ func inSlice(str string, sl []string) bool {
 	return false
 }
 
-func trigger(name string, trigger [][]string) {
+func trigger(trigger [][]string, logger *zap.Logger) {
 	for _, command := range trigger {
 		var err error
 		if len(command) == 1 {
@@ -206,18 +204,9 @@ func trigger(name string, trigger [][]string) {
 		}
 
 		if err != nil {
-			zap.L().Error(
-				"trigger",
-				zap.String("certificate_name", name),
-				zap.Strings("command", command),
-				zap.Error(err),
-			)
+			logger.Error("trigger", zap.Strings("command", command), zap.Error(err))
 			continue
 		}
-		zap.L().Info(
-			"trigger",
-			zap.String("certificate_name", name),
-			zap.Strings("command", command),
-		)
+		logger.Debug("trigger", zap.Strings("command", command))
 	}
 }
