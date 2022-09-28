@@ -8,6 +8,7 @@ issuers: # Описывает список доступных issuers
         tlsInsecure: bool # new при указании тру скипать ssl верификацию
         bootstrap: # блок авторизации в Vault по бутстрап токену
           tokenPath: string # rename $bootstrap_token
+          file: string
         appRole: # блок авторизации в Vault по аппроли
           name: string # rename $approle_name
           path: string # rename $approle_path

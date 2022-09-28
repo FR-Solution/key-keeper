@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/hashicorp/vault/api"
 
@@ -36,7 +37,12 @@ func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
 
-	client.SetToken(cfg.Auth.Bootstrap.Token)
+	token, err := getToken(cfg.Auth.Bootstrap)
+	if err != nil {
+		return nil, fmt.Errorf("get vault token: %w", err)
+	}
+
+	client.SetToken(token)
 	if !cfg.Auth.TLSInsecure {
 		err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle})
 		if err != nil {
@@ -88,4 +94,13 @@ func (s *vault) Get(kvMountPath, secretePath string) (map[string]interface{}, er
 		return sec.Data, err
 	}
 	return nil, err
+}
+
+func getToken(b config.Bootstrap) (string, error) {
+	if b.Token != "" {
+		return b.Token, nil
+	}
+
+	data, err := os.ReadFile(b.File)
+	return string(data), err
 }

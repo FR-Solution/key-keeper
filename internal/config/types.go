@@ -59,6 +59,7 @@ type CertVault struct {
 
 type Bootstrap struct {
 	Token string `yaml:"token"`
+	File  string `yaml:"file"`
 }
 
 type AppRole struct {
