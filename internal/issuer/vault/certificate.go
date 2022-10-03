@@ -90,6 +90,12 @@ func createCSR(spec config.Spec) (crt, key []byte, err error) {
 		return
 	}
 
+	dnsNames, err := getDNSNames(spec.Hostnames)
+	if err != nil {
+		err = fmt.Errorf("get hostname: %w", err)
+		return
+	}
+
 	template := x509.CertificateRequest{
 		Subject: pkix.Name{
 			CommonName:         spec.Subject.CommonName,
@@ -103,7 +109,7 @@ func createCSR(spec config.Spec) (crt, key []byte, err error) {
 			SerialNumber:       spec.Subject.SerialNumber,
 		},
 		IPAddresses:        ips,
-		DNSNames:           spec.Hostnames,
+		DNSNames:           dnsNames,
 		SignatureAlgorithm: x509.SHA256WithRSA,
 	}
 
@@ -183,6 +189,17 @@ func getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 		r = append(r, ip)
 	}
 	return r, nil
+}
+
+func getDNSNames(src []string) ([]string, error) {
+	var err error
+	for i, hostname := range src {
+		if hostname == "$HOSTNAME" {
+			src[i], err = os.Hostname()
+			break
+		}
+	}
+	return src, err
 }
 
 func inSlice(str string, sl []string) bool {
