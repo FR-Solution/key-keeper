@@ -18,8 +18,8 @@ func storeKeyPair(storePath string, name string, crt, key []byte) error {
 		crtPath := path.Join(storePath, name+".pem")
 		data, err := os.ReadFile(crtPath)
 		if err != nil || !reflect.DeepEqual(crt, data) {
-			if err := os.WriteFile(path.Join(crtPath, name+".pem"), crt, 0644); err != nil {
-				return fmt.Errorf("failed to save certificate with path %s: %w", storePath, err)
+			if err := os.WriteFile(crtPath, crt, 0644); err != nil {
+				return fmt.Errorf("failed to save certificate with path: %w", err)
 			}
 		}
 	}
@@ -28,7 +28,7 @@ func storeKeyPair(storePath string, name string, crt, key []byte) error {
 		keyPath := path.Join(storePath, name+"-key.pem")
 		data, err := os.ReadFile(keyPath)
 		if err != nil || !reflect.DeepEqual(key, data) {
-			if err := os.WriteFile(path.Join(storePath, name+"-key.pem"), key, 0600); err != nil {
+			if err := os.WriteFile(keyPath, key, 0600); err != nil {
 				return fmt.Errorf("failed to save key file: %w", err)
 			}
 		}
