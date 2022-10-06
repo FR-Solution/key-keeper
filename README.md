@@ -1,5 +1,6 @@
-### key-keeper 
-  инструмент для linux хостов, позволяющий заказывать в Vault хранилище сертификаты и секреты и следить за их актуальностью.
+### key-keeper
+
+инструмент для linux хостов, позволяющий заказывать в Vault хранилище сертификаты и секреты и следить за их актуальностью.
 
 ## Build & Push image
 
@@ -31,6 +32,11 @@ key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 ---
 issuers:
   - name: kubernetes-ca
+    role: kubelet-server
+    CAPath: "clusters/cluster-1/pki/kubernetes"
+    rootCAPath: "clusters/cluster-1/pki/root"
+    kv:
+      path: clusters/cluster-1/kv
     vault:
       server: http://example.com:9200
       auth:
@@ -42,14 +48,7 @@ issuers:
           name: kubernetes-ca
           path: "clusters/cluster-1/approle"
           secretIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/secret-id
-          roleIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/role-id
-      certificate:
-        role: kubelet-server
-        CAPath: "clusters/cluster-1/pki/kubernetes"
-        rootCAPath: "clusters/cluster-1/pki/root"
-      kv:
-        path: clusters/cluster-1/kv
-      timeout: 15s
+          roleIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/role-idW
 
 certificates:
   - name: kubernetes-ca

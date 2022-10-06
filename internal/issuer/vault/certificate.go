@@ -26,7 +26,7 @@ func (s *vault) checkCertificate(cert config.Certificate) {
 	crt, err := readCertificate(cert.HostPath, cert.Name)
 	if crt != nil {
 		logger.Debug("ttl", zap.Float64("remaining time(h)", time.Until(crt.NotAfter).Hours()))
-		if time.Until(crt.NotAfter) < cert.UpdateBefore {
+		if time.Until(crt.NotAfter) <= cert.UpdateBefore {
 			err = fmt.Errorf("expired until(h) %f", time.Until(crt.NotAfter).Hours())
 		}
 	}
@@ -65,7 +65,7 @@ func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error
 	}
 
 	vaultPath := path.Join(s.caPath, "sign", s.role)
-	cert, err := s.Write(vaultPath, certData)
+	cert, err := s.driver.Write(vaultPath, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with vault path %s : %w", vaultPath, err)
 	}

@@ -1,4 +1,4 @@
-package vault
+package driver
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *vault) auth(name string, a config.Auth) error {
+func (s *driver) auth(name string, a config.Auth) error {
 	roleID, err := s.roleID(name, a.AppRole)
 	if err != nil {
 		return fmt.Errorf("get role id: %w", err)
@@ -52,7 +52,7 @@ func (s *vault) auth(name string, a config.Auth) error {
 	return nil
 }
 
-func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
+func (s *driver) roleID(name string, appRole config.AppRole) (string, error) {
 	if roleID, rErr := os.ReadFile(appRole.RoleIDLocalPath); rErr == nil {
 		return string(roleID), nil
 	}
@@ -77,7 +77,7 @@ func (s *vault) roleID(name string, appRole config.AppRole) (string, error) {
 	return roleID.(string), err
 }
 
-func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
+func (s *driver) secretID(name string, appRole config.AppRole) (string, error) {
 	if secretID, rErr := os.ReadFile(appRole.SecretIDLocalPath); rErr == nil {
 		return string(secretID), nil
 	}
@@ -102,7 +102,7 @@ func (s *vault) secretID(name string, appRole config.AppRole) (string, error) {
 	return secretID.(string), err
 }
 
-func (s *vault) updateAuthToken(appRoleAuth *auth.AppRoleAuth) (time.Duration, error) {
+func (s *driver) updateAuthToken(appRoleAuth *auth.AppRoleAuth) (time.Duration, error) {
 	authInfo, err := s.cli.Auth().Login(context.Background(), appRoleAuth)
 	if err != nil {
 		return 0, err

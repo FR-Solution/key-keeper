@@ -11,13 +11,14 @@ import (
 )
 
 type Issuer interface {
+	Name() string
 	AddResource(config.Resources)
 	CheckResource()
 }
 
 type controller struct {
 	getConfig       func() (config.Config, error)
-	issuerConnector func(name string, cfg config.Vault) (Issuer, error)
+	issuerConnector func(cfg config.Issuer) (Issuer, error)
 
 	issuer sync.Map
 }
@@ -25,11 +26,11 @@ type controller struct {
 // New returns controller.
 func New(
 	config func() (config.Config, error),
-	vaultConnector func(name string, cfg config.Vault) (Issuer, error),
+	issuerConnector func(cfg config.Issuer) (Issuer, error),
 ) *controller {
 	return &controller{
 		getConfig:       config,
-		issuerConnector: vaultConnector,
+		issuerConnector: issuerConnector,
 	}
 }
 
@@ -51,8 +52,12 @@ func (s *controller) Start() error {
 	// start resource checking
 	go func() {
 		for range time.NewTicker(time.Hour).C {
+
 			s.issuer.Range(func(key, value any) bool {
-				value.(Issuer).CheckResource()
+				issuer := value.(Issuer)
+				zap.L().Debug("start_checking", zap.String("issuer", issuer.Name()))
+				issuer.CheckResource()
+				zap.L().Debug("finish_checking", zap.String("issuer", issuer.Name()))
 				return true
 			})
 		}
@@ -79,7 +84,7 @@ func (s *controller) getNewResource() error {
 			continue
 		}
 
-		conn, err := s.issuerConnector(issuer.Name, issuer.Vault)
+		conn, err := s.issuerConnector(issuer)
 		if err != nil {
 			zap.L().Error("issuer_connect", zap.String("issuer_name", issuer.Name), zap.Error(err))
 			continue

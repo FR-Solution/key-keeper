@@ -1,20 +1,21 @@
 package vault
 
 import (
-	"context"
-	"fmt"
-	"net/http"
-	"os"
-
-	"github.com/hashicorp/vault/api"
-
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 )
 
-type vault struct {
-	cli *api.Client
+type Driver interface {
+	Read(path string) (map[string]interface{}, error)
+	Write(path string, data map[string]interface{}) (map[string]interface{}, error)
+	Put(kvMountPath, secretePath string, data map[string]interface{}) error
+	Get(kvMountPath, secretePath string) (map[string]interface{}, error)
+}
 
+type vault struct {
+	driver Driver
+
+	name        string
 	role        string
 	caPath      string
 	rootCAPath  string
@@ -23,84 +24,53 @@ type vault struct {
 	certificate map[string]config.Certificate
 }
 
-// Connect to vault issuer.
-func Connect(name string, cfg config.Vault) (controller.Issuer, error) {
-	client, err := api.NewClient(
-		&api.Config{
-			Address: cfg.Server,
-			HttpClient: &http.Client{
-				Timeout: cfg.Timeout,
-			},
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("new vault client: %w", err)
-	}
-
-	token, err := getToken(cfg.Auth.Bootstrap)
-	if err != nil {
-		return nil, fmt.Errorf("get vault token: %w", err)
-	}
-
-	client.SetToken(token)
-	if !cfg.Auth.TLSInsecure {
-		err = client.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle})
+func Connector(
+	connect func(name string, cfg config.Vault) (Driver, error),
+) func(cfg config.Issuer) (controller.Issuer, error) {
+	return func(cfg config.Issuer) (controller.Issuer, error) {
+		driver, err := connect(cfg.Name, cfg.Vault)
 		if err != nil {
-			return nil, fmt.Errorf("configuring tls: %w", err)
+			return nil, err
 		}
+
+		return &vault{
+			driver: driver,
+
+			name:        cfg.Name,
+			role:        cfg.Role,
+			caPath:      cfg.CAPath,
+			rootCAPath:  cfg.RootCAPath,
+			kvMountPath: cfg.KV.Path,
+
+			certificate: make(map[string]config.Certificate),
+		}, nil
 	}
-
-	s := &vault{
-		cli: client,
-
-		role:        cfg.Certificate.Role,
-		caPath:      cfg.Certificate.CAPath,
-		rootCAPath:  cfg.Certificate.RootCAPath,
-		kvMountPath: cfg.KV.Path,
-
-		certificate: make(map[string]config.Certificate),
-	}
-	return s, s.auth(name, cfg.Auth)
 }
 
-// Read secret from vault by path.
-func (s *vault) Read(path string) (map[string]interface{}, error) {
-	sec, err := s.cli.Logical().Read(path)
-	if sec != nil {
-		return sec.Data, err
-	}
-	return nil, err
+func (s *vault) Name() string {
+	return s.name
 }
 
-// Write secret in vault by path.
-func (s *vault) Write(path string, data map[string]interface{}) (map[string]interface{}, error) {
-	sec, err := s.cli.Logical().Write(path, data)
-	if sec != nil {
-		return sec.Data, err
+func (s *vault) AddResource(r config.Resources) {
+	for _, cert := range r.Certificates {
+		s.certificate[cert.Name] = cert
 	}
-	return nil, err
+	for _, secret := range r.Secrets {
+		go func(secret config.Secret) {
+			s.checkSecret(secret)
+		}(secret)
+	}
+	s.CheckResource()
 }
 
-// Put in Vault KV.
-func (s *vault) Put(kvMountPath, secretePath string, data map[string]interface{}) error {
-	_, err := s.cli.KVv2(kvMountPath).Put(context.Background(), secretePath, data)
-	return err
-}
-
-// Get from Vault KV.
-func (s *vault) Get(kvMountPath, secretePath string) (map[string]interface{}, error) {
-	sec, err := s.cli.KVv2(kvMountPath).Get(context.Background(), secretePath)
-	if sec != nil {
-		return sec.Data, err
+func (s *vault) CheckResource() {
+	for _, cert := range s.certificate {
+		go func(c config.Certificate) {
+			if c.IsCA {
+				s.checkCA(c)
+				return
+			}
+			s.checkCertificate(c)
+		}(cert)
 	}
-	return nil, err
-}
-
-func getToken(b config.Bootstrap) (string, error) {
-	if b.Token != "" {
-		return b.Token, nil
-	}
-
-	data, err := os.ReadFile(b.File)
-	return string(data), err
 }

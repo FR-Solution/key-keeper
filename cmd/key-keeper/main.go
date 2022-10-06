@@ -11,6 +11,7 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 	"github.com/fraima/key-keeper/internal/issuer/vault"
+	"github.com/fraima/key-keeper/internal/issuer/vault/driver"
 )
 
 var (
@@ -48,7 +49,9 @@ func main() {
 
 	cntl := controller.New(
 		cfg.GetNewConfig,
-		vault.Connect,
+		vault.Connector(
+			driver.Connect,
+		),
 	)
 
 	if err := cntl.Start(); err != nil {
