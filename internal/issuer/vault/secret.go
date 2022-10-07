@@ -23,7 +23,7 @@ func (s *vault) checkSecret(i config.Secret) {
 }
 
 func (s *vault) readSecret(i config.Secret) ([]byte, error) {
-	storedSecrete, err := s.driver.Get(s.kvMountPath, i.Name)
+	storedSecrete, err := s.driver.Get(i.KV.Path, i.Name)
 	if err != nil {
 		return nil, fmt.Errorf("get from vault_kv : %w", err)
 	}

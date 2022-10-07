@@ -15,11 +15,10 @@ type Driver interface {
 type vault struct {
 	driver Driver
 
-	name        string
-	role        string
-	caPath      string
-	rootCAPath  string
-	kvMountPath string
+	name       string
+	role       string
+	caPath     string
+	rootCAPath string
 
 	certificate map[string]config.Certificate
 }
@@ -36,11 +35,10 @@ func Connector(
 		return &vault{
 			driver: driver,
 
-			name:        cfg.Name,
-			role:        cfg.Role,
-			caPath:      cfg.CAPath,
-			rootCAPath:  cfg.RootCAPath,
-			kvMountPath: cfg.KV.Path,
+			name:       cfg.Name,
+			role:       cfg.Role,
+			caPath:     cfg.CAPath,
+			rootCAPath: cfg.RootCAPath,
 
 			certificate: make(map[string]config.Certificate),
 		}, nil
