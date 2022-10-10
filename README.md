@@ -26,11 +26,6 @@ key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 >
 > config-regexp - регуляроное выражения для имени файлов которые содержат конфиги для key-keeper
 
-## Пример конфига
-
-
-
-
 ## Описание структуры конфигов:
 
 #### ISSUERS:
