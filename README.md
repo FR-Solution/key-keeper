@@ -28,69 +28,8 @@ key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 
 ## Пример конфига
 
-```yaml
----
-issuers:
-  - name: kubernetes-ca
-    vault:
-      server: http://example.com:9200
-      auth:
-        caBundle:
-        tlsInsecure: true
-        bootstrap:
-          token: ${token}
-        appRole:
-          name: kubernetes-ca
-          path: "clusters/cluster-1/approle"
-          secretIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/secret-id
-          roleIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/role-idW
-      resource:
-        role: kubelet-server
-        CAPath: "clusters/cluster-1/pki/kubernetes"
-        rootCAPath: "clusters/cluster-1/pki/root"
 
-certificates:
-  - name: kubernetes-ca
-    issuerRef:
-      name: kubernetes-ca
-    isCa: true
-    ca:
-      exportedKey: false
-      generate: false
-    hostPath: "/etc/kubernetes/pki/ca"
 
-  - name: kubelet-server
-    issuerRef:
-      name: kubelet-server
-    spec:
-      subject:
-        commonName: "system:node:master-0.cluster-1.dobry-kot.ru"
-      usage:
-        - server auth
-      privateKey:
-        algorithm: "RSA"
-        encoding: "PKCS1"
-        size: 4096
-      ipAddresses:
-        interfaces:
-          - lo
-          - eth*
-      ttl: 200h
-      hostnames:
-        - localhost
-        - "master-0.cluster-1.dobry-kot.ru"
-    renewBefore: 100h
-    hostPath: "/etc/kubernetes/pki/certs/kubelet"
-
-secrets:
-  - name: kube-apiserver-sa
-    issuerRef:
-      name: kube-apiserver-sa
-    key: public
-    kv:
-      path: clusters/cluster-1/kv
-    hostPath: /etc/kubernetes/pki/certs/kube-apiserver/kube-apiserver-sa.pub
-```
 
 ## Описание структуры конфигов:
 
@@ -113,11 +52,34 @@ secrets:
 | `.vault.auth.appRole.secretIDLocalPath` | string | локальный путь, где будет искать secret_id для авторизации              |
 | `.vault.kv`                             | object | описание доступа в Vault к Key Value стореджу                           |
 | `.vault.kv.path`                        | string | путь в Vault до Key Value стореджа                                      |
-| `.vault.certificate`                    | object | инструция доступа к vault роли для выпуска сертификата                  |
-| `.vault.certificate.role`               | string | имя роли через которую будет выпускаться сертификат                     |
-| `.vault.certificate.CAPath `            | string | базовый путь PKI хранилища, где прописана роль                          |
-| `.vault.certificate.rootCAPath`         | string | базовый путь PKI root хранилища от кого будет выписываться intermediate |
+| `.vault.resource`                       | object | инструция доступа к vault роли для выпуска сертификата                  |
+| `.vault.resource.role`                  | string | имя роли через которую будет выпускаться сертификат                     |
+| `.vault.resource.CAPath `               | string | базовый путь PKI хранилища, где прописана роль                          |
+| `.vault.resource.rootCAPath`            | string | базовый путь PKI root хранилища от кого будет выписываться intermediate |
 | `.vault.timeout `                       | string | максимальное время ответа сервера Vault                                 |
+
+```yaml
+---
+issuers:
+  - name: kubernetes-ca
+    vault:
+      server: http://example.com:9200
+      auth:
+        caBundle:
+        tlsInsecure: true
+        bootstrap:
+          token: ${token}             # <- или
+          path: /tmp/bootstrap-token  # <- или
+        appRole:
+          name: kubernetes-ca
+          path: "clusters/cluster-1/approle"
+          secretIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/secret-id
+          roleIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/role-id
+      resource:
+        role: kubelet-server
+        CAPath: "clusters/cluster-1/pki/kubernetes"
+        rootCAPath: "clusters/cluster-1/pki/root"
+```
 
 #### CERTIFICATES:
 
@@ -157,6 +119,42 @@ secrets:
 | `.updateBefore`                    | string  | время до истечения сертификата - при достижении сертификат перевыпустится                 |
 | `.trigger`                         | list    | список баш команд, которые выполнятся после обновления сертификата                        |
 
+```yaml
+certificates:
+  - name: kubernetes-ca
+    issuerRef:
+      name: kubernetes-ca
+    isCa: true
+    ca:
+      exportedKey: false
+      generate: false
+    hostPath: "/etc/kubernetes/pki/ca"
+
+  - name: kubelet-server
+    issuerRef:
+      name: kubelet-server
+    spec:
+      subject:
+        commonName: "system:node:master-0.cluster-1.dobry-kot.ru"
+      usage:
+        - server auth
+      privateKey:
+        algorithm: "RSA"
+        encoding: "PKCS1"
+        size: 4096
+      ipAddresses:
+        interfaces:
+          - lo
+          - eth*
+      ttl: 200h
+      hostnames:
+        - localhost
+        - "master-0.cluster-1.dobry-kot.ru"
+    renewBefore: 100h
+    hostPath: "/etc/kubernetes/pki/certs/kubelet"
+
+```
+
 #### SECRETS:
 
 | ключ              | тип    | описание                                                           |
@@ -167,3 +165,14 @@ secrets:
 | `.issuerRef.name` | string | имя инструкции issuer                                              |
 | `.key`            | string | ключ в объекта секрета                                             |
 | `.hostPath`       | string | путь в локальной файловой системе, где будет сохранен секрет       |
+
+```yaml
+secrets:
+  - name: kube-apiserver-sa
+    issuerRef:
+      name: kube-apiserver-sa
+    key: public
+    kv:
+      path: clusters/cluster-1/kv
+    hostPath: /etc/kubernetes/pki/certs/kube-apiserver/kube-apiserver-sa.pub
+```
