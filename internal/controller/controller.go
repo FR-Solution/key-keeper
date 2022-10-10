@@ -51,7 +51,7 @@ func (s *controller) Start() error {
 
 	// start resource checking
 	go func() {
-		for range time.NewTicker(time.Hour).C {
+		for range time.NewTicker(30 * time.Second).C {
 
 			s.issuer.Range(func(key, value any) bool {
 				issuer := value.(Issuer)
