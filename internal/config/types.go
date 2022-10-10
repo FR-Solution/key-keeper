@@ -34,7 +34,6 @@ type Secret struct {
 	IssuerRef IssuerRef `yaml:"issuerRef"`
 	Key       string    `yaml:"key"`
 	HostPath  string    `yaml:"hostPath"`
-	KV        KV        `yaml:"kv"`
 }
 
 type Vault struct {
@@ -66,6 +65,7 @@ type Resource struct {
 	Role       string `yaml:"role"`
 	CAPath     string `yaml:"CAPath"`
 	RootCAPath string `yaml:"rootCAPath"`
+	KV         KV     `yaml:"kv"`
 }
 
 type KV struct {

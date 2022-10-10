@@ -48,6 +48,8 @@ issuers:
         role: kubelet-server
         CAPath: "clusters/cluster-1/pki/kubernetes"
         rootCAPath: "clusters/cluster-1/pki/root"
+        kv:
+          path: clusters/cluster-1/kv
 
 certificates:
   - name: kubernetes-ca
@@ -87,8 +89,6 @@ secrets:
     issuerRef:
       name: kube-apiserver-sa
     key: public
-    kv:
-      path: clusters/cluster-1/kv
     hostPath: /etc/kubernetes/pki/certs/kube-apiserver/kube-apiserver-sa.pub
 ```
 

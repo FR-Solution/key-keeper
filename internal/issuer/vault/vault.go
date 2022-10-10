@@ -19,6 +19,7 @@ type vault struct {
 	role       string
 	caPath     string
 	rootCAPath string
+	kv         string
 
 	certificate map[string]config.Certificate
 }
@@ -39,6 +40,7 @@ func Connector(
 			role:       cfg.Vault.Resource.Role,
 			caPath:     cfg.Vault.Resource.CAPath,
 			rootCAPath: cfg.Vault.Resource.RootCAPath,
+			kv:         cfg.Vault.Resource.KV.Path,
 
 			certificate: make(map[string]config.Certificate),
 		}, nil
