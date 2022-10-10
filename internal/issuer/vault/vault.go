@@ -1,6 +1,10 @@
 package vault
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"net"
+
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 )
@@ -15,13 +19,15 @@ type Client interface {
 type vault struct {
 	cli Client
 
-	name       string
-	role       string
-	caPath     string
-	rootCAPath string
-	kv         string
-
+	name        string
+	role        string
+	caPath      string
+	rootCAPath  string
+	kv          string
 	certificate map[string]config.Certificate
+
+	generateKey   func(size int) (*rsa.PrivateKey, error)
+	getInterfaces func() ([]net.Interface, error)
 }
 
 func Connector(
@@ -33,17 +39,23 @@ func Connector(
 			return nil, err
 		}
 
-		return &vault{
+		v := &vault{
 			cli: driver,
 
-			name:       cfg.Name,
-			role:       cfg.Vault.Resource.Role,
-			caPath:     cfg.Vault.Resource.CAPath,
-			rootCAPath: cfg.Vault.Resource.RootCAPath,
-			kv:         cfg.Vault.Resource.KV.Path,
-
+			name:        cfg.Name,
+			role:        cfg.Vault.Resource.Role,
+			caPath:      cfg.Vault.Resource.CAPath,
+			rootCAPath:  cfg.Vault.Resource.RootCAPath,
+			kv:          cfg.Vault.Resource.KV.Path,
 			certificate: make(map[string]config.Certificate),
-		}, nil
+		}
+
+		v.generateKey = func(size int) (*rsa.PrivateKey, error) {
+			return rsa.GenerateKey(rand.Reader, size)
+		}
+		v.getInterfaces = net.Interfaces
+
+		return v, nil
 	}
 }
 

@@ -2,7 +2,6 @@ package vault
 
 import (
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -54,7 +53,7 @@ func (s *vault) checkCertificate(cert config.Certificate) {
 }
 
 func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error) {
-	csr, key, err := createCSR(certSpec)
+	csr, key, err := s.createCSR(certSpec)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create csr: %w", err)
 	}
@@ -77,14 +76,14 @@ func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error
 	return nil, nil, fmt.Errorf("certificate block not found")
 }
 
-func createCSR(spec config.Spec) (crt, key []byte, err error) {
-	pk, err := rsa.GenerateKey(rand.Reader, spec.PrivateKey.Size)
+func (s *vault) createCSR(spec config.Spec) (crt, key []byte, err error) {
+	pk, err := s.generateKey(spec.PrivateKey.Size)
 	if err != nil {
 		err = fmt.Errorf("generate key: %w", err)
 		return
 	}
 
-	ips, err := getIPAddresses(spec.IPAddresses)
+	ips, err := s.getIPAddresses(spec.IPAddresses)
 	if err != nil {
 		err = fmt.Errorf("get ip addresses: %w", err)
 		return
@@ -134,7 +133,7 @@ func createCSR(spec config.Spec) (crt, key []byte, err error) {
 	return
 }
 
-func getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
+func (s *vault) getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 	ipAddresses := make(map[string]net.IP)
 
 	for _, ip := range cfg.Static {
@@ -144,7 +143,7 @@ func getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 		}
 	}
 
-	ifaces, err := net.Interfaces()
+	ifaces, err := s.getInterfaces()
 	if err != nil {
 		return nil, errors.New("get interfaces")
 	}
