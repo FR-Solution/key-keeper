@@ -36,9 +36,9 @@ func Connector(
 			cli: driver,
 
 			name:       cfg.Name,
-			role:       cfg.Vault.Certificate.Role,
-			caPath:     cfg.Vault.Certificate.CAPath,
-			rootCAPath: cfg.Vault.Certificate.RootCAPath,
+			role:       cfg.Vault.Resource.Role,
+			caPath:     cfg.Vault.Resource.CAPath,
+			rootCAPath: cfg.Vault.Resource.RootCAPath,
 
 			certificate: make(map[string]config.Certificate),
 		}, nil

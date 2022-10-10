@@ -38,9 +38,9 @@ type Secret struct {
 }
 
 type Vault struct {
-	Server      string    `yaml:"server"`
-	Auth        Auth      `yaml:"auth"`
-	Certificate VaultCert `yaml:"auth"`
+	Server   string   `yaml:"server"`
+	Auth     Auth     `yaml:"auth"`
+	Resource Resource `yaml:"resource"`
 }
 
 type Auth struct {
@@ -62,7 +62,7 @@ type AppRole struct {
 	SecretIDLocalPath string `yaml:"secretIDLocalPath"`
 }
 
-type VaultCert struct {
+type Resource struct {
 	Role       string `yaml:"role"`
 	CAPath     string `yaml:"CAPath"`
 	RootCAPath string `yaml:"rootCAPath"`
