@@ -45,12 +45,12 @@ key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 | `.vault.auth.appRole.path`              | string | базовый путь approle в Vault                                            |
 | `.vault.auth.appRole.roleIDLocalPath`   | string | локальный путь, где будет искать role_id для авторизации                |
 | `.vault.auth.appRole.secretIDLocalPath` | string | локальный путь, где будет искать secret_id для авторизации              |
-| `.vault.kv`                             | object | описание доступа в Vault к Key Value стореджу                           |
-| `.vault.kv.path`                        | string | путь в Vault до Key Value стореджа                                      |
 | `.vault.resource`                       | object | инструция доступа к vault роли для выпуска сертификата                  |
 | `.vault.resource.role`                  | string | имя роли через которую будет выпускаться сертификат                     |
 | `.vault.resource.CAPath `               | string | базовый путь PKI хранилища, где прописана роль                          |
 | `.vault.resource.rootCAPath`            | string | базовый путь PKI root хранилища от кого будет выписываться intermediate |
+| `.vault.resource.kv`                    | object | описание доступа в Vault к Key Value стореджу                           |
+| `.vault.resource.kv.path`               | string | путь в Vault до Key Value стореджа                                      |
 | `.vault.timeout `                       | string | максимальное время ответа сервера Vault                                 |
 
 ```yaml
@@ -74,6 +74,8 @@ issuers:
         role: kubelet-server
         CAPath: "clusters/cluster-1/pki/kubernetes"
         rootCAPath: "clusters/cluster-1/pki/root"
+        kv: 
+          path: "clusters/cluster-1/kv"
 ```
 
 #### CERTIFICATES:
@@ -167,7 +169,5 @@ secrets:
     issuerRef:
       name: kube-apiserver-sa
     key: public
-    kv:
-      path: clusters/cluster-1/kv
     hostPath: /etc/kubernetes/pki/certs/kube-apiserver/kube-apiserver-sa.pub
 ```
