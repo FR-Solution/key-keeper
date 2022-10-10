@@ -16,14 +16,13 @@ func (s *vault) checkSecret(i config.Secret) {
 		logger.Warn("read", zap.Error(err))
 	}
 
-	err = writeToFile(i.HostPath, secret)
-	if err != nil {
+	if err = writeToFile(i.HostPath, secret); err != nil {
 		zap.L().Error("store", zap.String("path", i.HostPath), zap.Error(err))
 	}
 }
 
 func (s *vault) readSecret(i config.Secret) ([]byte, error) {
-	storedSecrete, err := s.driver.Get(i.KV.Path, i.Name)
+	storedSecrete, err := s.cli.Get(i.KV.Path, i.Name)
 	if err != nil {
 		return nil, fmt.Errorf("get from vault_kv : %w", err)
 	}

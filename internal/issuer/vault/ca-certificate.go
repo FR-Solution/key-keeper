@@ -65,7 +65,7 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 	}
 
 	vaultPath := path.Join(s.caPath, "intermediate/generate", keyType)
-	csr, err := s.driver.Write(vaultPath, csrData)
+	csr, err := s.cli.Write(vaultPath, csrData)
 	if err != nil {
 		err = fmt.Errorf("generate: %w", err)
 		return
@@ -78,7 +78,7 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 	}
 
 	vaultPath = path.Join(s.rootCAPath, "root/sign-intermediate")
-	ica, err := s.driver.Write(vaultPath, icaData)
+	ica, err := s.cli.Write(vaultPath, icaData)
 	if err != nil {
 		err = fmt.Errorf("send the intermediate ca CSR to the root CA for signing CA: %w", err)
 		return
@@ -89,7 +89,7 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 	}
 
 	vaultPath = path.Join(s.caPath, "intermediate/set-signed")
-	if _, err = s.driver.Write(vaultPath, certData); err != nil {
+	if _, err = s.cli.Write(vaultPath, certData); err != nil {
 		err = fmt.Errorf("publish the signed certificate back to the  intermediate ca : %w", err)
 		return
 	}
@@ -105,7 +105,7 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 
 func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
 	vaultPath = path.Join(vaultPath, "cert/ca_chain")
-	ica, err := s.driver.Read(vaultPath)
+	ica, err := s.cli.Read(vaultPath)
 	if ica != nil {
 		if c, ok := ica["certificate"]; ok {
 			crt = []byte(c.(string))

@@ -5,7 +5,7 @@ import (
 	"github.com/fraima/key-keeper/internal/controller"
 )
 
-type Driver interface {
+type Client interface {
 	Read(path string) (map[string]interface{}, error)
 	Write(path string, data map[string]interface{}) (map[string]interface{}, error)
 	Put(kvMountPath, secretePath string, data map[string]interface{}) error
@@ -13,7 +13,7 @@ type Driver interface {
 }
 
 type vault struct {
-	driver Driver
+	cli Client
 
 	name       string
 	role       string
@@ -24,7 +24,7 @@ type vault struct {
 }
 
 func Connector(
-	connect func(name string, cfg config.Vault) (Driver, error),
+	connect func(name string, cfg config.Vault) (Client, error),
 ) func(cfg config.Issuer) (controller.Issuer, error) {
 	return func(cfg config.Issuer) (controller.Issuer, error) {
 		driver, err := connect(cfg.Name, cfg.Vault)
@@ -33,7 +33,7 @@ func Connector(
 		}
 
 		return &vault{
-			driver: driver,
+			cli: driver,
 
 			name:       cfg.Name,
 			role:       cfg.Role,

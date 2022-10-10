@@ -65,7 +65,7 @@ func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error
 	}
 
 	vaultPath := path.Join(s.caPath, "sign", s.role)
-	cert, err := s.driver.Write(vaultPath, certData)
+	cert, err := s.cli.Write(vaultPath, certData)
 	if err != nil {
 		return nil, nil, fmt.Errorf("generate with vault path %s : %w", vaultPath, err)
 	}
