@@ -32,9 +32,6 @@ key-keeper -config-dir /path/to/config-dir -config-regexp .*.conf
 ---
 issuers:
   - name: kubernetes-ca
-    role: kubelet-server
-    CAPath: "clusters/cluster-1/pki/kubernetes"
-    rootCAPath: "clusters/cluster-1/pki/root"
     vault:
       server: http://example.com:9200
       auth:
@@ -47,6 +44,10 @@ issuers:
           path: "clusters/cluster-1/approle"
           secretIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/secret-id
           roleIDLocalPath: /var/lib/key-keeper/vault/kubernetes-ca/role-idW
+      certificate:
+        role: kubelet-server
+        CAPath: "clusters/cluster-1/pki/kubernetes"
+        rootCAPath: "clusters/cluster-1/pki/root"
 
 certificates:
   - name: kubernetes-ca

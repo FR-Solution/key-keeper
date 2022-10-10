@@ -8,11 +8,8 @@ type Config struct {
 }
 
 type Issuer struct {
-	Name       string `yaml:"name"`
-	Role       string `yaml:"role"`
-	CAPath     string `yaml:"CAPath"`
-	RootCAPath string `yaml:"rootCAPath"`
-	Vault      Vault  `yaml:"vault"`
+	Name  string `yaml:"name"`
+	Vault Vault  `yaml:"vault"`
 }
 
 type Resources struct {
@@ -41,9 +38,9 @@ type Secret struct {
 }
 
 type Vault struct {
-	Server  string        `yaml:"server"`
-	Auth    Auth          `yaml:"auth"`
-	Timeout time.Duration `yaml:"timeout"`
+	Server      string    `yaml:"server"`
+	Auth        Auth      `yaml:"auth"`
+	Certificate VaultCert `yaml:"auth"`
 }
 
 type Auth struct {
@@ -63,6 +60,12 @@ type AppRole struct {
 	Path              string `yaml:"path"`
 	RoleIDLocalPath   string `yaml:"roleIDLocalPath"`
 	SecretIDLocalPath string `yaml:"secretIDLocalPath"`
+}
+
+type VaultCert struct {
+	Role       string `yaml:"role"`
+	CAPath     string `yaml:"CAPath"`
+	RootCAPath string `yaml:"rootCAPath"`
 }
 
 type KV struct {

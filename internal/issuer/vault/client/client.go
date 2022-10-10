@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/vault/api"
 
@@ -23,7 +24,7 @@ func Connect(name string, cfg config.Vault) (vault.Client, error) {
 		&api.Config{
 			Address: cfg.Server,
 			HttpClient: &http.Client{
-				Timeout: cfg.Timeout,
+				Timeout: 10 *time.Second,
 			},
 		},
 	)
