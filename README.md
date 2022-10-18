@@ -132,7 +132,7 @@ certificates:
       name: kubelet-server
     spec:
       subject:
-        commonName: "system:node:master-0.cluster-1.dobry-kot.ru"
+        commonName: "system:node:master-0.cluster-1.example.com"
       usage:
         - server auth
       privateKey:
@@ -140,13 +140,24 @@ certificates:
         encoding: "PKCS1"
         size: 4096
       ipAddresses:
+        static:
+          - 1.1.1.1
+        ###
+        # * -> Позволяет указывать регексп интерфейсов (на выходе получаем список)
         interfaces:
           - lo
           - eth*
+        ###
+        # * -> В цикле будет пытаться отрезолвить имя, без выходного значения, сертификат не будет заказан.
+        dnsLookup:
+          - api.example.com 
       ttl: 200h
+      ###
+      # * -> Указав $HOSTNAME - hostname хоста добавится в поле AltNames сертификата.
       hostnames:
+        - $HOSTNAME
         - localhost
-        - "master-0.cluster-1.dobry-kot.ru"
+        - "master-0.cluster-1.example.com"
     renewBefore: 100h
     hostPath: "/etc/kubernetes/pki/certs/kubelet"
 
