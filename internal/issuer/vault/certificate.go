@@ -2,6 +2,7 @@ package vault
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -19,21 +20,14 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *vault) checkCertificate(cert config.Certificate) {
+func (s *vault) ensureCertificate(cert config.Certificate) {
 	logger := zap.L().With(zap.String("resource_type", "certificate"), zap.String("name", cert.Name))
 
-	crt, err := readCertificate(cert.HostPath, cert.Name)
-	if crt != nil {
-		logger.Debug("ttl", zap.Float64("remaining time(h)", time.Until(crt.NotAfter).Hours()))
-		if time.Until(crt.NotAfter) <= cert.UpdateBefore {
-			err = fmt.Errorf("expired until(h) %f", time.Until(crt.NotAfter).Hours())
-		}
-	}
-
+	err := checkCertificate(cert, logger)
 	if err == nil {
 		return
 	}
-	zap.L().Warn("check", zap.Error(err))
+	zap.L().Warn("ensure", zap.Error(err))
 
 	if os.IsNotExist(err) || cert.WithUpdate {
 		crt, key, err := s.generateCertificate(cert.Spec)
@@ -77,7 +71,7 @@ func (s *vault) generateCertificate(certSpec config.Spec) ([]byte, []byte, error
 }
 
 func (s *vault) createCSR(spec config.Spec) (crt, key []byte, err error) {
-	pk, err := s.generateKey(spec.PrivateKey.Size)
+	pk, err := rsa.GenerateKey(rand.Reader, spec.PrivateKey.Size)
 	if err != nil {
 		err = fmt.Errorf("generate key: %w", err)
 		return
@@ -143,7 +137,7 @@ func (s *vault) getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 		}
 	}
 
-	ifaces, err := s.getInterfaces()
+	ifaces, err := net.Interfaces()
 	if err != nil {
 		return nil, errors.New("get interfaces")
 	}
@@ -208,6 +202,16 @@ func inSlice(str string, sl []string) bool {
 		}
 	}
 	return false
+}
+
+func checkCertificate(cert config.Certificate, l *zap.Logger) error {
+	crt, err := readCertificate(cert.HostPath, cert.Name)
+	if crt != nil {
+		if time.Until(crt.NotAfter) <= cert.UpdateBefore {
+			err = fmt.Errorf("expired until(h) %f", time.Until(crt.NotAfter).Hours())
+		}
+	}
+	return err
 }
 
 func trigger(trigger [][]string, logger *zap.Logger) {

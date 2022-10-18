@@ -11,7 +11,7 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *vault) checkCA(cert config.Certificate) {
+func (s *vault) ensureCA(cert config.Certificate) {
 	logger := zap.L().With(zap.String("resource_type", "intermediate_ca"), zap.String("name", cert.Name))
 
 	var (
@@ -26,18 +26,7 @@ func (s *vault) checkCA(cert config.Certificate) {
 		logger.Debug("store")
 	}()
 
-	crt, key, err = s.readCA(s.caPath)
-	if err == nil {
-		var ca *x509.Certificate
-		ca, err = parseCertificate(crt)
-		if err == nil {
-			logger.Debug("ttl", zap.Float64("remaining time(h)", time.Until(ca.NotAfter).Hours()))
-			if time.Until(ca.NotAfter) <= cert.UpdateBefore {
-				err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
-			}
-		}
-	}
-
+	crt, key, err = s.checkCA(cert, logger)
 	if err == nil {
 		return
 	}
@@ -51,6 +40,34 @@ func (s *vault) checkCA(cert config.Certificate) {
 		}
 		zap.L().Info("generated")
 	}
+}
+
+func (s *vault) checkCA(cert config.Certificate, l *zap.Logger) ([]byte, []byte, error) {
+	crt, key, err := s.readCA(s.caPath)
+	if err == nil {
+		var ca *x509.Certificate
+		ca, err = parseCertificate(crt)
+		if err == nil {
+			if time.Until(ca.NotAfter) <= cert.UpdateBefore {
+				err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
+			}
+		}
+	}
+	return crt, key, err
+}
+
+func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
+	vaultPath = path.Join(vaultPath, "cert/ca_chain")
+	ica, err := s.cli.Read(vaultPath)
+	if ica != nil {
+		if c, ok := ica["certificate"]; ok {
+			crt = []byte(c.(string))
+		}
+		if k, ok := ica["private_key"]; ok {
+			key = []byte(k.(string))
+		}
+	}
+	return
 }
 
 func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error) {
@@ -99,20 +116,6 @@ func (s *vault) generateCA(cert config.Certificate) (crt, key []byte, err error)
 	}
 	if data, ok := csr["private_key"]; ok {
 		key = []byte(data.(string))
-	}
-	return
-}
-
-func (s *vault) readCA(vaultPath string) (crt, key []byte, err error) {
-	vaultPath = path.Join(vaultPath, "cert/ca_chain")
-	ica, err := s.cli.Read(vaultPath)
-	if ica != nil {
-		if c, ok := ica["certificate"]; ok {
-			crt = []byte(c.(string))
-		}
-		if k, ok := ica["private_key"]; ok {
-			key = []byte(k.(string))
-		}
 	}
 	return
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/fraima/key-keeper/internal/config"
 )
 
-func (s *vault) checkSecret(i config.Secret) {
+func (s *vault) ensureSecret(i config.Secret) {
 	logger := zap.L().With(zap.String("resource_type", "secret"), zap.String("name", i.Name))
 
 	secret, err := s.readSecret(i)

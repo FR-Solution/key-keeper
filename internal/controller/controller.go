@@ -13,7 +13,7 @@ import (
 type Issuer interface {
 	Name() string
 	AddResource(config.Resources)
-	CheckResource()
+	EnsureResource()
 }
 
 type controller struct {
@@ -49,15 +49,14 @@ func (s *controller) Start() error {
 		}
 	}()
 
-	// start resource checking
+	// start resource ensure
 	go func() {
 		for range time.NewTicker(30 * time.Second).C {
-
 			s.issuer.Range(func(key, value any) bool {
 				issuer := value.(Issuer)
-				zap.L().Debug("start_checking", zap.String("issuer", issuer.Name()))
-				issuer.CheckResource()
-				zap.L().Debug("finish_checking", zap.String("issuer", issuer.Name()))
+				zap.L().Debug("start_ensure", zap.String("issuer", issuer.Name()))
+				issuer.EnsureResource()
+				zap.L().Debug("finish_ensure", zap.String("issuer", issuer.Name()))
 				return true
 			})
 		}

@@ -1,10 +1,6 @@
 package vault
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"net"
-
 	"github.com/fraima/key-keeper/internal/config"
 	"github.com/fraima/key-keeper/internal/controller"
 )
@@ -25,9 +21,6 @@ type vault struct {
 	rootCAPath  string
 	kv          string
 	certificate map[string]config.Certificate
-
-	generateKey   func(size int) (*rsa.PrivateKey, error)
-	getInterfaces func() ([]net.Interface, error)
 }
 
 func Connector(
@@ -50,11 +43,6 @@ func Connector(
 			certificate: make(map[string]config.Certificate),
 		}
 
-		v.generateKey = func(size int) (*rsa.PrivateKey, error) {
-			return rsa.GenerateKey(rand.Reader, size)
-		}
-		v.getInterfaces = net.Interfaces
-
 		return v, nil
 	}
 }
@@ -69,20 +57,20 @@ func (s *vault) AddResource(r config.Resources) {
 	}
 	for _, secret := range r.Secrets {
 		go func(secret config.Secret) {
-			s.checkSecret(secret)
+			s.ensureSecret(secret)
 		}(secret)
 	}
-	s.CheckResource()
+	s.EnsureResource()
 }
 
-func (s *vault) CheckResource() {
+func (s *vault) EnsureResource() {
 	for _, cert := range s.certificate {
 		go func(c config.Certificate) {
 			if c.IsCA {
-				s.checkCA(c)
+				s.ensureCA(c)
 				return
 			}
-			s.checkCertificate(c)
+			s.ensureCertificate(c)
 		}(cert)
 	}
 }
