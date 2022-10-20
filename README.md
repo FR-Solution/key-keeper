@@ -10,7 +10,7 @@
 make build-and-push DOCKER_USER=geoirb
 ```
 
-# Build bin
+## Build bin
 
 ```bash
 go build -o key-keeper cmd/key-keeper/main.go
