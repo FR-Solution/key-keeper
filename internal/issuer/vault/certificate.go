@@ -207,7 +207,7 @@ func inSlice(str string, sl []string) bool {
 func checkCertificate(cert config.Certificate, l *zap.Logger) error {
 	crt, err := readCertificate(cert.HostPath, cert.Name)
 	if crt != nil {
-		if time.Until(crt.NotAfter) <= cert.UpdateBefore {
+		if time.Until(crt.NotAfter) <= cert.RenewBefore {
 			err = fmt.Errorf("expired until(h) %f", time.Until(crt.NotAfter).Hours())
 		}
 	}

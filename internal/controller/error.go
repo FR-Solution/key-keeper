@@ -4,5 +4,5 @@ import "errors"
 
 var (
 	errIssuerIsExist    = errors.New("issuer is exist")
-	errIssuerIsNotExist = errors.New("issuer is notexist")
+	errIssuerIsNotExist = errors.New("issuer is not exist")
 )

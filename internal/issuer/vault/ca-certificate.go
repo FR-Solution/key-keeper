@@ -48,7 +48,7 @@ func (s *vault) checkCA(cert config.Certificate, l *zap.Logger) ([]byte, []byte,
 		var ca *x509.Certificate
 		ca, err = parseCertificate(crt)
 		if err == nil {
-			if time.Until(ca.NotAfter) <= cert.UpdateBefore {
+			if time.Until(ca.NotAfter) <= cert.RenewBefore {
 				err = fmt.Errorf("expired until(h) %f", time.Until(ca.NotAfter).Hours())
 			}
 		}

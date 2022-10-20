@@ -63,7 +63,7 @@ func (s *client) roleID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("read role_id for path: %s : %w", vaultPath, err)
 	}
 	if role == nil {
-		return "", fmt.Errorf("no role_id info was returned")
+		return "", fmt.Errorf("role_id info was not  returned")
 	}
 
 	roleID, ok := role["role_id"]
@@ -88,7 +88,7 @@ func (s *client) secretID(name string, appRole config.AppRole) (string, error) {
 		return "", fmt.Errorf("read secrete_id for path: %s : %w", vaultPath, err)
 	}
 	if secret == nil {
-		return "", fmt.Errorf("no secrete_id info was returned")
+		return "", fmt.Errorf("secrete_id info was  not returned")
 	}
 
 	secretID, ok := secret["secret_id"]
@@ -108,7 +108,7 @@ func (s *client) updateAuthToken(appRoleAuth *auth.AppRoleAuth) (time.Duration, 
 		return 0, err
 	}
 	if authInfo == nil {
-		return 0, fmt.Errorf("no auth info was returned after login")
+		return 0, fmt.Errorf("auth info was not returned after login")
 	}
 
 	token, err := authInfo.TokenID()

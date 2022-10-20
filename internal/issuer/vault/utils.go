@@ -10,7 +10,7 @@ import (
 )
 
 func storeKeyPair(filepath string, name string, crt, key []byte) error {
-	if err := os.MkdirAll(filepath, 0644); err != nil {
+	if err := os.MkdirAll(filepath, 0777); err != nil {
 		return fmt.Errorf("mkdir all %s : %w", filepath, err)
 	}
 
@@ -19,7 +19,7 @@ func storeKeyPair(filepath string, name string, crt, key []byte) error {
 		data, err := os.ReadFile(crtPath)
 		if err != nil || !reflect.DeepEqual(crt, data) {
 			if err := os.WriteFile(crtPath, crt, 0644); err != nil {
-				return fmt.Errorf("failed to save certificate with path: %w", err)
+				return fmt.Errorf("failed to save certificate: %w", err)
 			}
 		}
 	}
@@ -52,7 +52,7 @@ func parseCertificate(crt []byte) (*x509.Certificate, error) {
 
 func writeToFile(filepath string, date []byte) error {
 	dir := path.Dir(filepath)
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(dir, 0777); err != nil {
 		return err
 	}
 	return os.WriteFile(filepath, date, 0644)

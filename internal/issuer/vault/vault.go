@@ -33,8 +33,7 @@ func Connector(
 		}
 
 		v := &vault{
-			cli: driver,
-
+			cli:         driver,
 			name:        cfg.Name,
 			role:        cfg.Vault.Resource.Role,
 			caPath:      cfg.Vault.Resource.CAPath,
@@ -42,7 +41,6 @@ func Connector(
 			kv:          cfg.Vault.Resource.KV.Path,
 			certificate: make(map[string]config.Certificate),
 		}
-
 		return v, nil
 	}
 }

@@ -18,15 +18,15 @@ type Resources struct {
 }
 
 type Certificate struct {
-	Name         string        `yaml:"name"`
-	IssuerRef    IssuerRef     `yaml:"issuerRef"`
-	IsCA         bool          `yaml:"isCa"`
-	CA           CA            `yaml:"ca"`
-	Spec         Spec          `yaml:"spec"`
-	HostPath     string        `yaml:"hostPath"`
-	WithUpdate   bool          `yaml:"withUpdate"`
-	UpdateBefore time.Duration `yaml:"updateBefore"`
-	Trigger      [][]string    `yaml:"trigger"`
+	Name        string        `yaml:"name"`
+	IssuerRef   IssuerRef     `yaml:"issuerRef"`
+	IsCA        bool          `yaml:"isCa"`
+	CA          CA            `yaml:"ca"`
+	Spec        Spec          `yaml:"spec"`
+	HostPath    string        `yaml:"hostPath"`
+	WithUpdate  bool          `yaml:"withUpdate"`
+	RenewBefore time.Duration `yaml:"renewBefore"`
+	Trigger     [][]string    `yaml:"trigger"`
 }
 
 type Secret struct {
