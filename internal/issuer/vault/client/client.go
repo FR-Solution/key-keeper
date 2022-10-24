@@ -24,7 +24,7 @@ func Connect(name string, cfg config.Vault) (vault.Client, error) {
 		&api.Config{
 			Address: cfg.Server,
 			HttpClient: &http.Client{
-				Timeout: 10 *time.Second,
+				Timeout: 10 * time.Second,
 			},
 		},
 	)
