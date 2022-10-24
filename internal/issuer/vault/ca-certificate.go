@@ -44,6 +44,9 @@ func (s *vault) ensureCA(cert config.Certificate) {
 
 func (s *vault) checkCA(cert config.Certificate, l *zap.Logger) ([]byte, []byte, error) {
 	crt, key, err := s.readCA(s.caPath)
+	if crt == nil || key == nil {
+		return nil, nil, fmt.Errorf("crt or key is empty path: %s", s.caPath)
+	}
 	if err == nil {
 		var ca *x509.Certificate
 		ca, err = parseCertificate(crt)
