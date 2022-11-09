@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	auth "github.com/hashicorp/vault/api/auth/approle"
@@ -34,18 +35,20 @@ func (s *client) auth(name string, a config.Auth) error {
 		return err
 	}
 
-	ttl, err := s.updateAuthToken(appRoleAuth)
+	token, ttl, err := s.getRoleToken(appRoleAuth)
 	if err != nil {
 		return err
 	}
+	s.cli.SetToken(token)
 
 	go func() {
 		t := time.NewTimer(ttl / 2)
 		for range t.C {
-			ttl, err := s.updateAuthToken(appRoleAuth)
+			token, ttl, err := s.getRoleToken(appRoleAuth)
 			if err != nil {
 				zap.L().Error("update auth token", zap.String("issuer_name", name), zap.Error(err))
 			}
+			s.cli.SetToken(token)
 			t.Reset(ttl / 2)
 		}
 	}()
@@ -53,7 +56,7 @@ func (s *client) auth(name string, a config.Auth) error {
 }
 
 func (s *client) roleID(name string, appRole config.AppRole) (string, error) {
-	if roleID, rErr := os.ReadFile(appRole.RoleIDLocalPath); rErr == nil {
+	if roleID, err := os.ReadFile(appRole.RoleIDLocalPath); err == nil {
 		return string(roleID), nil
 	}
 
@@ -78,7 +81,7 @@ func (s *client) roleID(name string, appRole config.AppRole) (string, error) {
 }
 
 func (s *client) secretID(name string, appRole config.AppRole) (string, error) {
-	if secretID, rErr := os.ReadFile(appRole.SecretIDLocalPath); rErr == nil {
+	if secretID, err := os.ReadFile(appRole.SecretIDLocalPath); err == nil {
 		return string(secretID), nil
 	}
 
@@ -102,24 +105,53 @@ func (s *client) secretID(name string, appRole config.AppRole) (string, error) {
 	return secretID.(string), err
 }
 
-func (s *client) updateAuthToken(appRoleAuth *auth.AppRoleAuth) (time.Duration, error) {
+func (s *client) getRoleToken(appRoleAuth *auth.AppRoleAuth) (string, time.Duration, error) {
 	authInfo, err := s.cli.Auth().Login(context.Background(), appRoleAuth)
 	if err != nil {
-		return 0, err
+		return "", 0, err
 	}
 	if authInfo == nil {
-		return 0, fmt.Errorf("auth info was not returned after login")
+		return "", 0, fmt.Errorf("auth info was not returned after login")
 	}
 
 	token, err := authInfo.TokenID()
 	if err != nil {
-		return 0, err
+		return "", 0, err
 	}
-	s.cli.SetToken(token)
 
 	ttl, err := authInfo.TokenTTL()
 	if err != nil {
-		return 0, err
+		return "", 0, err
 	}
-	return ttl, nil
+	return token, ttl, nil
+}
+
+func (s *client) getToken(a config.Auth) (string, error) {
+	secretID, sErr := os.ReadFile(a.AppRole.SecretIDLocalPath)
+	roleID, rErr := os.ReadFile(a.AppRole.RoleIDLocalPath)
+
+	if sErr == nil && rErr == nil {
+		appRoleAuth, err := auth.NewAppRoleAuth(
+			string(roleID),
+			&auth.SecretID{
+				FromString: string(secretID),
+			},
+			auth.WithMountPath(a.AppRole.Path),
+		)
+		if err != nil {
+
+		}
+		token, _, err := s.getRoleToken(appRoleAuth)
+		if err != nil {
+
+		}
+		return token, nil
+	}
+
+	if a.Bootstrap.Token != "" {
+		return a.Bootstrap.Token, nil
+	}
+
+	data, err := os.ReadFile(a.Bootstrap.File)
+	return strings.TrimSuffix(string(data), "\n"), err
 }

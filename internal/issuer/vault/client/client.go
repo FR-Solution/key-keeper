@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/vault/api"
@@ -32,12 +30,6 @@ func Connect(name string, cfg config.Vault) (vault.Client, error) {
 		return nil, fmt.Errorf("new vault client: %w", err)
 	}
 
-	token, err := getToken(cfg.Auth.Bootstrap)
-	if err != nil {
-		return nil, fmt.Errorf("get vault token: %w", err)
-	}
-
-	cli.SetToken(token)
 	if !cfg.Auth.TLSInsecure {
 		err = cli.CloneConfig().ConfigureTLS(&api.TLSConfig{CACert: cfg.Auth.CABundle})
 		if err != nil {
@@ -48,6 +40,14 @@ func Connect(name string, cfg config.Vault) (vault.Client, error) {
 	s := &client{
 		cli: cli,
 	}
+
+	token, err := s.getToken(cfg.Auth)
+	if err != nil {
+		return nil, fmt.Errorf("get vault token: %w", err)
+	}
+
+	s.cli.SetToken(token)
+
 	return s, s.auth(name, cfg.Auth)
 }
 
@@ -82,13 +82,4 @@ func (s *client) Get(kvMountPath, secretePath string) (map[string]interface{}, e
 		return sec.Data, err
 	}
 	return nil, err
-}
-
-func getToken(b config.Bootstrap) (string, error) {
-	if b.Token != "" {
-		return b.Token, nil
-	}
-
-	data, err := os.ReadFile(b.File)
-	return strings.TrimSuffix(string(data), "\n"), err
 }
