@@ -38,12 +38,12 @@ func (s *client) auth(name string, a config.Auth) error {
 		auth.WithMountPath(a.AppRole.Path),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("app role auth: %w", err)
 	}
 
 	token, ttl, err := s.getRoleToken(appRoleAuth)
 	if err != nil {
-		return err
+		return fmt.Errorf("get role token: %w", err)
 	}
 	s.cli.SetToken(token)
 
