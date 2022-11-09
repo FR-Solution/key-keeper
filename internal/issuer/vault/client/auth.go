@@ -15,11 +15,17 @@ import (
 )
 
 func (s *client) auth(name string, a config.Auth) error {
-	roleID, err := s.roleID(name, a.AppRole)
+	token, err := s.getBootstrapToken(a.Bootstrap)
+	if err != nil {
+		return fmt.Errorf("get vault token: %w", err)
+	}
+	s.cli.SetToken(token)
+
+	roleID, err := s.getRoleID(name, a.AppRole)
 	if err != nil {
 		return fmt.Errorf("get role id: %w", err)
 	}
-	secretID, err := s.secretID(name, a.AppRole)
+	secretID, err := s.getSecretID(name, a.AppRole)
 	if err != nil {
 		return fmt.Errorf("get secret id: %w", err)
 	}
@@ -55,7 +61,16 @@ func (s *client) auth(name string, a config.Auth) error {
 	return nil
 }
 
-func (s *client) roleID(name string, appRole config.AppRole) (string, error) {
+func (s *client) getBootstrapToken(a config.Bootstrap) (string, error) {
+	if a.Token != "" {
+		return a.Token, nil
+	}
+
+	data, err := os.ReadFile(a.File)
+	return strings.TrimSuffix(string(data), "\n"), err
+}
+
+func (s *client) getRoleID(name string, appRole config.AppRole) (string, error) {
 	if roleID, err := os.ReadFile(appRole.RoleIDLocalPath); err == nil {
 		return string(roleID), nil
 	}
@@ -80,7 +95,7 @@ func (s *client) roleID(name string, appRole config.AppRole) (string, error) {
 	return roleID.(string), err
 }
 
-func (s *client) secretID(name string, appRole config.AppRole) (string, error) {
+func (s *client) getSecretID(name string, appRole config.AppRole) (string, error) {
 	if secretID, err := os.ReadFile(appRole.SecretIDLocalPath); err == nil {
 		return string(secretID), nil
 	}
@@ -124,34 +139,4 @@ func (s *client) getRoleToken(appRoleAuth *auth.AppRoleAuth) (string, time.Durat
 		return "", 0, err
 	}
 	return token, ttl, nil
-}
-
-func (s *client) getToken(a config.Auth) (string, error) {
-	secretID, sErr := os.ReadFile(a.AppRole.SecretIDLocalPath)
-	roleID, rErr := os.ReadFile(a.AppRole.RoleIDLocalPath)
-
-	if sErr == nil && rErr == nil {
-		appRoleAuth, err := auth.NewAppRoleAuth(
-			string(roleID),
-			&auth.SecretID{
-				FromString: string(secretID),
-			},
-			auth.WithMountPath(a.AppRole.Path),
-		)
-		if err != nil {
-
-		}
-		token, _, err := s.getRoleToken(appRoleAuth)
-		if err != nil {
-
-		}
-		return token, nil
-	}
-
-	if a.Bootstrap.Token != "" {
-		return a.Bootstrap.Token, nil
-	}
-
-	data, err := os.ReadFile(a.Bootstrap.File)
-	return strings.TrimSuffix(string(data), "\n"), err
 }

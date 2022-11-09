@@ -41,14 +41,10 @@ func Connect(name string, cfg config.Vault) (vault.Client, error) {
 		cli: cli,
 	}
 
-	token, err := s.getToken(cfg.Auth)
-	if err != nil {
-		return nil, fmt.Errorf("get vault token: %w", err)
+	if err = s.auth(name, cfg.Auth); err != nil {
+		return nil, fmt.Errorf("auth: %w", err)
 	}
-
-	s.cli.SetToken(token)
-
-	return s, s.auth(name, cfg.Auth)
+	return s, err
 }
 
 // Read secret from vault by path.
