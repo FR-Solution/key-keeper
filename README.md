@@ -1,4 +1,4 @@
-### key-keeper
+# key-keeper
 
 инструмент для linux хостов, позволяющий заказывать в Vault хранилище сертификаты и секреты и следить за их актуальностью.
 
@@ -63,8 +63,8 @@ issuers:
         caBundle:
         tlsInsecure: true
         bootstrap:
-          token: ${token}             # <- или
-          path: /tmp/bootstrap-token  # <- или
+          token: ${token} # <- или
+          path: /tmp/bootstrap-token # <- или
         appRole:
           name: kubernetes-ca
           path: "clusters/cluster-1/approle"
@@ -74,7 +74,7 @@ issuers:
         role: kubelet-server
         CAPath: "clusters/cluster-1/pki/kubernetes"
         rootCAPath: "clusters/cluster-1/pki/root"
-        kv: 
+        kv:
           path: "clusters/cluster-1/kv"
 ```
 
@@ -150,7 +150,7 @@ certificates:
         ###
         # * -> В цикле будет пытаться отрезолвить имя, без выходного значения, сертификат не будет заказан.
         dnsLookup:
-          - api.example.com 
+          - api.example.com
       ttl: 200h
       ###
       # * -> Указав $HOSTNAME - hostname хоста добавится в поле AltNames сертификата.
@@ -160,7 +160,6 @@ certificates:
         - "master-0.cluster-1.example.com"
     renewBefore: 100h
     hostPath: "/etc/kubernetes/pki/certs/kubelet"
-
 ```
 
 #### SECRETS:
