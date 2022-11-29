@@ -8,13 +8,14 @@ RUN go mod download
 COPY . .
 
 ARG VERSION
+ARG PROJECT
 
 RUN go install -ldflags "-s \
     -X main.Version=${VERSION}" \
-    /app/cmd/key-keeper
+    /app/cmd/${PROJECT}
 
 FROM alpine:3.15.0
 
-COPY --from=builder /go/bin/key-keeper /usr/local/bin/key-keeper
+COPY --from=builder /go/bin/${PROJECT} /usr/local/bin/${PROJECT}
 
-ENTRYPOINT ["/usr/local/bin/key-keeper"]
+ENTRYPOINT [${PROJECT}]
