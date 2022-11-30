@@ -14,8 +14,10 @@ RUN go install -ldflags "-s \
     -X main.Version=${VERSION}" \
     /app/cmd/${PROJECT}
 
-FROM alpine:3.15.0
+FROM alpine:3.16.0
 
-COPY --from=builder /go/bin/${PROJECT} /usr/local/bin/${PROJECT}
+ARG PROJECT
 
-ENTRYPOINT [${PROJECT}]
+COPY --from=builder /go/bin/${PROJECT} /usr/local/bin/app
+
+ENTRYPOINT ["app"]

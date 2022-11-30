@@ -1,4 +1,6 @@
-project = key-keeper#change for new project
+#change for new project
+project = key-keeper
+#change for new release
 release = v1.0.0
 
 tag = $(DOCKER_USER)/$(project):$(release)
@@ -7,7 +9,8 @@ module = $(shell head -n 1 1 go.mod| awk '{print $2}')
 
 build-and-push:
 	docker build -t $(tag) --build-arg VERSION=$(release) --build-arg PROJECT=$(project) -f Dockerfile .
-	# docker image push $(tag)
+	docker image push $(tag)
+	echo $(tag)
 
 formatting:
 	go fmt ./...
