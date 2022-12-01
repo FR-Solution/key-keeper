@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -77,7 +78,13 @@ func (s *vault) createCSR(spec config.Spec) (crt, key []byte, err error) {
 		return
 	}
 
-	ips, err := s.getIPAddresses(spec.IPAddresses)
+	commonName, err := getCommonName(spec.Subject.CommonName)
+	if err != nil {
+		err = fmt.Errorf("get common name: %w", err)
+		return
+	}
+
+	ips, err := getIPAddresses(spec.IPAddresses)
 	if err != nil {
 		err = fmt.Errorf("get ip addresses: %w", err)
 		return
@@ -91,7 +98,7 @@ func (s *vault) createCSR(spec config.Spec) (crt, key []byte, err error) {
 
 	template := x509.CertificateRequest{
 		Subject: pkix.Name{
-			CommonName:         spec.Subject.CommonName,
+			CommonName:         commonName,
 			Country:            spec.Subject.Country,
 			Locality:           spec.Subject.Locality,
 			Organization:       spec.Subject.Organization,
@@ -127,7 +134,12 @@ func (s *vault) createCSR(spec config.Spec) (crt, key []byte, err error) {
 	return
 }
 
-func (s *vault) getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
+func getCommonName(src string) (string, error) {
+	hostname, err := os.Hostname()
+	return strings.ReplaceAll(src, "$HOSTNAME", hostname), err
+}
+
+func getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 	ipAddresses := make(map[string]net.IP)
 
 	for _, ip := range cfg.Static {
