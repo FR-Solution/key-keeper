@@ -5,7 +5,7 @@ release = v1.0.0
 
 tag = $(DOCKER_USER)/$(project):$(release)
 pwd = $(shell pwd)
-module = $(shell head -n 1 1 go.mod| awk '{print $2}')
+module = $(shell go list -m)
 
 build-and-push:
 	docker build -t $(tag) --build-arg VERSION=$(release) --build-arg PROJECT=$(project) -f Dockerfile .
