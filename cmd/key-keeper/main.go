@@ -28,8 +28,8 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	var configDir, configNameLayout string
-	flag.StringVar(&configDir, "config-dir", "", "path to dir with configs")
-	flag.StringVar(&configNameLayout, "config-regexp", "", "regexp for config files names")
+	flag.StringVar(&configDir, "config-dir", "/home/geo/projects/fraima/key-keeper/test/", "path to dir with configs")
+	flag.StringVar(&configNameLayout, "config-regexp", "test.yaml", "regexp for config files names")
 	flag.Parse()
 
 	if configDir == "" {
