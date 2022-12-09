@@ -197,14 +197,14 @@ func getIPAddresses(cfg config.IPAddresses) ([]net.IP, error) {
 }
 
 func getDNSNames(src []string) ([]string, error) {
-	var err error
-	for i, hostname := range src {
-		if hostname == "$HOSTNAME" {
-			src[i], err = os.Hostname()
-			break
-		}
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
 	}
-	return src, err
+	for i := range src {
+		src[i] = strings.ReplaceAll(src[i], "$HOSTNAME", hostname)
+	}
+	return src, nil
 }
 
 func inSlice(str string, sl []string) bool {

@@ -56,7 +56,6 @@ func (s *config) GetNewConfig() (cfg Config, err error) {
 		cfg.Resource.Secrets = append(cfg.Resource.Secrets, tmpCfg.Resource.Secrets...)
 		s.oldConfig[path] = struct{}{}
 	}
-
 	return
 }
 
