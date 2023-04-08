@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+PROJECT="github.com/fraima/key-keeper"
 VERSION=$(git describe --abbrev=0 --tag)
-
+GOPATH="/home/dk/workspace/fraima/key-keeper"
 TOOLS_ROOT="$GOPATH/src/$PROJECT"
 OUTPUTDIR=$TOOLS_ROOT/_output/releases
 mkdir -p "$OUTPUTDIR"
