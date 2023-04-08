@@ -3,3 +3,4 @@ key-keeper
 role_id
 secret_id
 test.yaml
+src/_output/*

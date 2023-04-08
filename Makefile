@@ -19,3 +19,6 @@ formatting:
 
 linter:
 	docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.49.0 golangci-lint run -v
+
+release:
+	sh hack/release.sh
