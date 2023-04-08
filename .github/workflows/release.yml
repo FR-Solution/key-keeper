@@ -44,9 +44,6 @@ jobs:
           allowUpdates: true
           artifacts: src/github.com/fraima/key-keeper/_output/releases/*
           bodyFile: src/github.com/fraima/key-keeper/release-notes.md
-          token: ${{ secrets.GH_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - uses: actions/upload-artifact@v2
         with:
