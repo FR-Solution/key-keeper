@@ -111,7 +111,7 @@ issuers:
 | `.spec.ipAddresses.interfaces`     | list    | список ip адресов, взятый с интерфейсов хоста, попадет в ipSans                           |
 | `.spec.ipAddresses.dnsLookup`      | list    | список ip адресов, взятый из функции dnslookup статичной A записи, попадет в ipSans       |
 | `.spec.ttl`                        | string  | срок на который заказывается сертификат                                                   |
-| `.spec.usage`                        | list  | [Key usage extensions and extended key usage](https://help.hcltechsw.com/domino/10.0.1/admin/conf_keyusageextensionsandextendedkeyusage_r.html)                                                 |
+| `.spec.usage`                      | list    | [Key usage extensions and extended key usage](https://help.hcltechsw.com/domino/10.0.1/admin/conf_keyusageextensionsandextendedkeyusage_r.html)|
 | `.hostPath`                        | string  | путь в локальной файловой системе, где будет сохранен сертификат                          |
 | `.withUpdate`                      | bool    | данный параметр создаст сертификат без последующего перевыпуска                           |
 | `.updateBefore`                    | string  | время до истечения сертификата - при достижении сертификат перевыпустится                 |
