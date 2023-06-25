@@ -1,0 +1,51 @@
+name: release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  publish:
+    name: release
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.19'
+
+      - name: Set env
+        shell: bash
+        run: |
+          echo "GOPATH=${{ github.workspace }}" >> $GITHUB_ENV
+          echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-release-${{ hashFiles('**/go.sum') }}
+          restore-keys: go-release-
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          path: src/github.com/fraima/key-keeper
+
+      - run: |
+          make release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        working-directory: src/github.com/fraima/key-keeper
+
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: src/github.com/fraima/key-keeper/_output/releases/*
+          bodyFile: src/github.com/fraima/key-keeper/release-notes.md
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: src/github.com/fraima/key-keeper/_output
